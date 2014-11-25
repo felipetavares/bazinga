@@ -1,0 +1,7 @@
+# Ignore build files
+build/
+# Ignore compiled files
+*.o
+*.a
+# Ignore compressed files
+*.tar.gz
