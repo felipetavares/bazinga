@@ -5,3 +5,6 @@ build/
 *.a
 # Ignore compressed files
 *.tar.gz
+# Executáveis da Lua
+luac
+lua
