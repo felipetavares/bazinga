@@ -1,8 +1,12 @@
 bazingatesting
 ==============
 
-Testing tech for bazinga engine
-Currently coding lua integration
+#### The CCSL team recommends Atom!
+
+Testing tech for bazinga engine.
+
+1. Lua Integration - [ok]
+2. SDL Support - [wip]
 
 How to compile (linux)
 ----------------------

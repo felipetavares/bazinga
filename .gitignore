@@ -1,6 +1,7 @@
 # Ignore build files
 build/
 # Ignore compiled files
+# Except the SDL ones (future)
 *.o
 *.a
 # Ignore compressed files
