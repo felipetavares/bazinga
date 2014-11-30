@@ -1,5 +1,8 @@
 #include "bazinga.h"
 
+#include <iostream>
+using namespace std;
+
 extern "C" {
   #include <lua.h>
   #include <lualib.h>
@@ -9,15 +12,34 @@ extern "C" {
 
 namespace bazinga {
   void startModules () {
-    lua_State* L = luaL_newstate();
+    cout << "startModules()" << endl;
+
+    lua_State *L;
+    L = luaL_newstate();
+    luaL_openlibs (L);
+
+    if (luaL_dofile(L, "main.lua")) {
+      cout << "bazinga: error when running file main.lua" << endl;
+    }
+
+    lua_close(L);
+
+    char *data = fs::getFileData(Path("maps:test.json"));
+    string sData = string (data);
+
+    BjObject *object = json::parse (sData);
+
+    delete object;
+
+    delete data;
   }
 
   void gameLoop () {
-
+    cout << "gameLoop()" << endl;
   }
 
   void endModules () {
-
+    cout << "endModules()" << endl;
   }
 }
 

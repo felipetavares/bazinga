@@ -28,7 +28,7 @@ ADD_CUSTOM_TARGET(
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
 
 # Compila o executável principal
-add_executable (bazinga bazinga.cpp)
+add_executable (bazinga bazinga.cpp json.cpp filesystem.cpp)
 
 # Linka com (lua, sdl)
 target_link_libraries (bazinga mingw32)
