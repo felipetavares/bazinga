@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include "filesystem.h"
+#include "json.h"
 using namespace std;
 
 extern "C" {
@@ -23,11 +24,13 @@ namespace bazinga {
   public:
     Object();
     Object(Path);
+    Object(BjObject*);
     ~Object();
 
     void update();
 
   private:
+    void loadFile(Path);
     void updateProperties();
     void createLuaProperties();
   };

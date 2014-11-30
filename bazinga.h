@@ -4,6 +4,8 @@
 #include "filesystem.h"
 #include "json.h"
 #include "object.h"
+#include "map.h"
+#include "video.h"
 
 void startModules ();
 void gameLoop();

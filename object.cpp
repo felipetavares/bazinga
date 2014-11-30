@@ -2,7 +2,54 @@
 #include <exception>
 using namespace bazinga;
 
+Object::Object (BjObject* jObject) {
+  BjValue* jProperties = jObject->get("properties");
+
+  L = NULL;
+
+  if (jProperties->type == BjValue::jObject) {
+    BjObject *properties = jProperties->object;
+    int i;
+
+    for (i=0;i<properties->keys.size();i++) {
+      if (properties->keys[i] == "script") {
+        Path path = Path(properties->values[i]->str);
+
+        loadFile (path);
+      } else {
+        BjValue *jOValue = properties->values[i];
+
+        if (jOValue->type == BjValue::jNumber) {
+          num_properties[properties->keys[i]] = jOValue->number;
+        } else
+        if (jOValue->type == BjValue::jString) {
+          str_properties[properties->keys[i]] = jOValue->str;
+        } else {
+            // Error
+        }
+      }
+    }
+  } else {
+    // Error
+  }
+}
+
 Object::Object (Path path) {
+  loadFile(path);
+}
+
+Object::Object () {
+  // We don't have any lua script attached to this object
+  L = NULL;
+}
+
+Object::~Object () {
+  if (L) {
+    lua_close(L);
+  }
+}
+
+void Object::loadFile (Path path) {
   script = path;
 
   // Creates a new Lua state
@@ -20,22 +67,6 @@ Object::Object (Path path) {
     lua_close(L);
     L = NULL;
   }
-
-  num_properties["x"] = 10;
-  num_properties["y"] = 20;
-  num_properties["w"] = 30;
-  num_properties["h"] = 40;
-}
-
-Object::Object () {
-  // We don't have any lua script attached to this object
-  L = NULL;
-}
-
-Object::~Object () {
-  if (L) {
-    lua_close(L);
-  }
 }
 
 void Object::update () {
@@ -52,12 +83,12 @@ void Object::update () {
         cout << "\t" << lua_tostring(L, -1) << endl;
       }
     } else {
-      updateProperties();
+      if (lua_gettop(L) < 1) { // This condition is not working ok
+        cout << "bazinga: update() at script " << script.getPath() << " doesn't return self" << endl;
+      } else
+        updateProperties();
     }
   }
-
-  cout << num_properties["x"] << endl;
-  cout << str_properties["img"] << endl;
 }
 
 void Object::updateProperties() {

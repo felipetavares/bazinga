@@ -1,4 +1,4 @@
-bazingatesting
+Bazinga Testing
 ==============
 
 #### The CCSL team recommends Atom!
@@ -9,7 +9,9 @@ Full lua integration and objects are supported at this stage.
 
 1. Lua Integration  - [ok]
 2. SDL Support      - [ok]
-3. Map loading      - [wip]
+3. Map Loading      - [ok]
+4. Video Support    - [ok]
+5. Map Display      - [wip]
 
 How to compile (linux)
 ----------------------
