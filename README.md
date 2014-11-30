@@ -5,8 +5,11 @@ bazingatesting
 
 Testing tech for bazinga engine.
 
-1. Lua Integration - [ok]
-2. SDL Support - [wip]
+Full lua integration and objects are supported at this stage.
+
+1. Lua Integration  - [ok]
+2. SDL Support      - [ok]
+3. Map loading      - [wip]
 
 How to compile (linux)
 ----------------------

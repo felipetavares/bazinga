@@ -1,37 +1,52 @@
 #include "bazinga.h"
 
 #include <iostream>
+#include <vector>
 using namespace std;
-
-extern "C" {
-  #include <lua.h>
-  #include <lualib.h>
-  #include <lauxlib.h>
-  #include <SDL.h>
-}
 
 namespace bazinga {
   void startModules () {
     cout << "startModules()" << endl;
 
-    lua_State *L;
-    L = luaL_newstate();
-    luaL_openlibs (L);
+    Object o = Object(Path("main.lua"));
 
-    if (luaL_dofile(L, "main.lua")) {
-      cout << "bazinga: error when running file main.lua" << endl;
+    o.update();
+
+    /*
+    lua_getglobal(L, "update");
+
+    lua_newtable(L);
+
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, 150);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, 150);
+    lua_settable(L, -3);
+
+    if (lua_pcall(L, 1, 1, 0)) {
+      cout << "bazinga: error when calling update() in file main.lua" << endl;
+
+      if (lua_isstring(L, -1)) {
+        cout << "\t" << lua_tostring(L, -1) << endl;
+      }
+    } else {
+
     }
 
     lua_close(L);
+    */
 
+    /*
     char *data = fs::getFileData(Path("maps:test.json"));
     string sData = string (data);
 
     BjObject *object = json::parse (sData);
 
     delete object;
-
     delete data;
+    */
   }
 
   void gameLoop () {

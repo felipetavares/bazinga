@@ -3,6 +3,7 @@
 
 #include "filesystem.h"
 #include "json.h"
+#include "object.h"
 
 void startModules ();
 void gameLoop();
