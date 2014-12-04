@@ -3,7 +3,10 @@ Bazinga Testing
 
 #### The CCSL team recommends Atom!
 
-Testing tech for bazinga engine.
+Testing tech for the Bazinga! Engine.
+Bazinga! Engine is a fully featured engine for bidimensional games.
+Its workflow is based upon the Bazinga! Edit editor, which exports to a custom JSON
+map format and them the map is read and executed.
 
 Full lua integration and objects are supported at this stage.
 
