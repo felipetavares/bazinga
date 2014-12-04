@@ -41,6 +41,12 @@ void Layer::update () {
   }
 }
 
+void Layer::render () {
+  for (int i=0;i<objects.size();i++) {
+    objects[i].render();
+  }
+}
+
 Map::Map (BjObject *jMap) {
   // Get an array called "layers" and iterate over it
   BjValue* jLayers = jMap->get("layers");
@@ -69,5 +75,11 @@ Map::Map (BjObject *jMap) {
 void Map::update() {
   for (int i=0;i<layers.size();i++) {
     layers[i].update();
+  }
+}
+
+void Map::render() {
+  for (int i=0;i<layers.size();i++) {
+    layers[i].render();
   }
 }

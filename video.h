@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "filesystem.h"
+#include "map.h"
 #include <string>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
@@ -19,6 +20,13 @@ namespace bazinga {
 		static const Uint32 videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 		static Path icon;
 	public:
+		class Image {
+			GLuint id;
+		public:
+			Image(Path);
+			GLuint getId();
+		};
+
 		static int windowBpp;
 		static int windowWidth;
 		static int windowHeight;
@@ -31,6 +39,7 @@ namespace bazinga {
 
 		static void setWindowTitleAndIcon (string,string="");
 		static void render ();
+		static void renderMap (Map*);
 	private:
 		static void getVideoModes ();
 		static void findBestVideoMode ();

@@ -1,6 +1,49 @@
 #include "video.h"
 #include <cmath>
+#include <il.h>
 using namespace bazinga;
+
+video::Image::Image (Path path) {
+	ILuint imageID;
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
+
+	ilLoadImage(path.getPath().c_str());
+	void *data = ilGetData();
+	if(!data) {
+		ilBindImage(0);
+		ilDeleteImages(1, &imageID);
+		return;
+	}
+
+	int const width  = ilGetInteger(IL_IMAGE_WIDTH);
+	int const height = ilGetInteger(IL_IMAGE_HEIGHT);
+	int const type   = ilGetInteger(IL_IMAGE_TYPE); // matches OpenGL
+	int const format = ilGetInteger(IL_IMAGE_FORMAT); // matches OpenGL
+
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // rows are tightly packed
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // pixels are tightly packed
+
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	cout << "bazinga: image: image loadded sucessfully (" << width << "," << height << ")" << endl;
+
+	id = textureID;
+}
+
+GLuint video::Image::getId () {
+	return id;
+}
 
 int video::windowBpp = 0;
 int video::windowWidth = 0;
@@ -21,6 +64,8 @@ void video::init() {
 		cout << "[ERR] [CANNOT INIT SDL]" << endl;
 		exit (-1);
 	}
+
+	ilInit();
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -52,10 +97,10 @@ void video::init() {
 	glEnable( GL_BLEND );
 	glEnable( GL_ALPHA );
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glAlphaFunc(GL_GREATER,0.5f);
-	glEnable(GL_ALPHA_TEST);
+	//glAlphaFunc(GL_GREATER,0.5f);
+	//glEnable(GL_ALPHA_TEST);
 
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 
@@ -127,6 +172,14 @@ void video::findBestVideoMode () {
 void video::setWindowTitleAndIcon (	string _title,
 										string _icon) {
 	SDL_WM_SetCaption (_title.c_str(),_icon.c_str());
+}
+
+void video::renderMap (Map *map) {
+	glClearColor (0,0,0,1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+
+	map->render();
 }
 
 void video::render () {

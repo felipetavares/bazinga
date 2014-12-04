@@ -5,6 +5,42 @@
 using namespace std;
 
 namespace bazinga {
+  Map* themap = NULL;
+
+  bool events () {
+    SDL_Event event;
+
+    while ( SDL_PollEvent(&event) ) {
+      switch (event.type) {
+        case SDL_JOYBUTTONDOWN:
+        case SDL_JOYBUTTONUP:
+          //inputManager->joystickButtonEvent (event);
+        break;
+        case SDL_JOYAXISMOTION:
+          //inputManager->joystickAxisEvent (event);
+        break;
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+        if (event.key.keysym.sym != SDLK_ESCAPE) {
+          //inputManager->keyboardKeyEvent (event);
+        } else
+          return false;
+        break;
+        case SDL_MOUSEMOTION:
+          //inputManager->mouseMoveEvent (event);
+        break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+          //inputManager->mouseButtonEvent (event);
+        break;
+        case SDL_QUIT:
+          return false;
+      }
+    }
+
+    return true;
+  }
+
   void startModules () {
     cout << "startModules()" << endl;
 
@@ -13,9 +49,7 @@ namespace bazinga {
 
     BjObject *object = json::parse (sData);
 
-    Map map = Map(object);
-
-    map.update();
+    themap = new Map(object);
 
     delete object;
     delete data;
@@ -23,15 +57,27 @@ namespace bazinga {
 
   void gameLoop () {
     cout << "gameLoop()" << endl;
+
+    while (events()) {
+      themap->update();
+      video::renderMap(themap);
+      video::render();
+    }
   }
 
   void endModules () {
     cout << "endModules()" << endl;
+
+    if (themap) {
+      delete themap;
+    }
   }
 }
 
 int main (int argc, char** argv) {
   bazinga::video::init();
+
+  bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
 
   bazinga::startModules();
   bazinga::gameLoop();

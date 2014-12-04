@@ -1,5 +1,8 @@
 #include "object.h"
+#include "cache.h"
+#include "filesystem.h"
 #include <exception>
+#include <SDL/SDL_opengl.h>
 using namespace bazinga;
 
 Object::Object (BjObject* jObject) {
@@ -89,6 +92,27 @@ void Object::update () {
         updateProperties();
     }
   }
+}
+
+void Object::render () {
+  float sX = 1;
+  float sY = 1;
+  glPushMatrix();
+    glTranslatef (num_properties["x"]-200, num_properties["y"]-200, 0);
+    glEnable (GL_TEXTURE);
+    glEnable (GL_TEXTURE_2D);
+    glDisable (GL_ALPHA_TEST);
+    glDisable (GL_BLEND);
+    GLuint texID = cache::getTexture(Path(str_properties["img"]));
+    cout << "bazinga: texID: " << texID << endl;
+    glBindTexture (GL_TEXTURE_2D, texID);
+    glBegin(GL_QUADS);
+    glTexCoord2f (0,0); 	glVertex3f(0, 0, 0);
+    glTexCoord2f (sX,0); 	glVertex3f(num_properties["w"], 0, 0);
+    glTexCoord2f (sX,sY); 	glVertex3f(num_properties["w"], num_properties["h"], 0);
+    glTexCoord2f (0,sY); 	glVertex3f(0, num_properties["h"], 0);
+    glEnd();
+  glPopMatrix();
 }
 
 void Object::updateProperties() {

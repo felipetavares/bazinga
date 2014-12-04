@@ -36,7 +36,7 @@ string Path::getOriginalPath () {
 
 void Path::setWindowsPath (string _path) {
 	for_each (_path.begin(),_path.end(),[=] (char &c)  -> void {
-		if (c == ':')
+		if (c == ':' || c == '\\' || c == '/')
 			c = '\\';
 	});
 
@@ -45,7 +45,7 @@ void Path::setWindowsPath (string _path) {
 
 void Path::setLinuxPath (string _path) {
 	for_each (_path.begin(),_path.end(),[=] (char &c)  -> void {
-		if (c == ':')
+		if (c == ':' || c == '\\' || c == '/')
 			c = '/';
 	});
 

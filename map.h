@@ -11,6 +11,7 @@ namespace bazinga {
   public:
     Layer (BjObject*);
 
+    void render();
     void update();
   };
 
@@ -19,6 +20,7 @@ namespace bazinga {
   public:
     Map (BjObject*);
 
+    void render();
     void update();
   };
 }

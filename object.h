@@ -28,7 +28,7 @@ namespace bazinga {
     ~Object();
 
     void update();
-
+    void render();
   private:
     void loadFile(Path);
     void updateProperties();
