@@ -10,13 +10,13 @@ BjValue::BjValue (const BjValue& _v) {
 }
 
 BjValue::BjValue () {
-	type = Type::jNull;
+	type = BjValue::jNull;
 	array = NULL;
 	object = NULL;
 }
 
 BjValue::BjValue (string& _str) : str() {
-	type = Type::jString;
+	type = BjValue::jString;
 	str = _str;
 
 	array = NULL;
@@ -24,7 +24,7 @@ BjValue::BjValue (string& _str) : str() {
 }
 
 BjValue::BjValue (float _number) {
-	type = Type::jNumber;
+	type = BjValue::jNumber;
 	number = _number;
 
 	array = NULL;
@@ -33,16 +33,16 @@ BjValue::BjValue (float _number) {
 
 BjValue::BjValue (bool _bool) {
 	if (_bool)
-		type = Type::jTrue;
+		type = BjValue::jTrue;
 	else
-		type = Type::jFalse;
+		type = BjValue::jFalse;
 
 	array = NULL;
 	object = NULL;
 }
 
 BjValue::BjValue (BjArray *_array) {
-	type = Type::jArray;
+	type = BjValue::jArray;
 	array = _array;
 
 	object = NULL;
@@ -56,9 +56,9 @@ BjValue::BjValue (BjObject *_object) {
 }
 
 BjValue::~BjValue () {
-	if (type == Type::jObject && object != NULL)
+	if (type == BjValue::jObject && object != NULL)
 		delete object;
-	else if (type == Type::jArray && array != NULL)
+	else if (type == BjValue::jArray && array != NULL)
 		delete array;
 }
 
@@ -147,26 +147,26 @@ string json::dumpValue (BjValue* _val) {
 	stringstream ss;
 
 	switch (_val->type) {
-		case BjValue::Type::jString:
+		case BjValue::jString:
 			str += "\"" + _val->str +  "\"";
 		break;
-		case BjValue::Type::jNumber:
+		case BjValue::jNumber:
 			ss << _val->number;
 			str += ss.str();
 		break;
-		case BjValue::Type::jObject:
+		case BjValue::jObject:
 			str += dumpObject(_val->object);
 		break;
-		case BjValue::Type::jArray:
+		case BjValue::jArray:
 			str += dumpArray(_val->array);
 		break;
-		case BjValue::Type::jTrue:
+		case BjValue::jTrue:
 			str += "true";
 		break;
-		case BjValue::Type::jFalse:
+		case BjValue::jFalse:
 			str += "false";
 		break;
-		case BjValue::Type::jNull:
+		case BjValue::jNull:
 			str += "null";
 		break;
 	}

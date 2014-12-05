@@ -5,8 +5,8 @@
 #include "filesystem.h"
 #include "map.h"
 #include <string>
-#include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
+#include <SDL.h>
+#include <SDL_opengl.h>
 #include <vector>
 using namespace std;
 

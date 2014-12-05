@@ -23,6 +23,7 @@
 #include <cstring>			// Memcpy
 #include <dirent.h>			// Directory listing
 #include <algorithm>
+#include <vector>
 using namespace std;
 
 namespace bazinga {

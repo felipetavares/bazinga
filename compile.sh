@@ -1,0 +1,4 @@
+#/bin/bash
+
+cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="g++" -DCMAKE_C_COMPILER="gcc" -DCMAKE_C_COMPILER_ENV_VAR="" -DCMAKE_CXX_COMPILER_ENV_VAR="" -DCMAKE_MAKE_PROGRAM="make" -DCMAKE_CXX_FLAGS="--std=c++0x" ..
+make
