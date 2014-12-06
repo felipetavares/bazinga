@@ -7,16 +7,17 @@
 namespace bazinga {
   class Layer {
     bool active;
-    vector <Object> objects;
+    vector <Object*> objects;
   public:
     Layer (BjObject*);
+    ~Layer();
 
     void render();
     void update();
   };
 
   class Map {
-    vector <Layer> layers;
+    vector <Layer*> layers;
   public:
     Map (BjObject*);
 

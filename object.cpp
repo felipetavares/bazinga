@@ -18,6 +18,8 @@ Object::Object (BjObject* jObject) {
       if (properties->keys[i] == "script") {
         Path path = Path(properties->values[i]->str);
 
+        cout << "bazinga: script: loading from " << path.getPath() << endl;
+
         loadFile (path);
       } else {
         BjValue *jOValue = properties->values[i];
@@ -47,7 +49,7 @@ Object::Object () {
 }
 
 Object::~Object () {
-  if (L) {
+  if (L != NULL) {
     lua_close(L);
   }
 }
@@ -98,21 +100,19 @@ void Object::render () {
     video::Image img = cache::getTexture(Path(str_properties["img"]));
     GLuint texID = img.id;
 
-    float sX = float(img.w)/float(img.rw);
-    float sY = 1-float(img.h)/float(img.rh);
-    
+    float sX = float(img.w)/((float)img.rw);
+    float sY = float(img.h)/((float)img.rh);
+
     glPushMatrix();
-        glTranslatef (num_properties["x"]-200, num_properties["y"]-200, 0);
+        glTranslatef (num_properties["x"]-400, num_properties["y"]-200, 0);
         glEnable (GL_TEXTURE);
         glEnable (GL_TEXTURE_2D);
-        glDisable (GL_ALPHA_TEST);
-        glDisable (GL_BLEND);
         glBindTexture (GL_TEXTURE_2D, texID);
         glBegin(GL_QUADS);
-        glTexCoord2f (0,0); 	glVertex3f(0, 0, 0);
-        glTexCoord2f (sX,0); 	glVertex3f(img.w, 0, 0);
-        glTexCoord2f (sX,sY); 	glVertex3f(img.w, img.h, 0);
-        glTexCoord2f (0,sY); 	glVertex3f(0, img.h, 0);
+          glTexCoord2f (0,1);  glVertex3f(0, 0, 0);
+          glTexCoord2f (sX,1); 	  glVertex3f(img.w, 0, 0);
+          glTexCoord2f (sX,1-sY);   glVertex3f(img.w, img.h, 0);
+          glTexCoord2f (0,1-sY); 	  glVertex3f(0, img.h, 0);
         glEnd();
     glPopMatrix();
 }
@@ -152,4 +152,9 @@ void Object::createLuaProperties() {
     lua_pushstring(L, s->second.c_str());
     lua_settable(L, -3);
   }
+}
+
+bool bazinga::compareObjects (Object *obj, Object *obj2) {
+    return (obj->num_properties["y"]+obj->num_properties["h"]-obj->num_properties["z"]) <
+           (obj2->num_properties["y"]+obj2->num_properties["h"]-obj2->num_properties["z"]);
 }

@@ -34,7 +34,7 @@ namespace bazinga {
 		Path (string="");
 		~Path ();
 
-		void setPath(string);   // set path in non-plataform-specific way (using ':' )
+		void setPath(string);   // set path in non-plataform-specific way (using '/' )
 		string getPath(); // get plataform specific path
 		string getExtension();
 		string getOriginalPath();

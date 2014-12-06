@@ -36,7 +36,7 @@ ENDIF(WIN32)
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
   lua.o ALL
-  COMMAND ${CMAKE_MAKE_PROGRAM} posix
+  COMMAND ${CMAKE_MAKE_PROGRAM} ansi
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
 

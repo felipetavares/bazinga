@@ -44,7 +44,7 @@ namespace bazinga {
   void startModules () {
     cout << "startModules()" << endl;
 
-    char *data = fs::getFileData(Path("maps:test.json"));
+    char *data = fs::getFileData(Path("C:/Users/Rachel/AppData/Roaming/LOVE/data/maps/sala 1"));
     string sData = string (data);
 
     BjObject *object = json::parse (sData);

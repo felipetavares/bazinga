@@ -1,5 +1,6 @@
 #include "video.h"
 #include <cmath>
+#include <sstream>
 #include <il.h>
 using namespace bazinga;
 
@@ -9,55 +10,65 @@ video::Image::Image (Path path) {
 	ilBindImage(imageID);
 
 	ilLoadImage(path.getPath().c_str());
-	void *data = ilGetData();
-	if(!data) {
-		ilBindImage(0);
-		ilDeleteImages(1, &imageID);
-		return;
-	}
 
 	int const width  = ilGetInteger(IL_IMAGE_WIDTH);
 	int const height = ilGetInteger(IL_IMAGE_HEIGHT);
 	int const depth  = ilGetInteger(IL_IMAGE_DEPTH);
-    int const bpp    = ilGetInteger(IL_IMAGE_BPP);
-	int const type   = ilGetInteger(IL_IMAGE_TYPE); // matches OpenGL
+	int const bpp    = ilGetInteger(IL_IMAGE_BPP);
+	int const type   = ilGetInteger(IL_IMAGE_TYPE); 	// matches OpenGL
 	int const format = ilGetInteger(IL_IMAGE_FORMAT); // matches OpenGL
 
-    int nw = pow(2, ceil(log2(width)));
-    int nh = pow(2, ceil(log2(height)));
+  int nw = pow(2, ceil(log2(width)));
+  int nh = pow(2, ceil(log2(height)));
 
-    ILuint potImageID;
-    ilGenImages (1, &potImageID);
-    ilBindImage (potImageID);
-    
-    ilTexImage (nw, nh, depth, bpp, format, type, NULL);
+  ILuint potImageID;
+  ilGenImages (1, &potImageID);
+  ilBindImage (potImageID);
 
-    ilBlit (imageID, 0, 0, 0, 0, 0, 0, width, height, depth);
+  ilTexImage (nw, nh, depth, bpp, format, type, NULL);
 
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+	void *data = ilGetData();
+	if(!data) {
+		ilBindImage(0);
+		ilDeleteImages(1, &potImageID);
+		return;
+	}
 
-    glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // rows are tightly packed
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // pixels are tightly packed
+	ilDisable(IL_BLIT_BLEND);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, format, nw, nh, 0, format, type, data);
+  ilOverlayImage (imageID, 0, 0, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	int const ptype   = ilGetInteger(IL_IMAGE_TYPE); 	// matches OpenGL
+	int const pformat = ilGetInteger(IL_IMAGE_FORMAT); // matches OpenGL
 
-    cout << "bazinga: image: image loadded sucessfully (" << nw << "," << nh << ")" << endl;
+	GLuint textureID;
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
 
-    ilSaveImage("debug.bmp");
+  glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // rows are tightly packed
+  glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+  glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // pixels are tightly packed
 
-    id = textureID;
-    w = width;
-    h = height;
-    rw = nw;
-    rh = nh;
+	glTexImage2D(GL_TEXTURE_2D, 0, pformat, nw, nh, 0, pformat, ptype, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  cout << "bazinga: image: image loadded sucessfully (" << nw << "," << nh << ")" << endl;
+
+	stringstream ss;
+
+	ss << "debug" << potImageID << ".bmp";
+
+	ilSaveImage(ss.str().c_str());
+
+  id = textureID;
+  w = width;
+  h = height;
+  rw = nw;
+  rh = nh;
 }
 
 int video::windowBpp = 0;
@@ -102,17 +113,18 @@ void video::init() {
 	// TODO: add SDL_image
 	//SDL_WM_SetIcon(IMG_Load(icon.getPath().c_str()), NULL);
 	screen = SDL_SetVideoMode (windowWidth,windowHeight,windowBpp,videoFlags);
-	SDL_ShowCursor (0);
+	SDL_ShowCursor (1);
 
 	cout << "[CRT] [WIN] [w:" << windowWidth << ",h:" << windowHeight << "]" << endl;
 
-	glEnable (GL_DEPTH_TEST);
+  // CHANGE THAT IF NEED BE
+	glDisable (GL_DEPTH_TEST);
 
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_BLEND );
 	glEnable( GL_ALPHA );
 
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//glAlphaFunc(GL_GREATER,0.5f);
 	//glEnable(GL_ALPHA_TEST);

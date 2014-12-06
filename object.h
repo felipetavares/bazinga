@@ -15,13 +15,12 @@ extern "C" {
 
 namespace bazinga {
   class Object {
+    Path script;
+    lua_State *L;
+  public:
     map <string, float>   num_properties;
     map <string, string>  str_properties;
 
-    Path script;
-
-    lua_State *L;
-  public:
     Object();
     Object(Path);
     Object(BjObject*);
@@ -29,11 +28,15 @@ namespace bazinga {
 
     void update();
     void render();
+
+    bool operator< (const Object&);
   private:
     void loadFile(Path);
     void updateProperties();
     void createLuaProperties();
   };
+
+    bool compareObjects(Object*, Object*);
 }
 
 #endif /* BAZINGA_OBJECT_H */

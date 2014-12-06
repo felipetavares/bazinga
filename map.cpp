@@ -23,7 +23,7 @@ Layer::Layer (BjObject *jLayer) {
       BjValue *jOValue = array->array[i];
 
       if (jOValue->type == BjValue::jObject) {
-        objects.push_back(Object(jOValue->object));
+        objects.push_back(new Object(jOValue->object));
       } else {
         // Error
       }
@@ -35,16 +35,24 @@ Layer::Layer (BjObject *jLayer) {
   cout << objects.size() << " objects loaded" << endl;
 }
 
+Layer::~Layer () {
+  for (int i=0;i<objects.size();i++) {
+    delete objects[i];
+  }
+}
+
 void Layer::update () {
   for (int i=0;i<objects.size();i++) {
-    objects[i].update();
+    objects[i]->update();
   }
 }
 
 void Layer::render () {
-  for (int i=0;i<objects.size();i++) {
-    objects[i].render();
-  }
+    sort(objects.begin(), objects.end(), compareObjects);
+
+    for (int i=0;i<objects.size();i++) {
+        objects[i]->render();
+    }
 }
 
 Map::Map (BjObject *jMap) {
@@ -60,7 +68,7 @@ Map::Map (BjObject *jMap) {
       BjValue *jOValue = array->array[i];
 
       if (jOValue->type == BjValue::jObject) {
-        layers.push_back(Layer(jOValue->object));
+        layers.push_back(new Layer(jOValue->object));
       } else {
         // Error
       }
@@ -74,12 +82,12 @@ Map::Map (BjObject *jMap) {
 
 void Map::update() {
   for (int i=0;i<layers.size();i++) {
-    layers[i].update();
+    layers[i]->update();
   }
 }
 
 void Map::render() {
   for (int i=0;i<layers.size();i++) {
-    layers[i].render();
+    layers[i]->render();
   }
 }
