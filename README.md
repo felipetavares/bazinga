@@ -4,9 +4,9 @@ Bazinga Testing
 #### The CCSL team recommends Atom!
 
 Testing tech for the Bazinga! Engine.
-Bazinga! Engine is a fully featured engine for bidimensional games.
-Its workflow is based upon the Bazinga! Edit editor, which exports to a custom JSON
-map format and them the map is read and executed.
+Bazinga! Engine is a fully featured engine for 2d games.
+Its workflow is based upon the [Bazinga! Edit](https://github.com/felipetavares/bazinga.v2) editor, which exports to a custom JSON
+map format and them the map can be loaded and executed.
 
 Full lua integration and objects are supported at this stage.
 
@@ -14,16 +14,20 @@ Full lua integration and objects are supported at this stage.
 2. SDL Support      - [ok]
 3. Map Loading      - [ok]
 4. Video Support    - [ok]
-5. Map Display      - [wip]
+5. Map Display      - [ok]
+6. Input Support     - [wip]
 
 How to compile (linux)
 ----------------------
 
-You will need the following dependencies:
+You will need the following dependencies (with related dev ones where applicable):
 
 * build-essential
 * cmake
 * git
+* libdevil
+* sdl
+* libgl
 
 The first step to compile is to download the source code
 
