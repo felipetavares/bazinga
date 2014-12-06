@@ -12,3 +12,5 @@ lua
 # Arquivos invisíveis
 !.gitignore
 .*
+# Zedstate (editor)
+.zedstate
