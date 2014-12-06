@@ -9,3 +9,6 @@ build/
 # Executáveis da Lua
 luac
 lua
+# Arquivos invisíveis
+!.gitignore
+.*

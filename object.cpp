@@ -2,7 +2,7 @@
 #include "cache.h"
 #include "filesystem.h"
 #include <exception>
-#include <SDL/SDL_opengl.h>
+#include <SDL_opengl.h>
 using namespace bazinga;
 
 Object::Object (BjObject* jObject) {
