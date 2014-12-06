@@ -21,10 +21,12 @@ namespace bazinga {
 		static Path icon;
 	public:
 		class Image {
-			GLuint id;
 		public:
+            unsigned int w,h;
+            unsigned int rw, rh;
+            GLuint id;
+
 			Image(Path);
-			GLuint getId();
 		};
 
 		static int windowBpp;

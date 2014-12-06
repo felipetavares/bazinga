@@ -95,24 +95,26 @@ void Object::update () {
 }
 
 void Object::render () {
-  float sX = 1;
-  float sY = 1;
-  glPushMatrix();
-    glTranslatef (num_properties["x"]-200, num_properties["y"]-200, 0);
-    glEnable (GL_TEXTURE);
-    glEnable (GL_TEXTURE_2D);
-    glDisable (GL_ALPHA_TEST);
-    glDisable (GL_BLEND);
-    GLuint texID = cache::getTexture(Path(str_properties["img"]));
-    cout << "bazinga: texID: " << texID << endl;
-    glBindTexture (GL_TEXTURE_2D, texID);
-    glBegin(GL_QUADS);
-    glTexCoord2f (0,0); 	glVertex3f(0, 0, 0);
-    glTexCoord2f (sX,0); 	glVertex3f(num_properties["w"], 0, 0);
-    glTexCoord2f (sX,sY); 	glVertex3f(num_properties["w"], num_properties["h"], 0);
-    glTexCoord2f (0,sY); 	glVertex3f(0, num_properties["h"], 0);
-    glEnd();
-  glPopMatrix();
+    video::Image img = cache::getTexture(Path(str_properties["img"]));
+    GLuint texID = img.id;
+
+    float sX = float(img.w)/float(img.rw);
+    float sY = 1-float(img.h)/float(img.rh);
+    
+    glPushMatrix();
+        glTranslatef (num_properties["x"]-200, num_properties["y"]-200, 0);
+        glEnable (GL_TEXTURE);
+        glEnable (GL_TEXTURE_2D);
+        glDisable (GL_ALPHA_TEST);
+        glDisable (GL_BLEND);
+        glBindTexture (GL_TEXTURE_2D, texID);
+        glBegin(GL_QUADS);
+        glTexCoord2f (0,0); 	glVertex3f(0, 0, 0);
+        glTexCoord2f (sX,0); 	glVertex3f(img.w, 0, 0);
+        glTexCoord2f (sX,sY); 	glVertex3f(img.w, img.h, 0);
+        glTexCoord2f (0,sY); 	glVertex3f(0, img.h, 0);
+        glEnd();
+    glPopMatrix();
 }
 
 void Object::updateProperties() {

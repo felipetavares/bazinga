@@ -4,16 +4,16 @@
 
 namespace bazinga {
   namespace cache {
-    map <string, GLuint> cachedData;
+    map <string, video::Image*> cachedData;
 
-    GLuint getTexture (Path path) {
+    video::Image getTexture (Path path) {
       try {
-        return cachedData.at(path.getPath());
+        return *cachedData.at(path.getPath());
       } catch (exception e) {
         cout << "bazinga: cache: " << path.getPath() << endl;
 
-        video::Image image = video::Image(path);
-        cachedData[path.getPath()] = image.getId();
+        video::Image *image = new video::Image(path);
+        cachedData[path.getPath()] = image;
       }
     }
   }

@@ -7,7 +7,7 @@ using namespace std;
 
 namespace bazinga {
   namespace cache {
-    GLuint getTexture (Path);
+    video::Image getTexture (Path);
   }
 }
 

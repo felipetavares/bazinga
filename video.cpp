@@ -18,31 +18,46 @@ video::Image::Image (Path path) {
 
 	int const width  = ilGetInteger(IL_IMAGE_WIDTH);
 	int const height = ilGetInteger(IL_IMAGE_HEIGHT);
+	int const depth  = ilGetInteger(IL_IMAGE_DEPTH);
+    int const bpp    = ilGetInteger(IL_IMAGE_BPP);
 	int const type   = ilGetInteger(IL_IMAGE_TYPE); // matches OpenGL
 	int const format = ilGetInteger(IL_IMAGE_FORMAT); // matches OpenGL
 
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
+    int nw = pow(2, ceil(log2(width)));
+    int nh = pow(2, ceil(log2(height)));
 
-	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // rows are tightly packed
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // pixels are tightly packed
+    ILuint potImageID;
+    ilGenImages (1, &potImageID);
+    ilBindImage (potImageID);
+    
+    ilTexImage (nw, nh, depth, bpp, format, type, NULL);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
+    ilBlit (imageID, 0, 0, 0, 0, 0, 0, width, height, depth);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 
-	cout << "bazinga: image: image loadded sucessfully (" << width << "," << height << ")" << endl;
+    glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // rows are tightly packed
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // pixels are tightly packed
 
-	id = textureID;
-}
+    glTexImage2D(GL_TEXTURE_2D, 0, format, nw, nh, 0, format, type, data);
 
-GLuint video::Image::getId () {
-	return id;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    cout << "bazinga: image: image loadded sucessfully (" << nw << "," << nh << ")" << endl;
+
+    ilSaveImage("debug.bmp");
+
+    id = textureID;
+    w = width;
+    h = height;
+    rw = nw;
+    rh = nh;
 }
 
 int video::windowBpp = 0;
