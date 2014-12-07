@@ -15,7 +15,7 @@ Full lua integration and objects are supported at this stage.
 3. Map Loading      - [ok]
 4. Video Support    - [ok]
 5. Map Display      - [ok]
-6. Input Support     - [wip]
+6. Input Support    - [wip]
 
 How to compile (linux)
 ----------------------

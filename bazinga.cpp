@@ -20,9 +20,18 @@ namespace bazinga {
           //inputManager->joystickAxisEvent (event);
         break;
         case SDL_KEYDOWN:
+        if (event.key.keysym.sym != SDLK_ESCAPE) {
+          string keyName = string(SDL_GetKeyName(event.key.keysym.sym));
+          transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
+          input::keypress(keyName);
+        } else
+          return false;
+        break;
         case SDL_KEYUP:
         if (event.key.keysym.sym != SDLK_ESCAPE) {
-          //inputManager->keyboardKeyEvent (event);
+          string keyName = string(SDL_GetKeyName(event.key.keysym.sym));
+          transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
+          input::keyunpress(keyName);
         } else
           return false;
         break;
@@ -76,6 +85,10 @@ namespace bazinga {
 
 int main (int argc, char** argv) {
   bazinga::video::init();
+  bazinga::input::init();
+
+  new bazinga::input::Context("main");
+  bazinga::input::activateContext("main");
 
   bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
 
@@ -83,6 +96,7 @@ int main (int argc, char** argv) {
   bazinga::gameLoop();
   bazinga::endModules();
 
+  bazinga::input::deinit();
   bazinga::video::deinit();
   return 0;
 }

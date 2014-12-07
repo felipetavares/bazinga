@@ -1,6 +1,7 @@
 #include "object.h"
 #include "cache.h"
 #include "filesystem.h"
+#include "input.h"
 #include <exception>
 #include <SDL_opengl.h>
 using namespace bazinga;
@@ -77,8 +78,9 @@ void Object::loadFile (Path path) {
 void Object::update () {
   // If we have an script attached
   if (L) {
-    lua_getglobal(L, "update");
+    input::setContextsIn(L);
 
+    lua_getglobal(L, "update");
     createLuaProperties();
 
     if (lua_pcall(L, 1, 1, 0)) {

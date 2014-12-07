@@ -6,6 +6,7 @@
 #include "object.h"
 #include "map.h"
 #include "video.h"
+#include "input.h"
 
 void startModules ();
 void gameLoop();

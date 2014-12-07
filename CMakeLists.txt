@@ -1,5 +1,6 @@
 # Compila a partir do CMake2.8
 cmake_minimum_required(VERSION 2.8)
+include(ExternalProject)
 
 ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
@@ -40,8 +41,20 @@ ADD_CUSTOM_TARGET(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
 
+ExternalProject_Add(
+  Chipmunk
+  URL ${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/
+  CMAKE_ARGS -DCMAKE_CXX_COMPILER=C:/MinGW/bin/g++.exe
+             -DCMAKE_C_COMPILER=C:/MinGW/bin/gcc.exe
+             -DCMAKE_CXX_FLAGS=-std=c++11
+             -DCMAKE_C_COMPILER_ENV_VAR=C:/MinGW/bin/
+             -DCMAKE_CXX_COMPILER_ENV_VAR=C:/MinGW/bin/
+             -DCMAKE_MAKE_PROGRAM=C:/MinGW/bin/mingw32-make.exe
+             -DCMAKE_AR=C:/MinGW/bin/ar.exe
+)
+
 # Compila o executável principal
-add_executable (bazinga bazinga.cpp json.cpp filesystem.cpp object.cpp map.cpp video.cpp cache.cpp)
+add_executable (bazinga bazinga.cpp json.cpp filesystem.cpp object.cpp map.cpp video.cpp cache.cpp input.cpp)
 
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)

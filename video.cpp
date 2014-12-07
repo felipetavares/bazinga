@@ -58,11 +58,14 @@ video::Image::Image (Path path) {
 
   cout << "bazinga: image: image loadded sucessfully (" << nw << "," << nh << ")" << endl;
 
+	// The following is debugging code
+	/*
 	stringstream ss;
 
 	ss << "debug" << potImageID << ".bmp";
 
 	ilSaveImage(ss.str().c_str());
+	*/
 
   id = textureID;
   w = width;
