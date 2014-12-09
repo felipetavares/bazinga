@@ -9,7 +9,7 @@ namespace bazinga {
 
   class Layer {
   public:
-    Layer (BjObject*, Map*);
+    Layer (BjObject*, Map*, int);
     ~Layer();
   };
 

@@ -1,7 +1,7 @@
 #include "map.h"
 using namespace bazinga;
 
-Layer::Layer (BjObject *jLayer, Map* map) {
+Layer::Layer (BjObject *jLayer, Map* map, int layer) {
   BjValue* jActive = jLayer->get("active");
 
   if (jActive->type == BjValue::jTrue) {
@@ -23,7 +23,7 @@ Layer::Layer (BjObject *jLayer, Map* map) {
       BjValue *jOValue = array->array[i];
 
       if (jOValue->type == BjValue::jObject) {
-        map->addObject(new Object(jOValue->object));
+        map->addObject(new Object(jOValue->object, layer));
       } else {
         // Error
       }

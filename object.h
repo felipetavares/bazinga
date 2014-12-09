@@ -23,7 +23,7 @@ namespace bazinga {
 
     Object();
     Object(Path);
-    Object(BjObject*);
+    Object(BjObject*, int);
     ~Object();
 
     void update();
