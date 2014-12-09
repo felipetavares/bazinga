@@ -53,24 +53,28 @@ namespace bazinga {
   void startModules () {
     cout << "startModules()" << endl;
 
-    char *data = fs::getFileData(Path("C:/Users/Rachel/AppData/Roaming/LOVE/data/maps/sala 1"));
+    char *data = fs::getFileData(Path("maps/map1"));
     string sData = string (data);
 
     BjObject *object = json::parse (sData);
 
     themap = new Map(object);
-
+    /*
+    
     delete object;
     delete data;
+    */
   }
 
   void gameLoop () {
     cout << "gameLoop()" << endl;
 
     while (events()) {
-      themap->update();
-      video::renderMap(themap);
-      video::render();
+      if (themap) {
+        themap->update();
+        video::renderMap(themap);
+        video::render();
+      }
     }
   }
 

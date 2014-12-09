@@ -36,7 +36,7 @@ namespace bazinga {
     void createLuaProperties();
   };
 
-    bool compareObjects(Object*, Object*);
+  bool compareObjects(Object*, Object*);
 }
 
 #endif /* BAZINGA_OBJECT_H */

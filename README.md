@@ -15,7 +15,8 @@ Full lua integration and objects are supported at this stage.
 3. Map Loading      - [ok]
 4. Video Support    - [ok]
 5. Map Display      - [ok]
-6. Input Support    - [wip]
+6. Input Support    - [ok]
+7. Physics Support  - [wip]
 
 How to compile (linux)
 ----------------------
@@ -40,14 +41,14 @@ it:
 
 ```bash
 mkdir build
+cp -r tmpbuild build
 cd build
 ```
 
 The last step is to really compile the code:
 
 ```bash
-cmake ..
-make
+./compile.sh
 ```
 
 Finally, you can run the code:
@@ -76,8 +77,8 @@ it:
 
 ```bash
 mkdir build
+xcopy tmpbuild build
 cd build
-cp ..\compile.bat .
 ```
 
 The last step is to really compile the code:
