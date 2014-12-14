@@ -5,21 +5,20 @@
 #include "json.h"
 
 namespace bazinga {
-  class Layer {
-    bool active;
-    vector <Object*> objects;
-  public:
-    Layer (BjObject*);
-    ~Layer();
+  class Map;
 
-    void render();
-    void update();
+  class Layer {
+  public:
+    Layer (BjObject*, Map*, int);
+    ~Layer();
   };
 
   class Map {
-    vector <Layer*> layers;
+    vector <Object*> objects;
   public:
     Map (BjObject*);
+
+    void addObject(Object*);
 
     void render();
     void update();

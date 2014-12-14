@@ -41,6 +41,7 @@ ADD_CUSTOM_TARGET(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
 
+IF (WIN32)
 ExternalProject_Add(
   Chipmunk
   URL ${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/
@@ -52,6 +53,22 @@ ExternalProject_Add(
              -DCMAKE_MAKE_PROGRAM=C:/MinGW/bin/mingw32-make.exe
              -DCMAKE_AR=C:/MinGW/bin/ar.exe
 )
+ENDIF(WIN32)
+
+IF(UNIX)
+ExternalProject_Add(
+  Chipmunk
+  URL ${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/
+  INSTALL_COMMAND ""
+  CMAKE_ARGS -DCMAKE_CXX_COMPILER=g++
+  -DCMAKE_C_COMPILER=gcc
+  -DCMAKE_CXX_FLAGS=-std=c++11
+  -DCMAKE_MAKE_PROGRAM=make
+  -DCMAKE_AR=ar
+  -DCMAKE_C_LINK_EXECUTABLE=ld
+  -DCMAKE_CXX_LINK_EXECUTABLE=ld
+)
+ENDIF(UNIX)
 
 # Compila o executável principal
 add_executable (bazinga bazinga.cpp json.cpp filesystem.cpp object.cpp map.cpp video.cpp cache.cpp input.cpp)

@@ -6,7 +6,7 @@
 #include <SDL_opengl.h>
 using namespace bazinga;
 
-Object::Object (BjObject* jObject) {
+Object::Object (BjObject* jObject, int layer) {
   BjValue* jProperties = jObject->get("properties");
 
   L = NULL;
@@ -26,7 +26,11 @@ Object::Object (BjObject* jObject) {
         BjValue *jOValue = properties->values[i];
 
         if (jOValue->type == BjValue::jNumber) {
-          num_properties[properties->keys[i]] = jOValue->number;
+          if (properties->keys[i] == "z") {
+            num_properties[properties->keys[i]] = jOValue->number+(layer*100);
+          } else {
+            num_properties[properties->keys[i]] = jOValue->number;
+          }
         } else
         if (jOValue->type == BjValue::jString) {
           str_properties[properties->keys[i]] = jOValue->str;
@@ -157,6 +161,6 @@ void Object::createLuaProperties() {
 }
 
 bool bazinga::compareObjects (Object *obj, Object *obj2) {
-    return (obj->num_properties["y"]+obj->num_properties["h"]-obj->num_properties["z"]) <
-           (obj2->num_properties["y"]+obj2->num_properties["h"]-obj2->num_properties["z"]);
+    return !((obj->num_properties["y"]+obj->num_properties["h"]-obj->num_properties["z"]) <
+           (obj2->num_properties["y"]+obj2->num_properties["h"]-obj2->num_properties["z"]));
 }
