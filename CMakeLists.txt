@@ -45,6 +45,7 @@ IF (WIN32)
 ExternalProject_Add(
   Chipmunk
   URL ${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/
+  INSTALL_COMMAND ""	
   CMAKE_ARGS -DCMAKE_CXX_COMPILER=C:/MinGW/bin/g++.exe
              -DCMAKE_C_COMPILER=C:/MinGW/bin/gcc.exe
              -DCMAKE_CXX_FLAGS=-std=c++11

@@ -2,9 +2,12 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 using namespace std;
 
 namespace bazinga {
+  double delta = 0;
+
   Map* themap = NULL;
 
   bool events () {
@@ -59,8 +62,8 @@ namespace bazinga {
     BjObject *object = json::parse (sData);
 
     themap = new Map(object);
-    /*
     
+    /*
     delete object;
     delete data;
     */
@@ -69,7 +72,20 @@ namespace bazinga {
   void gameLoop () {
     cout << "gameLoop()" << endl;
 
+    chrono::high_resolution_clock::time_point t;
+
     while (events()) {
+      auto t0 = chrono::high_resolution_clock::now();
+      auto elapsed = t0-t;
+      t = t0;
+
+      delta = ((std::chrono::duration_cast<std::chrono::microseconds>(elapsed)).count()/1000000.0);
+
+      stringstream ss;
+      ss << 1/delta;
+
+      bazinga::video::setWindowTitleAndIcon(ss.str(),string(""));
+
       if (themap) {
         themap->update();
         video::renderMap(themap);

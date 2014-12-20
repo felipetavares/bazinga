@@ -1,3 +1,4 @@
+#include "bazinga.h"
 #include "object.h"
 #include "cache.h"
 #include "filesystem.h"
@@ -27,7 +28,7 @@ Object::Object (BjObject* jObject, int layer) {
 
         if (jOValue->type == BjValue::jNumber) {
           if (properties->keys[i] == "z") {
-            num_properties[properties->keys[i]] = jOValue->number+(layer*100);
+            num_properties[properties->keys[i]] = jOValue->number-(layer*100);
           } else {
             num_properties[properties->keys[i]] = jOValue->number;
           }
@@ -86,6 +87,9 @@ void Object::update () {
 
     lua_getglobal(L, "update");
     createLuaProperties();
+
+    lua_pushnumber(L, bazinga::delta);
+    lua_setglobal(L, "dt");
 
     if (lua_pcall(L, 1, 1, 0)) {
       cout << "bazinga: error when calling update() in script " << script.getPath() << endl;
@@ -161,6 +165,6 @@ void Object::createLuaProperties() {
 }
 
 bool bazinga::compareObjects (Object *obj, Object *obj2) {
-    return !((obj->num_properties["y"]+obj->num_properties["h"]-obj->num_properties["z"]) <
+    return ((obj->num_properties["y"]+obj->num_properties["h"]-obj->num_properties["z"]) <
            (obj2->num_properties["y"]+obj2->num_properties["h"]-obj2->num_properties["z"]));
 }

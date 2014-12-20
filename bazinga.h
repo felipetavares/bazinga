@@ -8,8 +8,11 @@
 #include "video.h"
 #include "input.h"
 
-void startModules ();
-void gameLoop();
-void endModules ();
+namespace bazinga {
+	extern double delta;
+	void startModules ();
+	void gameLoop();
+	void endModules ();
+}
 
 #endif /* BAZINGA_H */
