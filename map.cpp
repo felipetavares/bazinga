@@ -36,7 +36,19 @@ Layer::Layer (BjObject *jLayer, Map* map, int layer) {
 Layer::~Layer () {
 }
 
-Map::Map (BjObject *jMap) {
+Map::Map () {
+  cout << "bazinga: chipmunk: initializing space...";
+
+  pSpace = cpSpaceNew();
+
+  if (pSpace) {
+    cout << " ok" << endl;
+  } else {
+    cout << " fail" << endl;
+  }
+}
+
+void Map::init (BjObject *jMap) {
   // Get an array called "layers" and iterate over it
   BjValue* jLayers = jMap->get("layers");
 
@@ -58,6 +70,15 @@ Map::Map (BjObject *jMap) {
   }
 
   cout << objects.size() << " objects loaded" << endl;
+}
+
+Map::~Map () {
+  if (pSpace)
+    cpSpaceFree(pSpace);
+}
+
+cpSpace* Map::getSpace () {
+  return pSpace;
 }
 
 void Map::addObject (Object *object) {

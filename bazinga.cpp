@@ -10,6 +10,10 @@ namespace bazinga {
 
   Map* themap = NULL;
 
+  Map* getActiveMap () {
+    return themap;
+  }
+
   bool events () {
     SDL_Event event;
 
@@ -61,7 +65,8 @@ namespace bazinga {
 
     BjObject *object = json::parse (sData);
 
-    themap = new Map(object);
+    themap = new Map();
+    themap->init(object);
     
     /*
     delete object;
@@ -104,19 +109,24 @@ namespace bazinga {
 }
 
 int main (int argc, char** argv) {
-  bazinga::video::init();
-  bazinga::input::init();
+  try {
+    bazinga::video::init();
+    bazinga::input::init();
 
-  new bazinga::input::Context("main");
-  bazinga::input::activateContext("main");
+    new bazinga::input::Context("main");
+    bazinga::input::activateContext("main");
 
-  bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
+    bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
 
-  bazinga::startModules();
-  bazinga::gameLoop();
-  bazinga::endModules();
+    bazinga::startModules();
+    bazinga::gameLoop();
+    bazinga::endModules();
 
-  bazinga::input::deinit();
-  bazinga::video::deinit();
+    bazinga::input::deinit();
+    bazinga::video::deinit();
+  } catch (exception e) {
+    cout << "bazinga: exception: " << e.what() << endl;
+  }
+
   return 0;
 }

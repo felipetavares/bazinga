@@ -43,6 +43,22 @@ Object::Object (BjObject* jObject, int layer) {
   } else {
     // Error
   }
+
+  cpSpace *pSpace = bazinga::getActiveMap()->getSpace();
+
+  float x = num_properties["x"];
+  float y = num_properties["y"];
+  float w = num_properties["w"];
+  float h = num_properties["h"];
+
+  cpVect verts[] = {
+    cpv(x-w/2,y-h/2),
+    cpv(x-w/2,y+h/2),
+    cpv(x+w/2,y+h/2),
+    cpv(x+w/2,y-h/2),
+  };
+
+  cpPolyShapeNew(pSpace->staticBody, 4, verts, cpvzero);
 }
 
 Object::Object (Path path) {
@@ -57,6 +73,10 @@ Object::Object () {
 Object::~Object () {
   if (L != NULL) {
     lua_close(L);
+  }
+
+  if (pShape != NULL) {
+    cpShapeFree(pShape);
   }
 }
 

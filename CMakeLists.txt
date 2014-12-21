@@ -4,7 +4,7 @@ include(ExternalProject)
 
 ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
-    # Other flags
+    -g # Debug, shall we?
 )
 
 # Vamos compilar a Bazinga Engine
@@ -18,6 +18,9 @@ include_directories (${CMAKE_SOURCE_DIR}/sdl/include/SDL/)
 
 # Adiciona bibliotecas DevIL ao projeto
 include_directories (${CMAKE_SOURCE_DIR}/devil/include/IL/)
+
+# Adiciona bibliotecas Chipmunk ao projeto
+include_directories (${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/include/chipmunk/)
 
 # Adiciona lib lua
 add_library(lualib STATIC IMPORTED)
@@ -33,6 +36,10 @@ set_target_properties(libSDLmain PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DI
 add_library(devil STATIC IMPORTED)
 set_target_properties(devil PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/build/DevIL.lib")
 ENDIF(WIN32)
+
+# Adiciona lib Chipmunk
+add_library(chipmunklib STATIC IMPORTED)
+set_target_properties(chipmunklib PROPERTIES IMPORTED_LOCATION "Chipmunk-prefix/src/Chipmunk-build/src/libchipmunk.a")
 
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
@@ -83,6 +90,7 @@ target_link_libraries (bazinga libSDL)
 ENDIF (WIN32)
 
 target_link_libraries (bazinga lualib)
+target_link_libraries (bazinga chipmunklib)
 
 IF (WIN32)
 target_link_libraries (bazinga devil)

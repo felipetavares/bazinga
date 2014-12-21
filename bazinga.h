@@ -13,6 +13,8 @@ namespace bazinga {
 	void startModules ();
 	void gameLoop();
 	void endModules ();
+
+	Map* getActiveMap();
 }
 
 #endif /* BAZINGA_H */

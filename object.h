@@ -5,6 +5,7 @@
 #include <map>
 #include "filesystem.h"
 #include "json.h"
+#include <chipmunk.h>
 using namespace std;
 
 extern "C" {
@@ -17,6 +18,7 @@ namespace bazinga {
   class Object {
     Path script;
     lua_State *L;
+    cpShape *pShape = NULL;
   public:
     map <string, float>   num_properties;
     map <string, string>  str_properties;

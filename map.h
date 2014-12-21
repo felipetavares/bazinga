@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "json.h"
+#include <chipmunk.h>
 
 namespace bazinga {
   class Map;
@@ -15,13 +16,21 @@ namespace bazinga {
 
   class Map {
     vector <Object*> objects;
+    
+    // Todas as coisas relacionadas à física
+    // tem como prefixo 'p'
+    cpSpace *pSpace = NULL;
   public:
-    Map (BjObject*);
+    Map ();
+    ~Map();
+    void init (BjObject *);
 
     void addObject(Object*);
 
     void render();
     void update();
+
+    cpSpace *getSpace();
   };
 }
 
