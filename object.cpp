@@ -44,38 +44,40 @@ Object::Object (BjObject* jObject, int layer) {
     // Error
   }
 
-  cpSpace *pSpace = bazinga::getActiveMap()->getSpace();
+  if (num_properties["col"]) {
+    cpSpace *pSpace = bazinga::getActiveMap()->getSpace();
 
-  float x = num_properties["x"];
-  float y = num_properties["y"];
-  float w = num_properties["w"];
-  float h = num_properties["h"];
+    float x = num_properties["x"];
+    float y = num_properties["y"];
+    float w = num_properties["w"];
+    float h = num_properties["h"];
 
-  if (L) {
-    cpVect verts[] = {
-      cpv(0,0),
-      cpv(0,h),
-      cpv(w,h),
-      cpv(w,0),
-    };
+    if (L) {
+      cpVect verts[] = {
+        cpv(0,0),
+        cpv(0,h),
+        cpv(w,h),
+        cpv(w,0),
+      };
 
-    pBody = cpSpaceAddBody(pSpace, cpBodyNew(100, INFINITY));
-    pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pBody, 4, verts, cpvzero));
-    cpBodySetPos (pBody, cpv(x,y));
-    cpShapeSetElasticity(pShape, 0.0);
-    cpShapeSetFriction(pShape, 0.0);
-  } else {
-    cpVect verts[] = {
-      cpv(x,y),
-      cpv(x,y+h),
-      cpv(x+w,y+h),
-      cpv(x+w,y),
-    };
+      pBody = cpSpaceAddBody(pSpace, cpBodyNew(100, INFINITY));
+      pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pBody, 4, verts, cpvzero));
+      cpBodySetPos (pBody, cpv(x,y));
+      cpShapeSetElasticity(pShape, 0.0);
+      cpShapeSetFriction(pShape, 0.0);
+    } else {
+      cpVect verts[] = {
+        cpv(x,y),
+        cpv(x,y+h),
+        cpv(x+w,y+h),
+        cpv(x+w,y),
+      };
 
-    //pBody = cpSpaceAddBody(pSpace, cpBodyNew(INFINITY, INFINITY));
-    pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pSpace->staticBody, 4, verts, cpvzero));
-    cpShapeSetElasticity(pShape, 0.0);
-    cpShapeSetFriction(pShape, 0.0);
+      //pBody = cpSpaceAddBody(pSpace, cpBodyNew(INFINITY, INFINITY));
+      pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pSpace->staticBody, 4, verts, cpvzero));
+      cpShapeSetElasticity(pShape, 0.0);
+      cpShapeSetFriction(pShape, 0.0);
+    }
   }
 }
 
@@ -125,12 +127,14 @@ void Object::loadFile (Path path) {
 void Object::update () {
   // If we have an script attached
   if (L) {
-    // Get position from physical body and...
-    cpVect position = cpBodyGetPos(pBody);
+    if (num_properties["col"]) {
+      // Get position from physical body and...
+      cpVect position = cpBodyGetPos(pBody);
 
-    // apply to lua props
-    num_properties["x"] = position.x;
-    num_properties["y"] = position.y;
+      // apply to lua props
+      num_properties["x"] = position.x;
+      num_properties["y"] = position.y;
+    }
 
     input::setContextsIn(L);
 
@@ -153,10 +157,8 @@ void Object::update () {
         updateProperties();
     }
 
-    // For debugging only
-    // cout << "bazinga: physics: applying force: " << num_properties["vx"] << "," << num_properties["vy"] << endl;
-
-    cpBodyApplyImpulse(pBody, cpv(num_properties["vx"], num_properties["vy"]), cpBodyLocal2World(pBody, cpv(0,0)));
+    if (num_properties["col"])
+      cpBodyApplyImpulse(pBody, cpv(num_properties["vx"], num_properties["vy"]), cpBodyLocal2World(pBody, cpv(0,0)));
   }
 }
 
@@ -168,7 +170,7 @@ void Object::render () {
     float sY = float(img.h)/((float)img.rh);
 
     glPushMatrix();
-        glTranslatef (num_properties["x"]-400, num_properties["y"]-200, 0);
+        glTranslatef (num_properties["gx"]+num_properties["x"]-400, num_properties["gy"]+num_properties["y"]-200, 0);
         glEnable (GL_TEXTURE);
         glEnable (GL_TEXTURE_2D);
         glBindTexture (GL_TEXTURE_2D, texID);

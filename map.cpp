@@ -41,6 +41,7 @@ Map::Map () {
   cout << "bazinga: chipmunk: initializing space...";
 
   pSpace = cpSpaceNew();
+  cpSpaceSetDamping (pSpace, 0.01);
 
   if (pSpace) {
     cout << " ok" << endl;
