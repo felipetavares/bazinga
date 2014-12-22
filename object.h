@@ -19,6 +19,7 @@ namespace bazinga {
     Path script;
     lua_State *L;
     cpShape *pShape = NULL;
+    cpBody *pBody = NULL;
   public:
     map <string, float>   num_properties;
     map <string, string>  str_properties;

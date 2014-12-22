@@ -1,4 +1,5 @@
 #include "map.h"
+#include "bazinga.h"
 using namespace bazinga;
 
 Layer::Layer (BjObject *jLayer, Map* map, int layer) {
@@ -89,6 +90,8 @@ void Map::update() {
   for (int i=0;i<objects.size();i++) {
     objects[i]->update();
   }
+
+  cpSpaceStep(pSpace, bazinga::delta);
 }
 
 void Map::render() {

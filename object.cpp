@@ -51,14 +51,32 @@ Object::Object (BjObject* jObject, int layer) {
   float w = num_properties["w"];
   float h = num_properties["h"];
 
-  cpVect verts[] = {
-    cpv(x-w/2,y-h/2),
-    cpv(x-w/2,y+h/2),
-    cpv(x+w/2,y+h/2),
-    cpv(x+w/2,y-h/2),
-  };
+  if (L) {
+    cpVect verts[] = {
+      cpv(0,0),
+      cpv(0,h),
+      cpv(w,h),
+      cpv(w,0),
+    };
 
-  cpPolyShapeNew(pSpace->staticBody, 4, verts, cpvzero);
+    pBody = cpSpaceAddBody(pSpace, cpBodyNew(100, INFINITY));
+    pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pBody, 4, verts, cpvzero));
+    cpBodySetPos (pBody, cpv(x,y));
+    cpShapeSetElasticity(pShape, 0.0);
+    cpShapeSetFriction(pShape, 0.0);
+  } else {
+    cpVect verts[] = {
+      cpv(x,y),
+      cpv(x,y+h),
+      cpv(x+w,y+h),
+      cpv(x+w,y),
+    };
+
+    //pBody = cpSpaceAddBody(pSpace, cpBodyNew(INFINITY, INFINITY));
+    pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pSpace->staticBody, 4, verts, cpvzero));
+    cpShapeSetElasticity(pShape, 0.0);
+    cpShapeSetFriction(pShape, 0.0);
+  }
 }
 
 Object::Object (Path path) {
@@ -77,6 +95,10 @@ Object::~Object () {
 
   if (pShape != NULL) {
     cpShapeFree(pShape);
+  }
+
+  if (pBody != NULL) {
+    cpBodyFree(pBody);
   }
 }
 
@@ -103,6 +125,13 @@ void Object::loadFile (Path path) {
 void Object::update () {
   // If we have an script attached
   if (L) {
+    // Get position from physical body and...
+    cpVect position = cpBodyGetPos(pBody);
+
+    // apply to lua props
+    num_properties["x"] = position.x;
+    num_properties["y"] = position.y;
+
     input::setContextsIn(L);
 
     lua_getglobal(L, "update");
@@ -123,6 +152,11 @@ void Object::update () {
       } else
         updateProperties();
     }
+
+    // For debugging only
+    // cout << "bazinga: physics: applying force: " << num_properties["vx"] << "," << num_properties["vy"] << endl;
+
+    cpBodyApplyImpulse(pBody, cpv(num_properties["vx"], num_properties["vy"]), cpBodyLocal2World(pBody, cpv(0,0)));
   }
 }
 
