@@ -7,6 +7,7 @@
 #include "map.h"
 #include "video.h"
 #include "input.h"
+#include "audio.h"
 
 namespace bazinga {
 	extern double delta;

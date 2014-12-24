@@ -112,6 +112,7 @@ int main (int argc, char** argv) {
   try {
     bazinga::video::init();
     bazinga::input::init();
+    bazinga::audio::init();
 
     new bazinga::input::Context("main");
     bazinga::input::activateContext("main");
@@ -122,6 +123,7 @@ int main (int argc, char** argv) {
     bazinga::gameLoop();
     bazinga::endModules();
 
+    bazinga::audio::deinit();
     bazinga::input::deinit();
     bazinga::video::deinit();
   } catch (exception e) {

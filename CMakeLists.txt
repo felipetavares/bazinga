@@ -79,7 +79,15 @@ ExternalProject_Add(
 ENDIF(UNIX)
 
 # Compila o executável principal
-add_executable (bazinga bazinga.cpp json.cpp filesystem.cpp object.cpp map.cpp video.cpp cache.cpp input.cpp)
+add_executable (bazinga bazinga.cpp
+                        json.cpp
+                        filesystem.cpp
+                        object.cpp
+                        map.cpp
+                        video.cpp
+                        cache.cpp
+                        input.cpp
+                        audio.cpp)
 
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)
