@@ -2,6 +2,7 @@
 build/
 # Ignore compiled files
 # TODO: add if needed
+*.o
 # Ignore compressed files
 *.tar.gz
 # Executáveis da Lua

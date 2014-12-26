@@ -22,6 +22,12 @@ include_directories (${CMAKE_SOURCE_DIR}/devil/include/IL/)
 # Adiciona bibliotecas Chipmunk ao projeto
 include_directories (${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/include/chipmunk/)
 
+# Adiciona bibliotecas Vorbis ao projeto
+include_directories (${CMAKE_SOURCE_DIR}/ogg/libvorbis-1.3.4/include/vorbis/)
+
+# Adiciona bibliotecas Vorbis ao projeto
+include_directories (${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/include/)
+
 # Adiciona lib lua
 add_library(lualib STATIC IMPORTED)
 set_target_properties(lualib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lua/lua-5.2.2/src/liblua.a")
@@ -41,12 +47,36 @@ ENDIF(WIN32)
 add_library(chipmunklib STATIC IMPORTED)
 set_target_properties(chipmunklib PROPERTIES IMPORTED_LOCATION "Chipmunk-prefix/src/Chipmunk-build/src/libchipmunk.a")
 
+# Adiciona libs do vorbis & ogg
+add_library(vorbislib STATIC IMPORTED)
+set_target_properties(vorbislib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ogg/libvorbis-1.3.4/lib/.libs/libvorbis.a")
+add_library(vorbisfilelib STATIC IMPORTED)
+set_target_properties(vorbisfilelib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ogg/libvorbis-1.3.4/lib/.libs/libvorbisfile.a")
+add_library(ogglib STATIC IMPORTED)
+set_target_properties(ogglib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/src/.libs/libogg.a")
+
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
   lua.o ALL
   COMMAND ${CMAKE_MAKE_PROGRAM} ansi
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
+
+# Compila libvorbis
+#ADD_CUSTOM_TARGET(
+#  libvorbis ALL
+#  COMMAND ./configure --with-ogg=${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/
+#  COMMAND ${CMAKE_MAKE_PROGRAM}
+#  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ogg/libvorbis-1.3.4
+#COMMENT "Compilando libvorbis 1.3.4 (com o Makefile original)")
+
+# Compila libogg
+#ADD_CUSTOM_TARGET(
+#  libogg ALL
+#  COMMAND ./configure
+#  COMMAND ${CMAKE_MAKE_PROGRAM}
+#  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2
+#COMMENT "Compilando libogg 1.3.2 (com o Makefile original)")
 
 IF (WIN32)
 ExternalProject_Add(
@@ -99,6 +129,9 @@ ENDIF (WIN32)
 
 target_link_libraries (bazinga lualib)
 target_link_libraries (bazinga chipmunklib)
+target_link_libraries (bazinga vorbisfilelib)
+target_link_libraries (bazinga vorbislib)
+target_link_libraries (bazinga ogglib)
 
 IF (WIN32)
 target_link_libraries (bazinga devil)
