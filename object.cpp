@@ -58,6 +58,40 @@ int LAPI_set_font (lua_State* L) {
   return 0;
 }
 
+int LAPI_set_align (lua_State* L) {
+  LAPI_log("LAPI_set_align");
+
+  if (lua_isstring(L, 1)) {
+    string alignment = string(lua_tostring(L, 1));
+    text::Align align;
+
+    if (alignment == "center") {
+      align = text::Center;
+    } else if (alignment == "left") {
+      align = text::Left;
+    } else if (alignment == "right") {
+      align = text::Right;
+    } else {
+      // Error, not a valid value
+    }
+
+    text::setAlign(align);
+  }
+
+  return 0;
+}
+
+int LAPI_fill_text (lua_State* L) {
+  LAPI_log("LAPI_fill_text");
+
+  if (lua_isstring(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3)) {
+    auto txt = lua_tostring(L, 1);
+    text::fillText(txt, lua_tonumber(L, 2), lua_tonumber(L, 3));
+  }
+
+  return 0;
+}
+
 int LAPI_set_camera (lua_State* L) {
   bazinga::getActiveMap()->setCamera(lua_tonumber(L, 1), lua_tonumber(L, 2));
 }
@@ -363,10 +397,33 @@ void Object::createLuaAPI (lua_State* L) {
   lua_pushcfunction(L, LAPI_new_font);
   lua_settable(L, -3);
 
-  // use a font
+  // Use a font
   // set_font(iName)
   lua_pushstring(L, "set_font");
   lua_pushcfunction(L, LAPI_set_font);
+  lua_settable(L, -3);
+
+  // Set alignment
+  // set_align(align)
+  lua_pushstring(L, "set_align");
+  lua_pushcfunction(L, LAPI_set_align);
+  lua_settable(L, -3);
+
+  // Fill text
+  // fill_text(txt, x, y)
+  lua_pushstring(L, "fill_text");
+  lua_pushcfunction(L, LAPI_fill_text);
+  lua_settable(L, -3);
+
+  // Globals for screen size
+  // w
+  lua_pushstring(L, "screen_w");
+  lua_pushnumber(L, video::windowWidth);
+  lua_settable(L, -3);
+
+  // h
+  lua_pushstring(L, "screen_h");
+  lua_pushnumber(L, video::windowHeight);
   lua_settable(L, -3);
 
   lua_setglobal(L, "bazinga");
