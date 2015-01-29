@@ -2,12 +2,23 @@
 cmake_minimum_required(VERSION 2.8)
 include(ExternalProject)
 
+# ATENÇÃO: LIBVORBIS, LIBOGG e FREETYPE2
+# PRECISAM SER COMPILADAS ANTES DE EXECUTAR
+# O CMAKE!
+
 ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
-    -g # Debug, shall we?
+    -g # Debug, shall we
 )
 
-# Vamos compilar a Bazinga Engine
+
+IF (WIN32)
+ADD_DEFINITIONS(
+    -Wl,--subsystem,windows
+)
+ENDIF (WIN32)
+
+# Vamos compilar a Bazinga! Engine
 project (Bazinga)
 
 # Adiciona bibliotecas Lua ao projeto
@@ -25,8 +36,11 @@ include_directories (${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/include/chipmun
 # Adiciona bibliotecas Vorbis ao projeto
 include_directories (${CMAKE_SOURCE_DIR}/ogg/libvorbis-1.3.4/include/vorbis/)
 
-# Adiciona bibliotecas Vorbis ao projeto
+# Adiciona bibliotecas Ogg ao projeto
 include_directories (${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/include/)
+
+# Adiciona bibliotecas FreeType2 ao projeto
+include_directories (${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/include/)
 
 # Adiciona lib lua
 add_library(lualib STATIC IMPORTED)
@@ -55,28 +69,16 @@ set_target_properties(vorbisfilelib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE
 add_library(ogglib STATIC IMPORTED)
 set_target_properties(ogglib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/src/.libs/libogg.a")
 
+# Adiciona libs FreeType2
+add_library(freetype2lib STATIC IMPORTED)
+set_target_properties(freetype2lib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/objs/freetype.a")
+
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
   lua.o ALL
   COMMAND ${CMAKE_MAKE_PROGRAM} ansi
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
-
-# Compila libvorbis
-#ADD_CUSTOM_TARGET(
-#  libvorbis ALL
-#  COMMAND ./configure --with-ogg=${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/
-#  COMMAND ${CMAKE_MAKE_PROGRAM}
-#  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ogg/libvorbis-1.3.4
-#COMMENT "Compilando libvorbis 1.3.4 (com o Makefile original)")
-
-# Compila libogg
-#ADD_CUSTOM_TARGET(
-#  libogg ALL
-#  COMMAND ./configure
-#  COMMAND ${CMAKE_MAKE_PROGRAM}
-#  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2
-#COMMENT "Compilando libogg 1.3.2 (com o Makefile original)")
 
 IF (WIN32)
 ExternalProject_Add(
@@ -117,7 +119,12 @@ add_executable (bazinga bazinga.cpp
                         video.cpp
                         cache.cpp
                         input.cpp
-                        audio.cpp)
+                        audio.cpp
+                        animation.cpp
+                        image.cpp
+                        text.cpp
+                        shader.cpp
+                        gl/glwin.cpp)
 
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)
@@ -132,6 +139,7 @@ target_link_libraries (bazinga chipmunklib)
 target_link_libraries (bazinga vorbisfilelib)
 target_link_libraries (bazinga vorbislib)
 target_link_libraries (bazinga ogglib)
+target_link_libraries (bazinga freetype2lib)
 
 IF (WIN32)
 target_link_libraries (bazinga devil)

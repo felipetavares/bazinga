@@ -20,15 +20,6 @@ namespace bazinga {
 		static const Uint32 videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 		static Path icon;
 	public:
-		class Image {
-		public:
-            unsigned int w,h;
-            unsigned int rw, rh;
-            GLuint id;
-
-			Image(Path);
-		};
-
 		static int windowBpp;
 		static int windowWidth;
 		static int windowHeight;

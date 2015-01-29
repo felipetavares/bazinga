@@ -16,9 +16,9 @@
 
 #include <iostream>
 #include <fcntl.h>			// Low level file creation
-#include <sys/types.h>	// For Linux/Windows
+#include <sys/types.h>		// For Linux/Windows
 #include <sys/stat.h>		// For Linux/Windows
-#include <cstdio>				// Files
+#include <cstdio>			// Files
 #include <unistd.h>			// Deleting
 #include <cstring>			// Memcpy
 #include <dirent.h>			// Directory listing
@@ -37,6 +37,7 @@ namespace bazinga {
 		void setPath(string);   // set path in non-plataform-specific way (using '/' )
 		string getPath(); // get plataform specific path
 		string getExtension();
+		string getName();
 		string getOriginalPath();
 		bool isEqual(Path);
 		void normalize();
@@ -55,7 +56,7 @@ namespace bazinga {
 		~fs	 ();
 
 		static bool fileExists (Path);
-		static bool copyFile (Path,Path);
+		static bool copyFile (Path,Path,bool);
 		static bool renameFile (Path,Path);
 		static bool deleteFile (Path);
 		static bool createFile (Path);

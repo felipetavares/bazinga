@@ -1,78 +1,7 @@
 #include "video.h"
 #include <cmath>
-#include <sstream>
 #include <il.h>
 using namespace bazinga;
-
-video::Image::Image (Path path) {
-	ILuint imageID;
-	ilGenImages(1, &imageID);
-	ilBindImage(imageID);
-
-	ilLoadImage(path.getPath().c_str());
-
-	int const width  = ilGetInteger(IL_IMAGE_WIDTH);
-	int const height = ilGetInteger(IL_IMAGE_HEIGHT);
-	int const depth  = ilGetInteger(IL_IMAGE_DEPTH);
-	int const bpp    = ilGetInteger(IL_IMAGE_BPP);
-	int const type   = ilGetInteger(IL_IMAGE_TYPE); 	// matches OpenGL
-	int const format = ilGetInteger(IL_IMAGE_FORMAT); // matches OpenGL
-
-  int nw = pow(2, ceil(log2(width)));
-  int nh = pow(2, ceil(log2(height)));
-
-  ILuint potImageID;
-  ilGenImages (1, &potImageID);
-  ilBindImage (potImageID);
-
-  ilTexImage (nw, nh, depth, bpp, format, type, NULL);
-
-	void *data = ilGetData();
-	if(!data) {
-		ilBindImage(0);
-		ilDeleteImages(1, &potImageID);
-		return;
-	}
-
-	ilDisable(IL_BLIT_BLEND);
-
-  ilOverlayImage (imageID, 0, 0, 0);
-
-	int const ptype   = ilGetInteger(IL_IMAGE_TYPE); 	// matches OpenGL
-	int const pformat = ilGetInteger(IL_IMAGE_FORMAT); // matches OpenGL
-
-	GLuint textureID;
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_2D, textureID);
-
-  glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // rows are tightly packed
-  glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-  glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // pixels are tightly packed
-
-	glTexImage2D(GL_TEXTURE_2D, 0, pformat, nw, nh, 0, pformat, ptype, data);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  cout << "bazinga: image: image loadded sucessfully (" << nw << "," << nh << ")" << endl;
-
-	// The following is debugging code
-	/*
-	stringstream ss;
-
-	ss << "debug" << potImageID << ".bmp";
-
-	ilSaveImage(ss.str().c_str());
-	*/
-
-  id = textureID;
-  w = width;
-  h = height;
-  rw = nw;
-  rh = nh;
-}
 
 int video::windowBpp = 0;
 int video::windowWidth = 0;
@@ -90,7 +19,7 @@ video::~video () {
 
 void video::init() {
 	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
-		cout << "[ERR] [CANNOT INIT SDL]" << endl;
+		cout << "bazinga: video: cannot init SDL" << endl;
 		exit (-1);
 	}
 
@@ -112,13 +41,13 @@ void video::init() {
 	findBestVideoMode();
 
 	icon = Path (".:Assets:BazingaEngineLittle.png");
-	cout << "[INF] Loading icon from " << icon.getPath() << endl;
+	cout << "bazinga: video: loading icon from " << icon.getPath() << endl;
 	// TODO: add SDL_image
 	//SDL_WM_SetIcon(IMG_Load(icon.getPath().c_str()), NULL);
 	screen = SDL_SetVideoMode (windowWidth,windowHeight,windowBpp,videoFlags);
 	SDL_ShowCursor (1);
 
-	cout << "[CRT] [WIN] [w:" << windowWidth << ",h:" << windowHeight << "]" << endl;
+	cout << "bazinga: video: window (" << windowWidth << ", " << windowHeight << ")" << endl;
 
   // CHANGE THAT IF NEED BE
 	glDisable (GL_DEPTH_TEST);
@@ -146,7 +75,7 @@ void video::init() {
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
-	cout << "[INF]" << " Using OpenGL version: " << glGetString(GL_VERSION) << endl;
+	cout << "bazinga: video: OpenGL: " << glGetString(GL_VERSION) << endl;
 }
 
 void video::deinit () {
@@ -156,15 +85,15 @@ void video::deinit () {
 void video::getVideoModes () {
 	SDL_Rect **modeList;
 
-	cout << "[INF] [QUERYING VIDEO MODES]" << endl;
+	cout << "bazinga: video: querying video modes" << endl;
 
 	modeList = SDL_ListModes (NULL, videoFlags);
 
-	cout << "[INF] [GOT VIDEO MODES FROM SDL]" << endl;
+	cout << "bazinga: video: loaded video modes from SDL" << endl;
 
 	if (modeList != NULL) {
 		if (modeList == (SDL_Rect**)-1) {
-			cout << "[INF] [ALL RESOLUTIONS AVAILABLE]" << endl;
+			cout << "bazinga: video: all resolutions available" << endl;
 			anyResolution = true;
 		} else {
 			for (int i=0;modeList[i];i++) {
@@ -172,7 +101,7 @@ void video::getVideoModes () {
 			}
 		}
 	} else {
-		cout << "[ERR] [NO VIDEO MODE AVAIABLE]" << endl;
+		cout << "bazinga: video: no video modes found" << endl;
 		exit (-1);
 	}
 

@@ -3,9 +3,61 @@
 #include "cache.h"
 #include "filesystem.h"
 #include "input.h"
+#include "image.h"
 #include <exception>
 #include <SDL_opengl.h>
 using namespace bazinga;
+
+// The Lua API
+void LAPI_log (string fname) {
+  cout << "bazinga: Lua API: " << fname << "() " << "C" << endl;
+}
+
+int LAPI_new_object (lua_State* L) {
+  LAPI_log ("LAPI_new_object");
+
+  bazinga::getActiveMap()->newObject(L);
+
+  return 0;
+}
+
+int LAPI_del_object (lua_State* L) {
+  LAPI_log ("LAPI_del_object");
+
+  if (lua_isnumber(L, 1)) {
+    bazinga::getActiveMap()->deleteObject(lua_tonumber(L, 1));
+  } else {
+
+  }
+
+  return 0;
+}
+
+int LAPI_new_font (lua_State* L) {
+  LAPI_log ("LAPI_new_font");
+
+  if (lua_isstring(L, 1) && lua_isstring(L, 2)) {
+    string fontName = string(lua_tostring(L, 1));
+    string internalName = string(lua_tostring(L, 2));
+    cache::createFont(Path(fontName), internalName);
+  } else {
+
+  }  
+
+  return 0;
+}
+
+int LAPI_set_camera (lua_State* L) {
+  bazinga::getActiveMap()->setCamera(lua_tonumber(L, 1), lua_tonumber(L, 2));
+}
+
+int LAPI_new_dialog (lua_State* L) {
+  // Creates a new dialog
+}
+
+int LAPI_del_dialog (lua_State* L) {
+  // Deletes a dialog
+}
 
 Object::Object (BjObject* jObject, int layer) {
   BjValue* jProperties = jObject->get("properties");
@@ -17,31 +69,91 @@ Object::Object (BjObject* jObject, int layer) {
     int i;
 
     for (i=0;i<properties->keys.size();i++) {
-      if (properties->keys[i] == "script") {
-        Path path = Path(properties->values[i]->str);
+      BjValue *jOValue = properties->values[i];
 
-        cout << "bazinga: script: loading from " << path.getPath() << endl;
-
-        loadFile (path);
-      } else {
-        BjValue *jOValue = properties->values[i];
-
-        if (jOValue->type == BjValue::jNumber) {
-          if (properties->keys[i] == "z") {
-            num_properties[properties->keys[i]] = jOValue->number-(layer*100);
-          } else {
-            num_properties[properties->keys[i]] = jOValue->number;
-          }
-        } else
-        if (jOValue->type == BjValue::jString) {
-          str_properties[properties->keys[i]] = jOValue->str;
+      if (jOValue->type == BjValue::jNumber) {
+        if (properties->keys[i] == "z") {
+          num_properties[properties->keys[i]] = jOValue->number-(layer*100);
         } else {
-            // Error
+          num_properties[properties->keys[i]] = jOValue->number;
         }
+      } else
+      if (jOValue->type == BjValue::jString) {
+        str_properties[properties->keys[i]] = jOValue->str;
+      } else {
+          // Error
       }
     }
   } else {
     // Error
+  }
+}
+
+Object::Object (Path path) {
+  loadFile(path);
+}
+
+Object::Object () {
+  // We don't have any lua script attached to this object
+  L = NULL;
+}
+
+Object::~Object () {
+  if (L != NULL) {
+    lua_close(L);
+  }
+
+  cpSpace *pSpace = bazinga::getActiveMap()->getSpace();
+
+  if (pShape != NULL) {
+    if (pSpace != NULL)
+      cpSpaceRemoveShape(pSpace, pShape);
+    cpShapeFree(pShape);
+  }
+
+  if (pBody != NULL) {
+    if (pSpace != NULL)
+      cpSpaceRemoveBody(pSpace, pBody);
+    cpBodyFree(pBody);
+  }
+
+  if (anim != NULL) {
+    delete anim;
+  }
+}
+
+void Object::loadFile (Path path) {
+  script = path;
+
+  // Creates a new Lua state
+  L = luaL_newstate();
+  luaL_openlibs (L);
+  createLuaAPI(L);
+
+  // Loads the file
+  if (luaL_dofile(L, script.getPath().c_str())) {
+    cout << "bazinga: script contains errors" << endl;
+
+    if (lua_isstring(L, -1)) {
+      cout << "\t" << lua_tostring(L, -1) << endl;
+    }
+
+    lua_close(L);
+    L = NULL;
+  }
+}
+
+void Object::init () {
+  if (str_properties["script"] != "") {
+    Path path = Path(str_properties["script"]);
+
+    cout << "bazinga: script: loading from " << path.getPath() << endl;
+
+    loadFile (path);
+  }
+
+  if (str_properties["anim"] != "") {
+    anim = new Animation(Path(str_properties["anim"]));
   }
 
   if (num_properties["col"]) {
@@ -65,6 +177,7 @@ Object::Object (BjObject* jObject, int layer) {
       cpBodySetPos (pBody, cpv(x,y));
       cpShapeSetElasticity(pShape, 0.0);
       cpShapeSetFriction(pShape, 0.0);
+      cpShapeSetUserData(pShape, this);
     } else {
       cpVect verts[] = {
         cpv(x,y),
@@ -73,55 +186,15 @@ Object::Object (BjObject* jObject, int layer) {
         cpv(x+w,y),
       };
 
-      //pBody = cpSpaceAddBody(pSpace, cpBodyNew(INFINITY, INFINITY));
       pShape = cpSpaceAddShape(pSpace, cpPolyShapeNew(pSpace->staticBody, 4, verts, cpvzero));
       cpShapeSetElasticity(pShape, 0.0);
       cpShapeSetFriction(pShape, 0.0);
+
+      cpShapeSetUserData(pShape, this);
     }
   }
-}
 
-Object::Object (Path path) {
-  loadFile(path);
-}
-
-Object::Object () {
-  // We don't have any lua script attached to this object
-  L = NULL;
-}
-
-Object::~Object () {
-  if (L != NULL) {
-    lua_close(L);
-  }
-
-  if (pShape != NULL) {
-    cpShapeFree(pShape);
-  }
-
-  if (pBody != NULL) {
-    cpBodyFree(pBody);
-  }
-}
-
-void Object::loadFile (Path path) {
-  script = path;
-
-  // Creates a new Lua state
-  L = luaL_newstate();
-  luaL_openlibs (L);
-
-  // Loads the file
-  if (luaL_dofile(L, script.getPath().c_str())) {
-    cout << "bazinga: script contains errors" << endl;
-
-    if (lua_isstring(L, -1)) {
-      cout << "\t" << lua_tostring(L, -1) << endl;
-    }
-
-    lua_close(L);
-    L = NULL;
-  }
+  num_properties["id"] = bazinga::getActiveMap()->getNewID();
 }
 
 void Object::update () {
@@ -139,7 +212,7 @@ void Object::update () {
     input::setContextsIn(L);
 
     lua_getglobal(L, "update");
-    createLuaProperties();
+    createLuaProperties(L);
 
     lua_pushnumber(L, bazinga::delta);
     lua_setglobal(L, "dt");
@@ -157,30 +230,41 @@ void Object::update () {
         updateProperties();
     }
 
-    if (num_properties["col"])
+    if (num_properties["col"]) {
+      cpBodySetPos(pBody, cpv(num_properties["x"], num_properties["y"]));
       cpBodyApplyImpulse(pBody, cpv(num_properties["vx"], num_properties["vy"]), cpBodyLocal2World(pBody, cpv(0,0)));
+    }
   }
 }
 
 void Object::render () {
-    video::Image img = cache::getTexture(Path(str_properties["img"]));
-    GLuint texID = img.id;
+    if (str_properties["anim"] != "") {
+      glPushMatrix();
+          glTranslatef (num_properties["gx"]+num_properties["x"]+anim->getWidth()/2, num_properties["gy"]+num_properties["y"]+anim->getHeight()/2, 0);
+          glRotatef(num_properties["ang"], 0, 0, 1);
+          anim->render();
+      glPopMatrix();
+    } else if (str_properties["img"] != "") {
+      Image* img = cache::getTexture(Path(str_properties["img"]));
+      GLuint texID = img->id;
 
-    float sX = float(img.w)/((float)img.rw);
-    float sY = float(img.h)/((float)img.rh);
+      float sX = float(img->w)/((float)img->rw);
+      float sY = float(img->h)/((float)img->rh);
 
-    glPushMatrix();
-        glTranslatef (num_properties["gx"]+num_properties["x"]-400, num_properties["gy"]+num_properties["y"]-200, 0);
-        glEnable (GL_TEXTURE);
-        glEnable (GL_TEXTURE_2D);
-        glBindTexture (GL_TEXTURE_2D, texID);
-        glBegin(GL_QUADS);
-          glTexCoord2f (0,1);  glVertex3f(0, 0, 0);
-          glTexCoord2f (sX,1); 	  glVertex3f(img.w, 0, 0);
-          glTexCoord2f (sX,1-sY);   glVertex3f(img.w, img.h, 0);
-          glTexCoord2f (0,1-sY); 	  glVertex3f(0, img.h, 0);
-        glEnd();
-    glPopMatrix();
+      glPushMatrix();
+          glTranslatef (num_properties["gx"]+num_properties["x"]+img->w/2, num_properties["gy"]+num_properties["y"]+img->h/2, 0);
+          glRotatef(num_properties["ang"], 0, 0, 1);
+          glEnable (GL_TEXTURE);
+          glEnable (GL_TEXTURE_2D);
+          glBindTexture (GL_TEXTURE_2D, texID);
+          glBegin(GL_QUADS);
+            glTexCoord2f (0,1);       glVertex3f(-int(img->w)/2, -int(img->h)/2, 0);
+            glTexCoord2f (sX,1);      glVertex3f(img->w/2, -int(img->h)/2, 0);
+            glTexCoord2f (sX,1-sY);   glVertex3f(img->w/2, img->h/2, 0);
+            glTexCoord2f (0,1-sY);    glVertex3f(-int(img->w)/2, img->h/2, 0);
+          glEnd();
+      glPopMatrix();
+    }
 }
 
 void Object::updateProperties() {
@@ -202,7 +286,7 @@ void Object::updateProperties() {
   }
 }
 
-void Object::createLuaProperties() {
+void Object::createLuaProperties(lua_State* L) {
   lua_newtable(L);
 
   map<string, float>::iterator n;
@@ -218,6 +302,31 @@ void Object::createLuaProperties() {
     lua_pushstring(L, s->second.c_str());
     lua_settable(L, -3);
   }
+}
+
+void Object::createLuaAPI (lua_State* L) {
+  lua_newtable(L);
+
+  // Create object
+  // new_object(str)
+  lua_pushstring(L, "new_object");
+  lua_pushcfunction(L, LAPI_new_object);
+  lua_settable(L, -3);
+
+  // Delete object
+  // del_object(num)
+  // ONLY WORKS IN CALLBACKS!
+  lua_pushstring(L, "del_object");
+  lua_pushcfunction(L, LAPI_del_object);
+  lua_settable(L, -3);
+
+  // Move the camera to a fixed position
+  // set_camera(num, num)
+  lua_pushstring(L, "set_camera");
+  lua_pushcfunction(L, LAPI_set_camera);
+  lua_settable(L, -3);
+
+  lua_setglobal(L, "bazinga");
 }
 
 bool bazinga::compareObjects (Object *obj, Object *obj2) {

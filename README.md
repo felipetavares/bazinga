@@ -16,7 +16,7 @@ Full lua integration and objects are supported at this stage.
 4. Video Support    - [ok]
 5. Map Display      - [ok]
 6. Input Support    - [ok]
-7. Physics Support  - [wip]
+7. Physics Support  - [ok]
 
 How to compile (linux)
 ----------------------

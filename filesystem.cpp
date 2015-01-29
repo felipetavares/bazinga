@@ -3,6 +3,7 @@
 using namespace bazinga;
 
 #ifdef WIN32
+#include <windows.h>
 #else
 #define _stat stat
 #endif
@@ -71,6 +72,21 @@ string Path::getExtension () {
 	}
 }
 
+string Path::getName () {
+	string name;
+	int i;
+	for (i =path.length()-1;path[i] != '\\' && path[i] != '/' && i >= 0;i--) {
+		name += path[i];
+	}
+
+	if (i==0)
+		return ""; // No name found
+	else {
+		reverse(name.begin(),name.end());
+		return name;
+	}	
+}
+
 void Path::normalize() {
 	for (int i=0;i<oPath.size()-1;i++) {
 		if (oPath[i] == '.' && oPath[i+1] == ':') {
@@ -128,10 +144,11 @@ bool fs::renameFile (Path _pathA,Path _pathB) {
 	return false;
 }
 
-bool fs::copyFile (Path _pathA,Path _pathB) {
-	if (fileExists (_pathA) && !fileExists(_pathB)) {
-		if (!createFile (_pathB))
-			return false;
+bool fs::copyFile (Path _pathA, Path _pathB, bool _overwrite) {
+	if (fileExists (_pathA) && (!fileExists(_pathB) || _overwrite)) {
+		if (!fileExists(_pathB))
+			if (!createFile (_pathB))
+				return false;
 
 		int fdA,fdB;
 		// Open file A for reading only B for writing only
@@ -237,7 +254,7 @@ vector <Path> fs::listDirectory (Path _path,bool &_success) {
                 d = opendir(_path.getPath().c_str());
 
                 if (d) {
-                	string lig = _path.getOriginalPath()[_path.getOriginalPath().size()-1] != ':'?":":"";
+                	string lig = _path.getOriginalPath()[_path.getOriginalPath().size()-1] != '/'?"/":"";
 			while ((entry = readdir(d)) != NULL) {
                                 dir.push_back (Path(_path.getOriginalPath()+lig+string(entry->d_name)));
 			}
@@ -254,8 +271,11 @@ vector <Path> fs::listDirectory (Path _path,bool &_success) {
 }
 
 bool fs::isDir(Path _path) {
-	return true;
+#ifdef _WIN32
+	return GetFileAttributes(_path.getPath().c_str())&FILE_ATTRIBUTE_DIRECTORY;
+#else
 	struct _stat info;
 	_stat (_path.getPath().c_str(),&info);
 	return S_ISDIR(info.st_mode);
+#endif
 }

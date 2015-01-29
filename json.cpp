@@ -78,7 +78,7 @@ BjValue* BjObject::get (string _key) {
 		}
 	}
 
-	return new BjValue (false);
+	return new BjValue ();
 }
 
 BjArray::BjArray () {

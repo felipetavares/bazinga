@@ -11,11 +11,13 @@
 
 namespace bazinga {
 	extern double delta;
-	void startModules ();
+	extern double curtime;
+	bool init ();
 	void gameLoop();
-	void endModules ();
+	void deinit ();
 
 	Map* getActiveMap();
+	cpBool pBeginCollision (cpArbiter*, cpSpace*, void*);
 }
 
 #endif /* BAZINGA_H */

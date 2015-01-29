@@ -5,6 +5,7 @@
 #include <map>
 #include "filesystem.h"
 #include "json.h"
+#include "animation.h"
 #include <chipmunk.h>
 using namespace std;
 
@@ -20,6 +21,7 @@ namespace bazinga {
     lua_State *L;
     cpShape *pShape = NULL;
     cpBody *pBody = NULL;
+    Animation *anim = NULL;
   public:
     map <string, float>   num_properties;
     map <string, string>  str_properties;
@@ -29,14 +31,16 @@ namespace bazinga {
     Object(BjObject*, int);
     ~Object();
 
+    void init();
     void update();
     void render();
 
     bool operator< (const Object&);
+    void createLuaProperties(lua_State*);
+    static void createLuaAPI(lua_State*);
   private:
     void loadFile(Path);
     void updateProperties();
-    void createLuaProperties();
   };
 
   bool compareObjects(Object*, Object*);
