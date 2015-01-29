@@ -1,5 +1,6 @@
 #include "map.h"
 #include "bazinga.h"
+#include "text.h"
 using namespace bazinga;
 
 Dialog::Dialog (int id, string text):
@@ -11,7 +12,7 @@ void Dialog::update () {
 }
 
 void Dialog::render () {
-  // TODO
+  text::fillText(text, 0, 0);
 }
 
 int Dialog::getID() {
@@ -109,7 +110,11 @@ Map::~Map () {
 }
 
 int Map::newDialog (string text) {
-  dialogs.push_back(new Dialog(did++, text));
+  int dialogID = did++;
+
+  dialogs.push_back(new Dialog(dialogID, text));
+
+  return dialogID;
 }
 
 void Map::deleteDialog (int id) {

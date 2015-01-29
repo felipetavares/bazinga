@@ -47,16 +47,35 @@ int LAPI_new_font (lua_State* L) {
   return 0;
 }
 
+int LAPI_set_font (lua_State* L) {
+  LAPI_log("LAPI_set_font");
+
+  if (lua_isstring(L, 1)) {
+    string internalName = string(lua_tostring(L, 1));
+    text::setFont(cache::getFont(internalName));
+  }
+
+  return 0;
+}
+
 int LAPI_set_camera (lua_State* L) {
   bazinga::getActiveMap()->setCamera(lua_tonumber(L, 1), lua_tonumber(L, 2));
 }
 
 int LAPI_new_dialog (lua_State* L) {
-  // Creates a new dialog
+  LAPI_log ("LAPI_new_dialog");
+
+  lua_pushnumber(L, bazinga::getActiveMap()->newDialog(lua_tostring(L, 1)));
+
+  return 1;
 }
 
 int LAPI_del_dialog (lua_State* L) {
-  // Deletes a dialog
+  LAPI_log ("LAPI_del_dialog");
+
+  bazinga::getActiveMap()->deleteDialog(lua_tonumber(L, 1));
+
+  return 0;
 }
 
 Object::Object (BjObject* jObject, int layer) {
@@ -324,6 +343,30 @@ void Object::createLuaAPI (lua_State* L) {
   // set_camera(num, num)
   lua_pushstring(L, "set_camera");
   lua_pushcfunction(L, LAPI_set_camera);
+  lua_settable(L, -3);
+
+  // Creates a new dialog
+  // id = new_dialog(txt)
+  lua_pushstring(L, "new_dialog");
+  lua_pushcfunction(L, LAPI_new_dialog);
+  lua_settable(L, -3);
+
+  // Delete a dialog
+  // del_dialog(id)
+  lua_pushstring(L, "del_dialog");
+  lua_pushcfunction(L, LAPI_del_dialog);
+  lua_settable(L, -3);
+
+  // Create a font
+  // new_font(oName, iName)
+  lua_pushstring(L, "new_font");
+  lua_pushcfunction(L, LAPI_new_font);
+  lua_settable(L, -3);
+
+  // use a font
+  // set_font(iName)
+  lua_pushstring(L, "set_font");
+  lua_pushcfunction(L, LAPI_set_font);
   lua_settable(L, -3);
 
   lua_setglobal(L, "bazinga");
