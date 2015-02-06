@@ -7,7 +7,8 @@
 #include <SDL_opengl.h>
 using namespace bazinga;
 
-Animation::Animation (Path fpath) {
+Animation::Animation (Path fpath):
+  ended(false) {
   char *data = fs::getFileData(fpath);
   string sData = string (data);
   BjObject *jObject = json::parse (sData);
@@ -123,10 +124,12 @@ void Animation::render () {
   	frame += direction;
 
   	if (frame < 0) {
-  		frame = image->w/w-1;
+      ended = true;
+    	frame = image->w/w-1;
   	}
   	if (frame >= image->w/w) {
-  		frame = 0;
+  		ended = true;
+      frame = 0;
   	}
   }
 }
@@ -137,4 +140,8 @@ int Animation::getWidth() {
 
 int Animation::getHeight() {
   return h;
+}
+
+bool Animation::isEnded () {
+  return ended;
 }

@@ -14,12 +14,16 @@ namespace bazinga {
 		enum Type {Horizontal, Vertical};
 
 		Type type;
+
+		bool ended;
 	public:
 		Animation (Path);
 	
 		void render();
 		int getWidth();
 		int getHeight();
+
+		bool isEnded();
 	};
 }
 

@@ -286,6 +286,10 @@ void Object::update () {
       num_properties["y"] = position.y;
     }
 
+    if (anim) {
+      num_properties["anim_ended"] = (int)anim->isEnded();
+    }
+
     input::setContextsIn(L);
 
     lua_getglobal(L, "update");
@@ -311,6 +315,7 @@ void Object::update () {
       cpBodySetPos(pBody, cpv(num_properties["x"], num_properties["y"]));
       cpBodyApplyImpulse(pBody, cpv(num_properties["vx"], num_properties["vy"]), cpBodyLocal2World(pBody, cpv(0,0)));
     }
+
   }
 }
 
@@ -356,6 +361,22 @@ void Object::updateProperties() {
       num_properties[string(key)] = value;
     } else {
       const char *value = lua_tostring(L, -2);
+      
+      // Update animation
+      if (string(key) == "anim") {
+        if (str_properties[string(key)] != string(value)) {
+          if (anim)
+            delete anim;
+
+          if (string(value) != "")
+            anim = new Animation(Path(string(value)));
+          else
+            anim = NULL;
+
+          cout << "bazinga: object: editing animation to " << string(value) << endl;
+        }
+      }
+
       str_properties[string(key)] = string(value);
     }
 
