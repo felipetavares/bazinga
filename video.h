@@ -19,6 +19,8 @@ namespace bazinga {
 
 		static const Uint32 videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 		static Path icon;
+
+		static float cr, cg, cb;
 	public:
 		static int windowBpp;
 		static int windowWidth;
@@ -33,6 +35,9 @@ namespace bazinga {
 		static void setWindowTitleAndIcon (string,string="");
 		static void render ();
 		static void renderMap (Map*);
+	
+		static void fillRect(int, int, int, int);
+		static void setColor(float, float, float);
 	private:
 		static void getVideoModes ();
 		static void findBestVideoMode ();

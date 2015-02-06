@@ -4,19 +4,56 @@
 using namespace bazinga;
 
 Dialog::Dialog (int id, string text):
-  id(id), text(text) {
+  id(id), text(text), textPosition(0), bufferPosition(0), nextTime(0),
+  ended(false) {
+    sizeW = video::windowWidth/2;
+    intervalTime = 0.05;
 }
 
 void Dialog::update () {
-  // TODO
+  if (textPosition < text.size()) {
+    if (curtime > nextTime) {
+      nextTime = curtime+intervalTime;
+      fillChar();
+    }
+  } else {
+    ended = true;
+  }
 }
 
 void Dialog::render () {
-  text::fillText(text, 0, 0);
+  int startY = video::windowHeight/2-20*bufferSize;
+
+  video::setColor(0.2, 0.2, 0.2);
+  video::fillRect(-sizeW/2-10, startY-10, sizeW+20, 20*bufferSize+10);
+
+  for (int i=0;i<bufferSize;i++)
+    text::fillText(buffer[i], -sizeW/2, startY+i*20+10);
+}
+
+void Dialog::fillChar () {
+  buffer[bufferPosition] += text[textPosition++];
+
+  auto size = text::measureText(buffer[bufferPosition]);
+
+  if (size.w > sizeW) {
+    if (bufferPosition < bufferSize-1)
+      bufferPosition++;
+    else {
+      for (int i=0;i<bufferSize-1;i++) {
+        buffer[i] = buffer[i+1];
+      }
+      buffer[bufferSize-1] = "";
+    }
+  }
 }
 
 int Dialog::getID() {
   return id;
+}
+
+bool Dialog::isEnded () {
+  return ended;
 }
 
 Layer::Layer (BjObject *jLayer, Map* map, int layer) {
@@ -129,6 +166,16 @@ void Map::deleteDialog (int id) {
   }
 }
 
+bool Map::isDialogEnded (int id) {
+  int i;
+  for (int i=0;i<dialogs.size();i++) {
+    auto d = dialogs[i];
+    if (d->getID() == id) {
+      return d->isEnded();
+    }
+  }
+}
+
 void Map::setCamera (float x, float y) {
   camx = x;
   camy = y;
@@ -144,6 +191,22 @@ void Map::deleteObject (int id) {
       objects[i]->num_properties["delete"] = 1;
     }
   }    
+}
+
+int Map::searchObject (string name) {
+  for (int i=0;i<objects.size();i++) {
+    if (objects[i]->str_properties["name"] == name) {
+      return objects[i]->num_properties["id"];
+    }    
+  }
+}
+
+void Map::hideObject (int id, bool hide) {
+  for (int i=0;i<objects.size();i++) {
+    if (objects[i]->num_properties["id"] == id) {
+      objects[i]->num_properties["hidden"] = (int)hide;
+    }    
+  }
 }
 
 // Creates an object from an object description file
@@ -217,7 +280,8 @@ void Map::render() {
   sort (objects.begin(), objects.end(), compareObjects);
 
   for (int i=0;i<objects.size();i++) {
-    objects[i]->render();
+    if (!objects[i]->num_properties["hidden"])
+      objects[i]->render();
   }
 
   glPopMatrix();

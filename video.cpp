@@ -3,6 +3,7 @@
 #include <il.h>
 using namespace bazinga;
 
+float video::cr = 0, video::cg = 0, video::cb = 0;
 int video::windowBpp = 0;
 int video::windowWidth = 0;
 int video::windowHeight = 0;
@@ -143,4 +144,25 @@ void video::renderMap (Map *map) {
 
 void video::render () {
 	SDL_GL_SwapBuffers();
+}
+
+void video::setColor (float r, float g, float b) {
+	cr = r;
+	cg = g;
+	cb = b;
+}
+
+void video::fillRect (int x, int y, int w, int h) {
+	glPushMatrix();
+		glColor3f(cr,cg,cb);
+		glTranslatef (x, y, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glVertex3f(0, 0, 0);
+			glVertex3f(w, 0, 0);
+			glVertex3f(w, h, 0);
+			glVertex3f(0, h, 0);
+		glEnd();
+		glColor3f(1,1,1);
+	glPopMatrix();
 }

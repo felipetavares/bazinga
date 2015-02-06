@@ -232,12 +232,25 @@ bool fs::setFileData (Path _path, const char* _data, size_t _size) {
 
 size_t fs::getFileSize (Path _path) {
 	if (fileExists(_path)) {
+#ifdef WIN32
+		int fd = open(_path.getPath().c_str(), O_RDONLY);
+		int size;
+		int readb;
+
+		do {
+			readb = read(fd, NULL, 1024);
+			size += readb;
+		} while (readb > 0);
+
+		return size;
+#else
 		struct _stat info;
 		if (_stat (_path.getPath().c_str(),&info) < 0) {
 			return -1;
 		}
 
 		return info.st_size;
+#endif
 	}
 
 	return -1;

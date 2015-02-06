@@ -9,6 +9,7 @@ shader::Vertex::Vertex (Path file) {
 		// Load the file
 		GLint fsize = fs::getFileSize(file);
 		GLchar *fdata = fs::getFileData(file);
+		fdata[fsize] = 0;
 
 		id = glCreateShader(GL_VERTEX_SHADER);
 
@@ -50,6 +51,7 @@ shader::Fragment::Fragment (Path file) {
 		// Load the file
 		GLint fsize = fs::getFileSize(file);
 		GLchar *fdata = fs::getFileData(file);
+		fdata[fsize] = 0;
 
 		id = glCreateShader(GL_FRAGMENT_SHADER);
 

@@ -101,7 +101,7 @@ namespace bazinga {
     bazinga::cache::init();
     bazinga::text::init();
     bazinga::input::init();
-    bazinga::audio::init();
+    //bazinga::audio::init();
 
     // On Linux: nothing
     // On Windows: setup OpenGL above 1.1
@@ -195,7 +195,7 @@ namespace bazinga {
       delete activeMap;
     }
 
-    bazinga::audio::deinit();
+    //bazinga::audio::deinit();
     bazinga::input::deinit();
     bazinga::text::deinit();
     bazinga::cache::deinit();

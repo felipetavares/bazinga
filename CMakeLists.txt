@@ -8,15 +8,14 @@ include(ExternalProject)
 
 ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
-    -g # Debug, shall we
+    #-g # Debug, shall we
 )
 
-
-IF (WIN32)
-ADD_DEFINITIONS(
-    -Wl,--subsystem,windows
-)
-ENDIF (WIN32)
+#IF (WIN32)
+#ADD_DEFINITIONS(
+#    -Wl,--subsystem,windows
+#)
+#ENDIF (WIN32)
 
 # Vamos compilar a Bazinga! Engine
 project (Bazinga)
@@ -129,7 +128,6 @@ add_executable (bazinga bazinga.cpp
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)
 target_link_libraries (bazinga glu32 opengl32)
-target_link_libraries (bazinga mingw32)
 target_link_libraries (bazinga libSDLmain)
 target_link_libraries (bazinga libSDL)
 ENDIF (WIN32)

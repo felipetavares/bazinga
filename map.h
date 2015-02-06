@@ -15,13 +15,30 @@ namespace bazinga {
   };
 
   class Dialog {
-    string text;
+    static const int bufferSize = 3;
     int id;
+
+    string text;
+    int textPosition;
+
+    string buffer[bufferSize];
+    int bufferPosition;
+  
+    int sizeW;
+
+    float nextTime;
+    float intervalTime;
+
+    bool ended;
   public:
     Dialog(int, string);
     void update();
     void render();
     int getID();
+    bool isEnded();
+  private:
+    // Add a character to the output
+    void fillChar();
   };
 
   class Map {
@@ -48,6 +65,9 @@ namespace bazinga {
     void render();
     void update();
     int newDialog(string);
+    int searchObject(string);
+    void hideObject(int, bool);
+    bool isDialogEnded(int);
     void deleteDialog(int);
     int getNewID();
 

@@ -112,6 +112,30 @@ int LAPI_del_dialog (lua_State* L) {
   return 0;
 }
 
+int LAPI_ended_dialog (lua_State* L) {
+  // LAPI_log ("LAPI_ended_dialog");
+
+  lua_pushboolean(L, bazinga::getActiveMap()->isDialogEnded(lua_tonumber(L, 1)));
+
+  return 1;
+}
+
+int LAPI_search_object (lua_State* L) {
+  LAPI_log ("LAPI_search_object");
+
+  lua_pushnumber(L, bazinga::getActiveMap()->searchObject(string(lua_tostring(L, 1))));
+
+  return 1;
+}
+
+int LAPI_hide_object (lua_State* L) {
+  // LAPI_log ("LAPI_hide_object");
+
+  bazinga::getActiveMap()->hideObject(lua_tonumber(L, 1), (bool)lua_toboolean(L, 2));
+
+  return 1;
+}
+
 Object::Object (BjObject* jObject, int layer) {
   BjValue* jProperties = jObject->get("properties");
 
@@ -391,6 +415,12 @@ void Object::createLuaAPI (lua_State* L) {
   lua_pushcfunction(L, LAPI_del_dialog);
   lua_settable(L, -3);
 
+  // Verify if a dialog has finished presenting
+  // ended = ended_dialog(id)
+  lua_pushstring(L, "ended_dialog");
+  lua_pushcfunction(L, LAPI_ended_dialog);
+  lua_settable(L, -3);
+
   // Create a font
   // new_font(oName, iName)
   lua_pushstring(L, "new_font");
@@ -424,6 +454,18 @@ void Object::createLuaAPI (lua_State* L) {
   // h
   lua_pushstring(L, "screen_h");
   lua_pushnumber(L, video::windowHeight);
+  lua_settable(L, -3);
+
+  // Search object
+  // id = search_object(name)
+  lua_pushstring(L, "search_object");
+  lua_pushcfunction(L, LAPI_search_object);
+  lua_settable(L, -3);
+
+  // Hide object
+  // hide_object(id, hide)
+  lua_pushstring(L, "hide_object");
+  lua_pushcfunction(L, LAPI_hide_object);
   lua_settable(L, -3);
 
   lua_setglobal(L, "bazinga");
