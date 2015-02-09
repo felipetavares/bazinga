@@ -33,6 +33,7 @@ namespace bazinga {
 		static void deinit();
 
 		static void setWindowTitleAndIcon (string,string="");
+		static void setWindowIcon(Path);
 		static void render ();
 		static void renderMap (Map*);
 	

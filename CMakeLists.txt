@@ -72,6 +72,9 @@ set_target_properties(ogglib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/o
 add_library(freetype2lib STATIC IMPORTED)
 set_target_properties(freetype2lib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/objs/freetype.a")
 
+add_library(bazingares STATIC IMPORTED)
+set_target_properties(bazingares PROPERTIES IMPORTED_LOCATION "bazinga.res")
+
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
   lua.o ALL
@@ -130,6 +133,7 @@ IF (WIN32)
 target_link_libraries (bazinga glu32 opengl32)
 target_link_libraries (bazinga libSDLmain)
 target_link_libraries (bazinga libSDL)
+target_link_libraries (bazinga bazingares)
 ENDIF (WIN32)
 
 target_link_libraries (bazinga lualib)

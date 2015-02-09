@@ -50,6 +50,9 @@ namespace bazinga {
     cpSpace *pSpace = NULL;
 
     float camx, camy;
+    float zoomX, zoomY;
+
+    bool reorder = true;
 
     vector <Dialog*> dialogs;
   public:
@@ -69,9 +72,12 @@ namespace bazinga {
     void hideObject(int, bool);
     bool isDialogEnded(int);
     void deleteDialog(int);
+    void setReorder(bool);
+    void setGravity(float, float);
     int getNewID();
 
     void setCamera (float, float);
+    void setZoom (float, float);
 
     cpSpace *getSpace();
   };

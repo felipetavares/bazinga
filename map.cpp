@@ -111,6 +111,9 @@ Map::Map () {
   cout << "bazinga: chipmunk: initializing collision handler..." << endl;
 
   cpSpaceSetDefaultCollisionHandler(pSpace, pBeginCollision, NULL, NULL, NULL, NULL);
+
+  zoomX = 1;
+  zoomY = 1;
 }
 
 int Map::getNewID() {
@@ -179,6 +182,11 @@ bool Map::isDialogEnded (int id) {
 void Map::setCamera (float x, float y) {
   camx = x;
   camy = y;
+}
+
+void Map::setZoom (float x, float y) {
+  zoomX = x;
+  zoomY = y;
 }
 
 cpSpace* Map::getSpace () {
@@ -252,6 +260,14 @@ int Map::newObject (lua_State *L) {
   return 0;
 }
 
+void Map::setGravity (float x, float y) {
+  pSpace->gravity = cpv(x, y);
+}
+
+void Map::setReorder (bool reorder) {
+  this->reorder = reorder;
+}
+
 void Map::addObject (Object *object) {
   objects.push_back(object);
 }
@@ -275,9 +291,12 @@ void Map::update() {
 
 void Map::render() {
   glPushMatrix();
+  glScalef(zoomX, zoomY, 0);
+
   glTranslatef (-camx, -camy, 0);
 
-  sort (objects.begin(), objects.end(), compareObjects);
+  if (reorder)
+    sort (objects.begin(), objects.end(), compareObjects);
 
   for (int i=0;i<objects.size();i++) {
     if (!objects[i]->num_properties["hidden"])

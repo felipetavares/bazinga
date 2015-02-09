@@ -134,6 +134,10 @@ void video::setWindowTitleAndIcon (	string _title,
 	SDL_WM_SetCaption (_title.c_str(),_icon.c_str());
 }
 
+void video::setWindowIcon (Path icon) {
+	SDL_WM_SetIcon(SDL_LoadBMP(icon.getPath().c_str()), NULL);
+}
+
 void video::renderMap (Map *map) {
 	glClearColor (0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

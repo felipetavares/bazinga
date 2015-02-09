@@ -111,6 +111,7 @@ namespace bazinga {
     bazinga::input::activateContext("main");
 
     bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
+    bazinga::video::setWindowIcon(Path("assets/images/icon.bmp"));
 
     auto v = bazinga::cache::getVertexShader(bazinga::Path("shaders/default-vert.glsl"));
     auto f = bazinga::cache::getFragmentShader(bazinga::Path("shaders/default-frag.glsl"));

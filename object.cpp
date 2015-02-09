@@ -96,6 +96,10 @@ int LAPI_set_camera (lua_State* L) {
   bazinga::getActiveMap()->setCamera(lua_tonumber(L, 1), lua_tonumber(L, 2));
 }
 
+int LAPI_set_zoom (lua_State* L) {
+  bazinga::getActiveMap()->setZoom(lua_tonumber(L, 1), lua_tonumber(L, 2));
+}
+
 int LAPI_new_dialog (lua_State* L) {
   LAPI_log ("LAPI_new_dialog");
 
@@ -134,6 +138,20 @@ int LAPI_hide_object (lua_State* L) {
   bazinga::getActiveMap()->hideObject(lua_tonumber(L, 1), (bool)lua_toboolean(L, 2));
 
   return 1;
+}
+
+int LAPI_set_reorder (lua_State* L) {
+  LAPI_log ("LAPI_set_reorder");
+
+  bazinga::getActiveMap()->setReorder((bool)lua_toboolean(L, 1));
+
+  return 0;
+}
+
+int LAPI_set_gravity (lua_State* L) {
+  bazinga::getActiveMap()->setGravity(lua_tonumber(L, 1), lua_tonumber(L, 2));
+
+  return 0;  
 }
 
 Object::Object (BjObject* jObject, int layer) {
@@ -320,10 +338,14 @@ void Object::update () {
 }
 
 void Object::render () {
+    float scaleX = num_properties["sx"]==0?1:num_properties["sx"];
+    float scaleY = num_properties["sy"]==0?1:num_properties["sy"];
+
     if (str_properties["anim"] != "") {
       glPushMatrix();
           glTranslatef (num_properties["gx"]+num_properties["x"]+anim->getWidth()/2, num_properties["gy"]+num_properties["y"]+anim->getHeight()/2, 0);
           glRotatef(num_properties["ang"], 0, 0, 1);
+          glScalef(scaleX, scaleY, 0);
           anim->render();
       glPopMatrix();
     } else if (str_properties["img"] != "") {
@@ -332,6 +354,8 @@ void Object::render () {
 
       float sX = float(img->w)/((float)img->rw);
       float sY = float(img->h)/((float)img->rh);
+
+      glScalef(scaleX, scaleY, 0);
 
       glPushMatrix();
           glTranslatef (num_properties["gx"]+num_properties["x"]+img->w/2, num_properties["gy"]+num_properties["y"]+img->h/2, 0);
@@ -424,6 +448,12 @@ void Object::createLuaAPI (lua_State* L) {
   lua_pushcfunction(L, LAPI_set_camera);
   lua_settable(L, -3);
 
+  // Set zoom for the camera
+  // set_zoom(num, num)
+  lua_pushstring(L, "set_zoom");
+  lua_pushcfunction(L, LAPI_set_zoom);
+  lua_settable(L, -3);
+
   // Creates a new dialog
   // id = new_dialog(txt)
   lua_pushstring(L, "new_dialog");
@@ -488,6 +518,19 @@ void Object::createLuaAPI (lua_State* L) {
   lua_pushstring(L, "hide_object");
   lua_pushcfunction(L, LAPI_hide_object);
   lua_settable(L, -3);
+
+  // Reorder objects
+  // set_reorder(reorder)
+  lua_pushstring(L, "set_reorder");
+  lua_pushcfunction(L, LAPI_set_reorder);
+  lua_settable(L, -3);
+
+  // Set Gravity
+  // set_gravity (x, y)
+  lua_pushstring(L, "set_gravity");
+  lua_pushcfunction(L, LAPI_set_gravity);
+  lua_settable(L, -3);
+
 
   lua_setglobal(L, "bazinga");
 }
