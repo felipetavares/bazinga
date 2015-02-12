@@ -28,7 +28,7 @@ namespace bazinga {
 
     float nextTime;
     float intervalTime;
-
+    float nextWordSize;
     bool ended;
   public:
     Dialog(int, string);
@@ -39,6 +39,8 @@ namespace bazinga {
   private:
     // Add a character to the output
     void fillChar();
+    // Move to next output line
+    void nextLine();
   };
 
   class Map {

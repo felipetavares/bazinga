@@ -1,6 +1,7 @@
 #include "map.h"
 #include "bazinga.h"
 #include "text.h"
+#include <ctype.h>
 using namespace bazinga;
 
 Dialog::Dialog (int id, string text):
@@ -8,6 +9,7 @@ Dialog::Dialog (int id, string text):
   ended(false) {
     sizeW = video::windowWidth/2;
     intervalTime = 0.05;
+    nextWordSize = 0;
 }
 
 void Dialog::update () {
@@ -36,15 +38,36 @@ void Dialog::fillChar () {
 
   auto size = text::measureText(buffer[bufferPosition]);
 
-  if (size.w > sizeW) {
-    if (bufferPosition < bufferSize-1)
-      bufferPosition++;
-    else {
-      for (int i=0;i<bufferSize-1;i++) {
-        buffer[i] = buffer[i+1];
-      }
-      buffer[bufferSize-1] = "";
+  if (isspace(text[textPosition])) {
+    if (size.w+nextWordSize >= sizeW) {
+      while (isspace(text[textPosition]))
+        textPosition++;
+      nextLine();
     }
+
+    string nextWord = "";
+    int i = textPosition;
+    while (isspace(text[i++]));
+    for (;i<text.size() && !isspace(text[i]);i++) {
+      nextWord += text[i];
+    }
+    nextWordSize = text::measureText(nextWord).w;
+  }
+
+  if (size.w > sizeW) {
+    nextLine();
+  }
+}
+
+void Dialog::nextLine () {
+  if (bufferPosition < bufferSize-1)
+    bufferPosition++;
+  else {
+    for (int i=0;i<bufferSize-1;i++) {
+      buffer[i] = buffer[i+1];
+    }
+
+    buffer[bufferSize-1] = "";
   }
 }
 
