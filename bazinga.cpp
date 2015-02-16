@@ -9,6 +9,7 @@
 #include "gui/spacer.h"
 #include "gui/slider.h"
 #include "gui/progress.h"
+#include "gui/entry.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -19,6 +20,8 @@ namespace bazinga {
   double curtime = 0;
   bool console = false;
   bool setNewScene = false;
+  bool blockNewScene = false;
+  bool exitFlag = false;
   Path newScenePath;
   string mainScenePath = "scenes/main.scene";
 
@@ -45,6 +48,9 @@ namespace bazinga {
     SDL_Event event;
 
     while ( SDL_PollEvent(&event) ) {
+      if (exitFlag)
+        return false;
+
       switch (event.type) {
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
@@ -57,17 +63,53 @@ namespace bazinga {
         if (event.key.keysym.sym != SDLK_ESCAPE) {
           string keyName = string(SDL_GetKeyName(event.key.keysym.sym));
           transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
-          input::keypress(keyName);
-        } else
-          return false;
+          input::keypress(keyName, event.key.keysym.unicode);
+        } else {
+            auto window = new gui::Window("About", 800, 600);
+            auto container = new gui::Container(gui::Container::VERTICAL);
+            auto line = new gui::Container(gui::Container::HORIZONTAL);
+            auto line2 = new gui::Container(gui::Container::HORIZONTAL);
+            auto line3 = new gui::Container(gui::Container::HORIZONTAL);
+            auto line4 = new gui::Container(gui::Container::HORIZONTAL);
+
+            line->borderLeft = line->borderRight = 0;
+            line->borderTop = line->borderBottom = 0;
+
+            line2->borderLeft = line2->borderRight = 0;
+            line2->borderTop = line2->borderBottom = 0;
+
+            line3->borderLeft = line3->borderRight = 0;
+            line3->borderTop = line3->borderBottom = 0;
+
+            line4->borderLeft = line4->borderRight = 0;
+            line4->borderTop = line4->borderBottom = 0;
+
+            line->add(new gui::Label("Sair da demo:"));
+            auto button = new gui::Button("Sair");
+            line->add(button);
+
+            container->add(line);
+            container->add(line2);
+            container->add(line3);
+            container->add(line4);
+            container->add(new gui::Spacer(gui::Spacer::VERTICAL));
+
+            window->setRoot(container);
+            gui::add(window);
+
+            button->onClick = [=] (gui::Widget* wid) {
+              bazinga::quit();
+            };
+        }
         break;
         case SDL_KEYUP:
         if (event.key.keysym.sym != SDLK_ESCAPE) {
           string keyName = string(SDL_GetKeyName(event.key.keysym.sym));
           transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
           input::keyunpress(keyName);
-        } else
-          return false;
+        } else {
+          //return false;
+        }
         break;
         case SDL_MOUSEMOTION:
           input::mousemove (event.motion.x-video::windowWidth/2,
@@ -92,6 +134,9 @@ namespace bazinga {
   }
 
   void setScene (Path path) {
+    if (blockNewScene)
+      return;
+
     bazinga::newScenePath = path;
     bazinga::setNewScene = true;
   }
@@ -128,50 +173,6 @@ namespace bazinga {
     //cout << "gameLoop()" << endl;
     cache::createFont(Path("assets/fonts/texgyrecursor-bold.otf"), "default");
 
-    auto window = new gui::Window("About", 800, 600);
-    auto container = new gui::Container(gui::Container::VERTICAL);
-    auto line = new gui::Container(gui::Container::HORIZONTAL);
-    auto line2 = new gui::Container(gui::Container::HORIZONTAL);
-    auto line3 = new gui::Container(gui::Container::HORIZONTAL);
-
-    line->borderLeft = line->borderRight = 0;
-    line->borderTop = line->borderBottom = 0;
-
-    line2->borderLeft = line2->borderRight = 0;
-    line2->borderTop = line2->borderBottom = 0;
-
-    line3->borderLeft = line3->borderRight = 0;
-    line3->borderTop = line3->borderBottom = 0;
-
-    line->add(new gui::Label("Set to 100%:"));
-    auto button = new gui::Button("100%");
-    line->add(button);
-
-    line2->add(new gui::Label("Adjust:"));
-    auto slider = new gui::Slider(0.5);
-    line2->add(slider);
-
-    line3->add(new gui::Label("This much:"));
-    auto pbar = new gui::Progress(0.5);
-    line3->add(pbar);
-
-    container->add(line);
-    container->add(line2);
-    container->add(line3);
-
-    container->add(new gui::Spacer(gui::Spacer::VERTICAL));
-
-    window->setRoot(container);
-    gui::add(window);
-
-    slider->onChange = [=] (gui::Widget* wid) {
-      pbar->setPosition(((gui::Slider*)wid)->getPosition());
-    };
-
-    button->onClick = [=] (gui::Widget* wid) {
-      pbar->setPosition(1);
-    };
-
     chrono::high_resolution_clock::time_point t;
     chrono::high_resolution_clock::time_point startTime;
 
@@ -207,21 +208,29 @@ namespace bazinga {
         //}
 
         gui::render();
-
-        video::render();
       }
+
+      video::render();
 
       if (bazinga::setNewScene) {
-        if (activeMap) {
-          delete activeMap;
-        }
+        bazinga::setNewScene = false;
 
-        setNewScene = false;
+        blockNewScene = true;
 
-        activeMap = new Map(newScenePath);
-        activeMap->init();
+        video::onFinish = [=] () {
+          if (activeMap) {
+            delete activeMap;
+          }
+
+          activeMap = new Map(newScenePath);
+          activeMap->init();
+          
+          video::fadeFrom(0, 0, 0, 0.5);
+
+          blockNewScene = false;
+        };
+        video::fadeTo(0, 0, 0, 0.5);
       }
-
     }
   }
 
@@ -236,6 +245,10 @@ namespace bazinga {
     bazinga::text::deinit();
     bazinga::cache::deinit();
     bazinga::video::deinit();
+  }
+
+  void quit () {
+    exitFlag = true;
   }
 }
 

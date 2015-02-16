@@ -82,7 +82,7 @@ namespace bazinga {
 			float dh;
 		}TextMetrics;
 
-		enum Align {
+		enum Align {	
 			Center,
 			Left,
 			Right

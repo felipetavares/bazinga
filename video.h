@@ -8,6 +8,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <vector>
+#include <functional>
 using namespace std;
 
 namespace bazinga {
@@ -17,12 +18,16 @@ namespace bazinga {
 
 		static SDL_Surface *screen;
 
-		static const Uint32 videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
+		static const Uint32 videoFlags = SDL_FULLSCREEN | SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 		static Path icon;
 
 		static float cr, cg, cb, ca;
 		static float bcr, bcg, bcb;
+		static float fcr, fcg, fcb;
+		static float endtime,starttime;
+		static bool fadedirection;
 	public:
+		static function <void(void)> onFinish;
 		static int windowBpp;
 		static int windowWidth;
 		static int windowHeight;
@@ -42,6 +47,8 @@ namespace bazinga {
 		static void fillCircle(int, int, int);
 		static void setColor(float, float, float, float);
 		static void setBackgroundColor(float, float, float);
+		static void fadeFrom(float, float, float, float);
+		static void fadeTo(float, float, float, float);
 	private:
 		static void getVideoModes ();
 		static void findBestVideoMode ();

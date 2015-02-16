@@ -14,11 +14,12 @@ namespace bazinga {
 		class Event {
 			bool captured;
 		public:
-			enum Type {MOUSEPRESS, MOUSEUNPRESS, MOUSEMOVE};
+			enum Type {MOUSEPRESS, MOUSEUNPRESS, MOUSEMOVE, KEYPRESS};
 
 			Type type;
 			int button;
 			int x, y;
+			uint16_t unicode;
 
 			Event (Type);
 			bool isValid();
@@ -102,6 +103,7 @@ namespace bazinga {
 		};
 
 		extern vector <Window*> windows;
+		extern Widget* focus;
 
 		void init();
 		void render();
@@ -109,12 +111,17 @@ namespace bazinga {
 
 		// Add a new window to the interface
 		void add(Window*);
+		// Set/Unset focus
+		void setFocus(Widget*);
+		void unsetFocus(Widget*);
 
 		// Handle mouse events
 		void mousemove (int, int);
 		void mousepress (int, int, int);
 		void mouseunpress (int, int, int);
-	
+		void keypress(uint16_t);
+
+		// Handy function
 		bool inside(int, int,
 					int, int, int, int);
 	}

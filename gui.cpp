@@ -6,6 +6,9 @@ using namespace std;
 using namespace bazinga;
 
 vector <gui::Window*> gui::windows;
+gui::Widget* gui::focus;
+
+string data = "";
 
 gui::Container::Container (Flow flow):
 	x(0), y(0), w(0), h(0),
@@ -371,7 +374,7 @@ void gui::Window::render () {
 	text::setFont(font);
 	text::setAlign(text::Center);
 	text::setBaseline(text::Middle);
-	text::fillText(title, this->x+this->w/2, this->y+tbar/2);
+	text::fillText(data, this->x+this->w/2, this->y+tbar/2);
 
 	if (overclose) {
 		auto close = cache::getTexture(Path("assets/gui/close.png"));
@@ -392,6 +395,7 @@ void gui::Window::render () {
 }
 
 void gui::init () {
+	focus = NULL;
 }
 
 void gui::render () {
@@ -415,6 +419,16 @@ void gui::deinit () {
 
 void gui::add (gui::Window* window) {
 	windows.push_back(window);
+}
+
+void gui::setFocus (Widget* wid) {
+	focus = wid;
+}
+
+void gui::unsetFocus (Widget* wid) {
+	if (focus == wid) {
+		focus = NULL;
+	}
 }
 
 void gui::mousemove (int x, int y) {
@@ -456,6 +470,14 @@ void gui::mouseunpress (int button, int x, int y) {
 		if (!event.isValid())
 			break;
 	}	
+}
+
+void gui::keypress (uint16_t unicode) {
+	if (focus) {
+		Event evt = Event(Event::KEYPRESS);
+		evt.unicode = unicode;
+		focus->event(evt);
+	}
 }
 
 bool gui::inside (int px, int py,

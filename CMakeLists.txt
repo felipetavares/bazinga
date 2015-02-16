@@ -133,7 +133,8 @@ add_executable (bazinga bazinga.cpp
                         gui/spacer.cpp
                         gui/slider.cpp
                         gui/progress.cpp
-                        gui/rwidget.cpp)
+                        gui/rwidget.cpp
+                        gui/entry.cpp)
 
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)

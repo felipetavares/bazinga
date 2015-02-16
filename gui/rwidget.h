@@ -25,6 +25,7 @@ namespace bazinga {
 			virtual void ractivate(int, int);
 			virtual void rclick(int, int);
 			virtual void rmove(int, int);
+			virtual void rkey(string);
 		};
 	}
 }

@@ -22,6 +22,8 @@ namespace bazinga {
 
 	void toggleConsole();
 	void setScene(Path);
+
+	void quit();
 }
 
 #endif /* BAZINGA_H */

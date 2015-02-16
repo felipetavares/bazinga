@@ -36,7 +36,7 @@ namespace bazinga {
     void addContext (string, Context*);
     void activateContext (string);
 
-    void keypress(string);
+    void keypress(string, uint16_t);
     void keyunpress(string);
     void mousemove(int, int);
     void mousepress(int, int, int);

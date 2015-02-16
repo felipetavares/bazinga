@@ -1,19 +1,26 @@
 #include "video.h"
+#include "bazinga.h"
 #include <cmath>
 #include <il.h>
 using namespace bazinga;
 
 float video::cr = 0, video::cg = 0, video::cb = 0, video::ca = 0;
 float video::bcr = 0, video::bcg = 0, video::bcb = 0;
+float video::fcr = 0, video::fcg = 0, video::fcb = 0;
+float video::endtime = 0, video::starttime = 0;
+bool video::fadedirection;
 int video::windowBpp = 0;
 int video::windowWidth = 0;
 int video::windowHeight = 0;
 bool video::anyResolution = false;
+function <void(void)> video::onFinish = NULL;
 vector <SDL_Rect> *video::videoModes = NULL;
 Path video::icon;
 SDL_Surface *video::screen = NULL;
 
 video::video () {
+	endtime = -1;
+	starttime = -1;
 }
 
 video::~video () {
@@ -24,6 +31,8 @@ void video::init() {
 		cout << "bazinga: video: cannot init SDL" << endl;
 		exit (-1);
 	}
+
+	SDL_EnableUNICODE(1);
 
 	ilInit();
 
@@ -51,7 +60,7 @@ void video::init() {
 
 	cout << "bazinga: video: window (" << windowWidth << ", " << windowHeight << ")" << endl;
 
-  // CHANGE THAT IF NEED BE
+	// CHANGE THAT IF NEED BE
 	glDisable (GL_DEPTH_TEST);
 
 	glEnable( GL_TEXTURE_2D );
@@ -147,10 +156,6 @@ void video::renderMap (Map *map) {
 	map->render();
 }
 
-void video::render () {
-	SDL_GL_SwapBuffers();
-}
-
 void video::setColor (float r, float g, float b, float a) {
 	cr = r;
 	cg = g;
@@ -199,4 +204,49 @@ void video::fillCircle (int cx, int cy, int r) {
 		y = s * t + c * y;
 	} 
 	glEnd(); 
+}
+
+void video::render () {
+	if (endtime > 0) {
+		float factor;
+
+		if (fadedirection)
+			factor = 1-(bazinga::curtime-starttime)/(endtime-starttime);
+		else
+			factor = (bazinga::curtime-starttime)/(endtime-starttime);
+
+		if (bazinga::curtime > endtime) {
+			endtime = starttime = -1;
+		
+			if (onFinish) {
+				onFinish();
+				onFinish = NULL;
+			}
+		}
+
+		video::setColor(fcr,fcg,fcb, factor);
+		video::fillRect(-windowWidth/2, -windowHeight/2, windowWidth, windowHeight);
+	}
+
+	SDL_GL_SwapBuffers();
+}
+
+void video::fadeFrom (float r, float g, float b, float time) {
+	fcr = r;
+	fcg = g;
+	fcb = b;
+
+	endtime = bazinga::curtime+time;
+	starttime = bazinga::curtime;
+	fadedirection = true;
+}
+
+void video::fadeTo (float r, float g, float b, float time) {
+	fcr = r;
+	fcg = g;
+	fcb = b;
+
+	endtime = bazinga::curtime+time;
+	starttime = bazinga::curtime;
+	fadedirection = false;
 }

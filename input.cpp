@@ -112,8 +112,10 @@ void input::mouseunpress (int button, int x, int y) {
   gui::mouseunpress(button, x, y);
 }
 
-void input::keypress(string key) {
+void input::keypress(string key, uint16_t unicode) {
   cout << "bazinga: input: keydown: " << key << endl;
+
+  gui::keypress(unicode);
 
   if (key == "tab") {
     toggleConsole();
