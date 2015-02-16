@@ -12,12 +12,16 @@
 namespace bazinga {
 	extern double delta;
 	extern double curtime;
+
 	bool init ();
 	void gameLoop();
 	void deinit ();
 
 	Map* getActiveMap();
 	cpBool pBeginCollision (cpArbiter*, cpSpace*, void*);
+
+	void toggleConsole();
+	void setScene(Path);
 }
 
 #endif /* BAZINGA_H */

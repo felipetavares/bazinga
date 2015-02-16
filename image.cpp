@@ -83,3 +83,26 @@ Image::Image (Path path) {
 Image::~Image () {
   glDeleteTextures(1, &id);
 }
+
+void Image::render (int x, int y) {
+  GLuint texID = id;
+
+  float sX = float(w)/((float)rw);
+  float sY = float(h)/((float)rh);
+
+  glScalef(1, 1, 0);
+
+  glPushMatrix();
+      glColor4f(1,1,1,1);
+      glTranslatef (x, y, 0);
+      glEnable (GL_TEXTURE);
+      glEnable (GL_TEXTURE_2D);
+      glBindTexture (GL_TEXTURE_2D, texID);
+      glBegin(GL_QUADS);
+        glTexCoord2f (0,1);       glVertex3f(-int(w)/2, -int(h)/2, 0);
+        glTexCoord2f (sX,1);      glVertex3f(w/2, -int(h)/2, 0);
+        glTexCoord2f (sX,1-sY);   glVertex3f(w/2, h/2, 0);
+        glTexCoord2f (0,1-sY);    glVertex3f(-int(w)/2, h/2, 0);
+      glEnd();
+  glPopMatrix();
+}

@@ -15,7 +15,9 @@ namespace bazinga {
   };
 
   class Dialog {
-    static const int bufferSize = 3;
+    Path imagePath;
+
+    static const int bufferSize = 4;
     int id;
 
     string text;
@@ -30,8 +32,10 @@ namespace bazinga {
     float intervalTime;
     float nextWordSize;
     bool ended;
+
+    string nextWord;
   public:
-    Dialog(int, string);
+    Dialog(int, string, Path);
     void update();
     void render();
     int getID();
@@ -44,6 +48,9 @@ namespace bazinga {
   };
 
   class Map {
+    Path file;
+    lua_State *lScript;
+
     vector <Object*> objects;
     static int oid;
     static int did;
@@ -58,9 +65,9 @@ namespace bazinga {
 
     vector <Dialog*> dialogs;
   public:
-    Map ();
+    Map (Path);
     ~Map();
-    void init (BjObject *);
+    bool init ();
 
     int newObject (lua_State*);
     void addObject(Object*);
@@ -69,7 +76,7 @@ namespace bazinga {
 
     void render();
     void update();
-    int newDialog(string);
+    int newDialog(string, Path);
     int searchObject(string);
     void hideObject(int, bool);
     bool isDialogEnded(int);
@@ -80,6 +87,8 @@ namespace bazinga {
 
     void setCamera (float, float);
     void setZoom (float, float);
+
+    cpBool pmBeginCollision(cpArbiter*, cpSpace*, void *);
 
     cpSpace *getSpace();
   };

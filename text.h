@@ -67,7 +67,7 @@ namespace bazinga {
 			~Font();
 			void setSize (int);
 			int render (const char*, int);
-			int measure (const char*, int, float&, float&);
+			int measure (const char*, int, float&, float&, float&);
 			void setColor (float, float, float, float);
 		private:
 			uint32_t utf82unicode(uint32_t);
@@ -77,6 +77,9 @@ namespace bazinga {
 
 		typedef struct TextMetrics {
 			float w,h;
+
+			// Distance from top to baseline
+			float dh;
 		}TextMetrics;
 
 		enum Align {
@@ -107,7 +110,7 @@ namespace bazinga {
 		// Not fully implemented
 		void setBaseline (Baseline); // ctx.textBaseline = ('top'|'middle'|'bottom'|'alphabetic')		
 		// Fill an UTF-8 encoded string
-		void fillText (string, float, float); // ctx.fillText(str, x, y)
+		void fillText (string, int, int); // ctx.fillText(str, x, y)
 		// Measures an UTF-8 encoded strnig
 		TextMetrics measureText (string);
 	}

@@ -68,8 +68,11 @@ namespace bazinga {
     }
 
     void createFont (Path fname, string name) {
-      if (cachedFont[name] == NULL)
+      try {
+        cachedFont.at(name);
+      } catch (exception e) {
         cachedFont[name] = new text::Font(fname);
+      }
     }
 
     void createShaderProgram (shader::Vertex* vert, shader::Fragment* frag, string name) {

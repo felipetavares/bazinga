@@ -3,54 +3,40 @@
 #include "filesystem.h"
 #include "text.h"
 #include "cache.h"
+#include "gui.h"
+#include "gui/label.h"
+#include "gui/button.h"
+#include "gui/spacer.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
 using namespace std;
 
 namespace bazinga {
-  lua_State *lCallbacks;
   double delta = 0;
   double curtime = 0;
-  
+  bool console = false;
+  bool setNewScene = false;
+  Path newScenePath;
+  string mainScenePath = "scenes/main.scene";
+
   Map* activeMap = NULL;
 
   Map* getActiveMap () {
     return activeMap;
   }
 
-  void postStepAct(cpSpace *space, cpArbiter *arb, void *data) {
-    cpShape *a, *b;
-    cpArbiterGetShapes(arb, &a, &b);
-  }
+  //void postStepAct(cpSpace *space, cpArbiter *arb, void *data) {
+  //  cpShape *a, *b;
+  //  cpArbiterGetShapes(arb, &a, &b);
+  //}
 
   cpBool pBeginCollision (cpArbiter *arb, cpSpace *space, void *data) {
-    cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepAct, arb, NULL);
+    return getActiveMap()->pmBeginCollision(arb, space, data);
+  }
 
-    cpShape *a, *b;
-    cpArbiterGetShapes(arb, &a, &b);
-
-    lua_getglobal(lCallbacks, "collision_begin");
-
-    ((Object*)cpShapeGetUserData(a))->createLuaProperties(lCallbacks);
-    ((Object*)cpShapeGetUserData(b))->createLuaProperties(lCallbacks);
-
-    if (lua_pcall(lCallbacks, 2, 1, 0)) {
-      cout << "bazinga: error when calling collision_begin() in callbacks.lua" << endl;
-
-      if (lua_isstring(lCallbacks, -1)) {
-        cout << "\t" << lua_tostring(lCallbacks, -1) << endl;
-      }
-    } else {
-      if (lua_gettop(lCallbacks) < 1) { // This condition is not working ok
-        cout << "bazinga: collision_begin() in callbacks.lua doesn't return value" << endl;
-      } else {
-        return lua_toboolean(lCallbacks, -1);
-      }
-    }
-
-    // Default: collision will occur
-    return true;
+  void toggleConsole() {
+    console = !console;
   }
 
   bool events () {
@@ -82,11 +68,16 @@ namespace bazinga {
           return false;
         break;
         case SDL_MOUSEMOTION:
-          //inputManager->mouseMoveEvent (event);
+          input::mousemove (event.motion.x-video::windowWidth/2,
+                            event.motion.y-video::windowHeight/2);
         break;
         case SDL_MOUSEBUTTONDOWN:
+          input::mousepress (event.button.button,
+                             event.button.x-video::windowWidth/2,
+                             event.button.y-video::windowHeight/2);
+        break;
         case SDL_MOUSEBUTTONUP:
-          //inputManager->mouseButtonEvent (event);
+          input::mouseunpress (event.button.button);
         break;
         case SDL_QUIT:
           return false;
@@ -96,12 +87,18 @@ namespace bazinga {
     return true;
   }
 
+  void setScene (Path path) {
+    bazinga::newScenePath = path;
+    bazinga::setNewScene = true;
+  }
+
   bool init () {
     bazinga::video::init();
     bazinga::cache::init();
     bazinga::text::init();
     bazinga::input::init();
     //bazinga::audio::init();
+    bazinga::gui::init();
 
     // On Linux: nothing
     // On Windows: setup OpenGL above 1.1
@@ -118,46 +115,38 @@ namespace bazinga {
     bazinga::cache::createShaderProgram (v, f, "default");
     bazinga::cache::getShaderProgram("default")->loadUniforms({"sampler","color"});
 
-    lCallbacks = luaL_newstate();
-    luaL_openlibs (lCallbacks);
-    Object::createLuaAPI(lCallbacks);
-
-    // Loads the file
-    if (luaL_dofile(lCallbacks, (Path("callbacks.lua")).getPath().c_str())) {
-      cout << "bazinga: script contains errors" <<  endl;
-
-      if (lua_isstring(lCallbacks, -1)) {
-        cout << "\t" << lua_tostring(lCallbacks, -1) << endl;
-      }
-
-      lua_close(lCallbacks);
-      lCallbacks = NULL;
-    }
-
-    auto mainScene = Path("scenes/main.scene");
-
-    if (fs::fileExists(mainScene)) {
-      char *data = fs::getFileData(mainScene);
-      string sData = string (data);
-
-      BjObject *object = json::parse (sData);
-
-      activeMap = new Map();
-      activeMap->init(object);
-      
-      delete object;
-      delete data;
-    } else {
-      cout << "bazinga: scene: could not load " << mainScene.getPath() << endl;
-      cout << "\t" << "aborting" << endl;
-      return false;
-    }
+    setScene(Path(mainScenePath));
 
     return true;
   }
 
   void gameLoop () {
     //cout << "gameLoop()" << endl;
+    cache::createFont(Path("assets/fonts/texgyrecursor-bold.otf"), "default");
+
+    auto window = new gui::Window("About", 800, 600);
+    auto container = new gui::Container(gui::Container::VERTICAL);
+    auto line = new gui::Container(gui::Container::HORIZONTAL);
+    auto line2 = new gui::Container(gui::Container::HORIZONTAL);
+
+    line->borderLeft = line->borderRight = 0;
+    line->borderTop = line->borderBottom = 0;
+
+    line2->borderLeft = line2->borderRight = 0;
+    line2->borderTop = line2->borderBottom = 0;
+
+    line->add(new gui::Label("A button:"));
+    line->add(new gui::Button("Button 0"));
+    line->add(new gui::Spacer());
+
+    line->add(new gui::Label("A slider:"));
+    line->add(new gui::Slider(0.5));
+    line->add(new gui::Spacer());
+
+    container->add(line);
+
+    window->setRoot(container);
+    gui::add(window);
 
     chrono::high_resolution_clock::time_point t;
     chrono::high_resolution_clock::time_point startTime;
@@ -185,9 +174,30 @@ namespace bazinga {
 
       if (activeMap) {
         activeMap->update();
+
         video::renderMap(activeMap);
+     
+        //if (console) {
+        //  video::setColor(1,0,0,1);
+        //  video::fillRect(-100,-100,200,200);
+        //}
+
+        gui::render();
+
         video::render();
       }
+
+      if (bazinga::setNewScene) {
+        if (activeMap) {
+          delete activeMap;
+        }
+
+        setNewScene = false;
+
+        activeMap = new Map(newScenePath);
+        activeMap->init();
+      }
+
     }
   }
 
@@ -196,6 +206,7 @@ namespace bazinga {
       delete activeMap;
     }
 
+    bazinga::gui::deinit();
     //bazinga::audio::deinit();
     bazinga::input::deinit();
     bazinga::text::deinit();
@@ -232,31 +243,10 @@ void copyMaps () {
 
 #ifdef _WIN32
 int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-#else
+ #else
 int main (int argc, char** argv) {
 #endif /* _WIN32 */ 
   copyMaps();
-
-  /*
-  text::setAlign(text::Left);
-  text::setBaseline(text::Alphabetic);
-
-  font.setSize(32);
-  text::fillText(ss.str(), 0, 0);
-
-  font.setSize(12);
-  text::fillText(ss.str(), 0, 32);
-
-  text::setAlign(text::Right);
-  font.setSize(32);
-  font.setColor(0,1,0,1);
-  text::fillText(ss.str(), 0, 64);
-
-  text::setAlign(text::Center);
-  font.setSize(32);
-  font.setColor(1,1,1,1);
-  text::fillText(ss.str(), 0, 128);
-  */
 
   try {
     if (bazinga::init())

@@ -38,6 +38,9 @@ namespace bazinga {
 
     void keypress(string);
     void keyunpress(string);
+    void mousemove(int, int);
+    void mousepress(int, int, int);
+    void mouseunpress(int);
 
     void setContextsIn (lua_State*);
 

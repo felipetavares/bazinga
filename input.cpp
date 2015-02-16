@@ -1,4 +1,6 @@
 #include "input.h"
+#include "bazinga.h"
+#include "gui.h"
 #include <iostream>
 #include <algorithm>
 using namespace bazinga;
@@ -98,8 +100,24 @@ void input::activateContext (string name) {
   active.push_back(ctx);
 }
 
+void input::mousemove (int x, int y) {
+  gui::mousemove(x, y);
+}
+
+void input::mousepress (int button, int x, int y) {
+  gui::mousepress(button, x, y);
+}
+
+void input::mouseunpress (int button) {
+  gui::mouseunpress(button);
+}
+
 void input::keypress(string key) {
   cout << "bazinga: input: keydown: " << key << endl;
+
+  if (key == "tab") {
+    toggleConsole();
+  }
 
   for (auto c :active) {
     c->keypress(key);

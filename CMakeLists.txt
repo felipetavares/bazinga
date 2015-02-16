@@ -126,7 +126,11 @@ add_executable (bazinga bazinga.cpp
                         image.cpp
                         text.cpp
                         shader.cpp
-                        gl/glwin.cpp)
+                        gl/glwin.cpp
+                        gui.cpp
+                        gui/label.cpp
+                        gui/button.cpp
+                        gui/spacer.cpp)
 
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)

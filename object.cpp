@@ -24,11 +24,7 @@ int LAPI_new_object (lua_State* L) {
 int LAPI_del_object (lua_State* L) {
   LAPI_log ("LAPI_del_object");
 
-  if (lua_isnumber(L, 1)) {
-    bazinga::getActiveMap()->deleteObject(lua_tonumber(L, 1));
-  } else {
-
-  }
+  bazinga::getActiveMap()->deleteObject(luaL_checknumber(L, 1));
 
   return 0;
 }
@@ -36,13 +32,9 @@ int LAPI_del_object (lua_State* L) {
 int LAPI_new_font (lua_State* L) {
   LAPI_log ("LAPI_new_font");
 
-  if (lua_isstring(L, 1) && lua_isstring(L, 2)) {
-    string fontName = string(lua_tostring(L, 1));
-    string internalName = string(lua_tostring(L, 2));
-    cache::createFont(Path(fontName), internalName);
-  } else {
-
-  }  
+  string fontName = string(luaL_checkstring(L, 1));
+  string internalName = string(luaL_checkstring(L, 2));
+  cache::createFont(Path(fontName), internalName);
 
   return 0;
 }
@@ -50,10 +42,29 @@ int LAPI_new_font (lua_State* L) {
 int LAPI_set_font (lua_State* L) {
   LAPI_log("LAPI_set_font");
 
-  if (lua_isstring(L, 1)) {
-    string internalName = string(lua_tostring(L, 1));
-    text::setFont(cache::getFont(internalName));
-  }
+  string internalName = string(luaL_checkstring(L, 1));
+  text::setFont(cache::getFont(internalName));
+
+  return 0;
+}
+
+int LAPI_set_font_size (lua_State* L) {
+  LAPI_log("LAPI_set_font_size");
+
+  string internalName = string(luaL_checkstring(L, 1));
+  cache::getFont(internalName)->setSize(luaL_checknumber(L, 2));
+
+  return 0;
+}
+
+int LAPI_set_font_color (lua_State* L) {
+  LAPI_log("LAPI_set_font_color");
+
+  string internalName = string(luaL_checkstring(L, 1));
+  cache::getFont(internalName)->setColor(luaL_checknumber(L, 2),
+                                         luaL_checknumber(L, 3),
+                                         luaL_checknumber(L, 4),
+                                         luaL_checknumber(L, 5));
 
   return 0;
 }
@@ -61,22 +72,20 @@ int LAPI_set_font (lua_State* L) {
 int LAPI_set_align (lua_State* L) {
   LAPI_log("LAPI_set_align");
 
-  if (lua_isstring(L, 1)) {
-    string alignment = string(lua_tostring(L, 1));
-    text::Align align;
+  string alignment = string(luaL_checkstring(L, 1));
+  text::Align align;
 
-    if (alignment == "center") {
-      align = text::Center;
-    } else if (alignment == "left") {
-      align = text::Left;
-    } else if (alignment == "right") {
-      align = text::Right;
-    } else {
-      // Error, not a valid value
-    }
-
-    text::setAlign(align);
+  if (alignment == "center") {
+    align = text::Center;
+  } else if (alignment == "left") {
+    align = text::Left;
+  } else if (alignment == "right") {
+    align = text::Right;
+  } else {
+    // Error, not a valid value
   }
+
+  text::setAlign(align);
 
   return 0;
 }
@@ -84,26 +93,24 @@ int LAPI_set_align (lua_State* L) {
 int LAPI_fill_text (lua_State* L) {
   LAPI_log("LAPI_fill_text");
 
-  if (lua_isstring(L, 1) && lua_isnumber(L, 2) && lua_isnumber(L, 3)) {
-    auto txt = lua_tostring(L, 1);
-    text::fillText(txt, lua_tonumber(L, 2), lua_tonumber(L, 3));
-  }
+  auto txt = luaL_checkstring(L, 1);
+  text::fillText(txt, luaL_checknumber(L, 2), luaL_checknumber(L, 3));
 
   return 0;
 }
 
 int LAPI_set_camera (lua_State* L) {
-  bazinga::getActiveMap()->setCamera(lua_tonumber(L, 1), lua_tonumber(L, 2));
+  bazinga::getActiveMap()->setCamera(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
 }
 
 int LAPI_set_zoom (lua_State* L) {
-  bazinga::getActiveMap()->setZoom(lua_tonumber(L, 1), lua_tonumber(L, 2));
+  bazinga::getActiveMap()->setZoom(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
 }
 
 int LAPI_new_dialog (lua_State* L) {
   LAPI_log ("LAPI_new_dialog");
 
-  lua_pushnumber(L, bazinga::getActiveMap()->newDialog(lua_tostring(L, 1)));
+  lua_pushnumber(L, bazinga::getActiveMap()->newDialog(luaL_checkstring(L, 1), Path(luaL_checkstring(L, 2))));
 
   return 1;
 }
@@ -111,7 +118,7 @@ int LAPI_new_dialog (lua_State* L) {
 int LAPI_del_dialog (lua_State* L) {
   LAPI_log ("LAPI_del_dialog");
 
-  bazinga::getActiveMap()->deleteDialog(lua_tonumber(L, 1));
+  bazinga::getActiveMap()->deleteDialog(luaL_checknumber(L, 1));
 
   return 0;
 }
@@ -119,7 +126,7 @@ int LAPI_del_dialog (lua_State* L) {
 int LAPI_ended_dialog (lua_State* L) {
   // LAPI_log ("LAPI_ended_dialog");
 
-  lua_pushboolean(L, bazinga::getActiveMap()->isDialogEnded(lua_tonumber(L, 1)));
+  lua_pushboolean(L, bazinga::getActiveMap()->isDialogEnded(luaL_checknumber(L, 1)));
 
   return 1;
 }
@@ -127,7 +134,7 @@ int LAPI_ended_dialog (lua_State* L) {
 int LAPI_search_object (lua_State* L) {
   LAPI_log ("LAPI_search_object");
 
-  lua_pushnumber(L, bazinga::getActiveMap()->searchObject(string(lua_tostring(L, 1))));
+  lua_pushnumber(L, bazinga::getActiveMap()->searchObject(string(luaL_checkstring(L, 1))));
 
   return 1;
 }
@@ -135,7 +142,7 @@ int LAPI_search_object (lua_State* L) {
 int LAPI_hide_object (lua_State* L) {
   // LAPI_log ("LAPI_hide_object");
 
-  bazinga::getActiveMap()->hideObject(lua_tonumber(L, 1), (bool)lua_toboolean(L, 2));
+  bazinga::getActiveMap()->hideObject(luaL_checknumber(L, 1), (bool)lua_toboolean(L, 2));
 
   return 1;
 }
@@ -149,9 +156,27 @@ int LAPI_set_reorder (lua_State* L) {
 }
 
 int LAPI_set_gravity (lua_State* L) {
-  bazinga::getActiveMap()->setGravity(lua_tonumber(L, 1), lua_tonumber(L, 2));
+  bazinga::getActiveMap()->setGravity(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
 
-  return 0;  
+  return 0;
+}
+
+int LAPI_set_scene (lua_State* L) {
+  LAPI_log ("LAPI_set_scene");
+
+  bazinga::setScene(Path(luaL_checkstring(L, 1)));
+
+  return 0;
+}
+
+int LAPI_set_background_color (lua_State* L) {
+  LAPI_log ("LAPI_set_background_color");
+
+  video::setBackgroundColor(luaL_checknumber(L, 1),
+                            luaL_checknumber(L, 2),
+                            luaL_checknumber(L, 3));
+
+  return 0;
 }
 
 Object::Object (BjObject* jObject, int layer) {
@@ -168,7 +193,7 @@ Object::Object (BjObject* jObject, int layer) {
 
       if (jOValue->type == BjValue::jNumber) {
         if (properties->keys[i] == "z") {
-          num_properties[properties->keys[i]] = jOValue->number-(layer*100);
+          num_properties[properties->keys[i]] = jOValue->number-((layer!=0)*100);
         } else {
           num_properties[properties->keys[i]] = jOValue->number;
         }
@@ -230,7 +255,7 @@ void Object::loadFile (Path path) {
     cout << "bazinga: script contains errors" << endl;
 
     if (lua_isstring(L, -1)) {
-      cout << "\t" << lua_tostring(L, -1) << endl;
+      cout << "\t" << luaL_checkstring(L, -1) << endl;
     }
 
     lua_close(L);
@@ -290,6 +315,7 @@ void Object::init () {
   }
 
   num_properties["id"] = bazinga::getActiveMap()->getNewID();
+  num_properties["alpha"] = 1;
 }
 
 void Object::update () {
@@ -304,6 +330,12 @@ void Object::update () {
       num_properties["y"] = position.y;
     }
 
+    if (str_properties["img"] != "") {
+      Image *img = cache::getTexture(Path(str_properties["img"]));
+      num_properties["img_w"] = img->w;
+      num_properties["img_h"] = img->h;
+    }
+
     if (anim) {
       num_properties["anim_ended"] = (int)anim->isEnded();
     }
@@ -315,12 +347,14 @@ void Object::update () {
 
     lua_pushnumber(L, bazinga::delta);
     lua_setglobal(L, "dt");
+    lua_pushnumber(L, bazinga::curtime);
+    lua_setglobal(L, "curt");
 
     if (lua_pcall(L, 1, 1, 0)) {
       cout << "bazinga: error when calling update() in script " << script.getPath() << endl;
 
       if (lua_isstring(L, -1)) {
-        cout << "\t" << lua_tostring(L, -1) << endl;
+        cout << "\t" << luaL_checkstring(L, -1) << endl;
       }
     } else {
       if (lua_gettop(L) < 1) { // This condition is not working ok
@@ -333,7 +367,6 @@ void Object::update () {
       cpBodySetPos(pBody, cpv(num_properties["x"], num_properties["y"]));
       cpBodyApplyImpulse(pBody, cpv(num_properties["vx"], num_properties["vy"]), cpBodyLocal2World(pBody, cpv(0,0)));
     }
-
   }
 }
 
@@ -346,6 +379,7 @@ void Object::render () {
           glTranslatef (num_properties["gx"]+num_properties["x"]+anim->getWidth()/2, num_properties["gy"]+num_properties["y"]+anim->getHeight()/2, 0);
           glRotatef(num_properties["ang"], 0, 0, 1);
           glScalef(scaleX, scaleY, 0);
+          glColor4f(1,1,1, num_properties["alpha"]);
           anim->render();
       glPopMatrix();
     } else if (str_properties["img"] != "") {
@@ -363,6 +397,7 @@ void Object::render () {
           glEnable (GL_TEXTURE);
           glEnable (GL_TEXTURE_2D);
           glBindTexture (GL_TEXTURE_2D, texID);
+          glColor4f(1,1,1, num_properties["alpha"]);
           glBegin(GL_QUADS);
             glTexCoord2f (0,1);       glVertex3f(-int(img->w)/2, -int(img->h)/2, 0);
             glTexCoord2f (sX,1);      glVertex3f(img->w/2, -int(img->h)/2, 0);
@@ -378,13 +413,13 @@ void Object::updateProperties() {
   while (lua_next(L, -2)) {
     lua_pushvalue(L, -2);
 
-    const char *key = lua_tostring(L, -1);
+    const char *key = luaL_checkstring(L, -1);
 
     if (lua_isnumber(L, -2)) {
-      float value = lua_tonumber(L, -2);
+      float value = luaL_checknumber(L, -2);
       num_properties[string(key)] = value;
     } else {
-      const char *value = lua_tostring(L, -2);
+      const char *value = luaL_checkstring(L, -2);
       
       // Update animation
       if (string(key) == "anim") {
@@ -427,6 +462,9 @@ void Object::createLuaProperties(lua_State* L) {
 }
 
 void Object::createLuaAPI (lua_State* L) {
+  lua_pushnumber(L, bazinga::curtime);
+  lua_setglobal(L, "curt");
+
   lua_newtable(L);
 
   // Create object
@@ -490,6 +528,18 @@ void Object::createLuaAPI (lua_State* L) {
   lua_pushcfunction(L, LAPI_set_align);
   lua_settable(L, -3);
 
+  // Set size
+  // set_font_size(iName, size)
+  lua_pushstring(L, "set_font_size");
+  lua_pushcfunction(L, LAPI_set_font_size);
+  lua_settable(L, -3);
+
+  // Set size
+  // set_font_size(iName, r, g, b, a)
+  lua_pushstring(L, "set_font_color");
+  lua_pushcfunction(L, LAPI_set_font_color);
+  lua_settable(L, -3);
+
   // Fill text
   // fill_text(txt, x, y)
   lua_pushstring(L, "fill_text");
@@ -531,6 +581,17 @@ void Object::createLuaAPI (lua_State* L) {
   lua_pushcfunction(L, LAPI_set_gravity);
   lua_settable(L, -3);
 
+  // Set scene (change to scene)
+  // set_scene (fileName)
+  lua_pushstring(L, "set_scene");
+  lua_pushcfunction(L, LAPI_set_scene);
+  lua_settable(L, -3);
+
+  // Set background (clear) color
+  // set_background_color (r, g, b)
+  lua_pushstring(L, "set_background_color");
+  lua_pushcfunction(L, LAPI_set_background_color);
+  lua_settable(L, -3);
 
   lua_setglobal(L, "bazinga");
 }

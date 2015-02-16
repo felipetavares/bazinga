@@ -13,6 +13,8 @@ namespace bazinga {
 
 		Image(Path);
 		~Image();
+
+		void render(int, int);
 	};
 }
 

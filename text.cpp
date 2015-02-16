@@ -166,7 +166,7 @@ int text::Font::utf8asint(const char* str, int len, uint32_t& utf8) {
 	return advance;
 }
 
-int text::Font::measure (const char* str, int len, float& w, float& h) {
+int text::Font::measure (const char* str, int len, float& w, float& h, float &dh) {
 	Char *bchar;
 	uint64_t c;
 	uint32_t utf8Char;
@@ -223,7 +223,8 @@ int text::Font::measure (const char* str, int len, float& w, float& h) {
 	}
 
 	w = bchar->adw>bchar->w?bchar->adw:bchar->w;
-	h = bchar->adh>bchar->h?bchar->adh:bchar->h;
+	h = bchar->h+bchar->dh;
+	dh = bchar->dh;
 
     return advance;
 }
@@ -387,7 +388,7 @@ void text::setFont (Font* ft) {
 	font = ft;
 }
 
-void text::fillText (string text, float x, float y) {
+void text::fillText (string text, int x, int y) {
 	const char *str = text.c_str();
 	int len = text.size();
 	TextMetrics metrics;
@@ -410,13 +411,13 @@ void text::fillText (string text, float x, float y) {
 
 	switch (baseline) {
 		case Top:
-			y -= metrics.h/2;
+			y -= metrics.dh;
 		break;
 		case Middle:
-			//y -= metrics.h/2;
+			y -= metrics.dh+metrics.h/2;
 		break;
 		case Bottom:
-			y += metrics.h/2;
+			y += metrics.h-metrics.dh;
 		break;
 	}
 
@@ -439,17 +440,19 @@ void text::fillText (string text, float x, float y) {
 text::TextMetrics text::measureText (string text) {
 	const char *str = text.c_str();
 	int len = text.size();
-	float charW, charH;
+	float charW, charH, charDH;
 	
 	TextMetrics metrics;
 	metrics.w = 0;
 	metrics.h = 0;
+	metrics.dh = 0;
 
 	while (len > 0) {
-		int advance = font->measure(str, len, charW, charH);
+		int advance = font->measure(str, len, charW, charH, charDH);
 		
 		metrics.w += charW;
 		metrics.h = metrics.h>charH?metrics.h:charH;
+		metrics.dh = metrics.dh<charDH?metrics.dh:charDH;
 
 		if (advance > 0) {
 			str += advance;
@@ -459,6 +462,8 @@ text::TextMetrics text::measureText (string text) {
 			break;
 		}
 	}
+
+	metrics.h -= metrics.dh;
 
 	return metrics;
 }

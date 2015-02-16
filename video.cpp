@@ -3,7 +3,8 @@
 #include <il.h>
 using namespace bazinga;
 
-float video::cr = 0, video::cg = 0, video::cb = 0;
+float video::cr = 0, video::cg = 0, video::cb = 0, video::ca = 0;
+float video::bcr = 0, video::bcg = 0, video::bcb = 0;
 int video::windowBpp = 0;
 int video::windowWidth = 0;
 int video::windowHeight = 0;
@@ -139,7 +140,7 @@ void video::setWindowIcon (Path icon) {
 }
 
 void video::renderMap (Map *map) {
-	glClearColor (0,0,0,1);
+	glClearColor (bcr,bcg,bcb,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
@@ -150,15 +151,22 @@ void video::render () {
 	SDL_GL_SwapBuffers();
 }
 
-void video::setColor (float r, float g, float b) {
+void video::setColor (float r, float g, float b, float a) {
 	cr = r;
 	cg = g;
 	cb = b;
+	ca = a;
+}
+
+void video::setBackgroundColor (float r, float g, float b) {
+	bcr = r;
+	bcg = g;
+	bcb = b;
 }
 
 void video::fillRect (int x, int y, int w, int h) {
 	glPushMatrix();
-		glColor3f(cr,cg,cb);
+		glColor4f(cr,cg,cb,ca);
 		glTranslatef (x, y, 0);
 		glDisable (GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
@@ -167,6 +175,28 @@ void video::fillRect (int x, int y, int w, int h) {
 			glVertex3f(w, h, 0);
 			glVertex3f(0, h, 0);
 		glEnd();
-		glColor3f(1,1,1);
 	glPopMatrix();
+}
+
+void video::fillCircle (int cx, int cy, int r) {
+	int num_segments = 3*r;
+	float theta = 2 * 3.1415926 / float(num_segments); 
+	float c = cosf(theta); // Precalculate the sine and cosine
+	float s = sinf(theta);
+	float t;
+
+	float x = r; // We start at angle = 0 
+	float y = 0; 
+    
+	glBegin(GL_TRIANGLE_FAN); 
+	glColor4f(cr,cg,cb,ca);
+	for(int i = 0; i < num_segments; i++) { 
+		glVertex2f(x + cx, y + cy); // Output vertex 
+        
+		// Apply the rotation matrix
+		t = x;
+		x = c * x - s * y;
+		y = s * t + c * y;
+	} 
+	glEnd(); 
 }

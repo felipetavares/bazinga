@@ -1,12 +1,14 @@
 #include "map.h"
 #include "bazinga.h"
 #include "text.h"
+#include "image.h"
+#include "cache.h"
 #include <ctype.h>
 using namespace bazinga;
 
-Dialog::Dialog (int id, string text):
+Dialog::Dialog (int id, string text, Path path):
   id(id), text(text), textPosition(0), bufferPosition(0), nextTime(0),
-  ended(false) {
+  ended(false), imagePath(path) {
     sizeW = video::windowWidth/2;
     intervalTime = 0.05;
     nextWordSize = 0;
@@ -15,6 +17,20 @@ Dialog::Dialog (int id, string text):
 void Dialog::update () {
   if (textPosition < text.size()) {
     if (curtime > nextTime) {
+      switch (text[textPosition]) {
+        case '!': case '.': case '?':
+          intervalTime = 0.5;
+        break;
+        case ';': case ':':
+          intervalTime = 0.5;
+        break;
+        case ',':
+          intervalTime = 0.25;
+        break;
+        default:
+          intervalTime = 0.05;
+      }
+
       nextTime = curtime+intervalTime;
       fillChar();
     }
@@ -24,13 +40,23 @@ void Dialog::update () {
 }
 
 void Dialog::render () {
-  int startY = video::windowHeight/2-20*bufferSize;
+  auto size = text::measureText("#");
 
-  video::setColor(0.2, 0.2, 0.2);
-  video::fillRect(-sizeW/2-10, startY-10, sizeW+20, 20*bufferSize+10);
+  int startY = video::windowHeight/2-1.5*size.h*bufferSize;
+
+  Image *img = cache::getTexture(imagePath);
+
+  img->render(-sizeW/2+img->w/2, startY-20-img->h/2-10);
+
+  video::setColor(0, 0, 0, 0.5);
+  video::fillRect(-sizeW/2, startY-20, sizeW+20, 1.5*size.h*bufferSize+10);
+  video::setColor(1, 1, 1, 1);
+  video::fillRect(-sizeW/2-10, startY-30, sizeW+20, 1.5*size.h*bufferSize+10);
+
+  text::setAlign(text::Left);
 
   for (int i=0;i<bufferSize;i++)
-    text::fillText(buffer[i], -sizeW/2, startY+i*20+10);
+    text::fillText(buffer[i], -sizeW/2, startY+i*1.5*size.h-10);
 }
 
 void Dialog::fillChar () {
@@ -40,22 +66,23 @@ void Dialog::fillChar () {
 
   if (isspace(text[textPosition])) {
     if (size.w+nextWordSize >= sizeW) {
-      while (isspace(text[textPosition]))
+      while (isspace(text[textPosition]) && textPosition<text.size())
         textPosition++;
       nextLine();
     }
 
-    string nextWord = "";
+    nextWord = "";
     int i = textPosition;
-    while (isspace(text[i++]));
+    while (isspace(text[i]) && i<text.size())
+      i++;
+    for (;i<text.size() && !isspace(text[i]);i++);
+    while (isspace(text[i]) && i<text.size())
+      i++;
     for (;i<text.size() && !isspace(text[i]);i++) {
       nextWord += text[i];
     }
-    nextWordSize = text::measureText(nextWord).w;
-  }
 
-  if (size.w > sizeW) {
-    nextLine();
+    nextWordSize = text::measureText(nextWord).w;
   }
 }
 
@@ -119,7 +146,9 @@ Layer::~Layer () {
 int Map::oid = 0;
 int Map::did = 0;
 
-Map::Map () {
+Map::Map (Path file):
+  file(file) {
+
   cout << "bazinga: chipmunk: initializing space...";
 
   pSpace = cpSpaceNew();
@@ -143,7 +172,38 @@ int Map::getNewID() {
   return oid++;
 }
 
-void Map::init (BjObject *jMap) {
+bool Map::init () {
+  lScript = luaL_newstate();
+  luaL_openlibs (lScript);
+  Object::createLuaAPI(lScript);
+  
+  // Loads the file
+  if (luaL_dofile(lScript, (Path("scripts/"+file.getName()+".lua")).getPath().c_str())) {
+    cout << "bazinga: script contains errors" <<  endl;
+
+    if (lua_isstring(lScript, -1)) {
+      cout << "\t" << lua_tostring(lScript, -1) << endl;
+    }
+
+    lua_close(lScript);
+    lScript = NULL;
+  }
+
+  BjObject *jMap;
+
+  if (fs::fileExists(file)) {
+    char *data = fs::getFileData(file);
+    string sData = string (data);
+
+    jMap = json::parse (sData);
+    
+    delete data;
+  } else {
+    cout << "bazinga: scene: could not load " << file.getPath() << endl;
+    cout << "\t" << "aborting" << endl;
+    return false;
+  }
+
   // Get an array called "layers" and iterate over it
   BjValue* jLayers = jMap->get("layers");
 
@@ -165,6 +225,9 @@ void Map::init (BjObject *jMap) {
   }
 
   cout << "bazinga: scene: " << objects.size() << " objects loaded" << endl;
+
+  delete jMap;
+  return true;
 }
 
 Map::~Map () {
@@ -172,10 +235,10 @@ Map::~Map () {
     cpSpaceFree(pSpace);
 }
 
-int Map::newDialog (string text) {
+int Map::newDialog (string text, Path path) {
   int dialogID = did++;
 
-  dialogs.push_back(new Dialog(dialogID, text));
+  dialogs.push_back(new Dialog(dialogID, text, path));
 
   return dialogID;
 }
@@ -293,6 +356,35 @@ void Map::setReorder (bool reorder) {
 
 void Map::addObject (Object *object) {
   objects.push_back(object);
+}
+
+cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
+    //cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepAct, arb, NULL);
+
+    cpShape *a, *b;
+    cpArbiterGetShapes(arb, &a, &b);
+
+    lua_getglobal(lScript, "collision_begin");
+
+    ((Object*)cpShapeGetUserData(a))->createLuaProperties(lScript);
+    ((Object*)cpShapeGetUserData(b))->createLuaProperties(lScript);
+
+    if (lua_pcall(lScript, 2, 1, 0)) {
+      cout << "bazinga: error when calling collision_begin() in scene script" << endl;
+
+      if (lua_isstring(lScript, -1)) {
+        cout << "\t" << lua_tostring(lScript, -1) << endl;
+      }
+    } else {
+      if (lua_gettop(lScript) < 1) { // This condition is not working ok
+        cout << "bazinga: collision_begin() in scene script doesn't return value" << endl;
+      } else {
+        return lua_toboolean(lScript, -1);
+      }
+    }
+
+    // Default: collision will occur
+    return true;  
 }
 
 void Map::update() {
