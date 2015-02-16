@@ -3,7 +3,8 @@
 #include "../text.h"
 using namespace bazinga;
 
-gui::Spacer::Spacer () {
+gui::Spacer::Spacer (Type type) {
+	this->type = type;
 }
 
 void gui::Spacer::event (Event& evt) {
@@ -16,7 +17,19 @@ void gui::Spacer::pack (int w, int h) {
 }
 
 void gui::Spacer::getPreferredSize (int& w, int& h) {
-	h = w = ANY;
+	switch (type) {
+		case BOTH:
+			h = w = ANY;
+		break;
+		case VERTICAL:
+			w = 1;
+			h = ANY;
+		break;
+		case HORIZONTAL:
+			w = ANY;
+			h = HORIZONTAL;
+		break;
+	}
 }
 
 void gui::Spacer::getMinSize (int& w, int& h) {

@@ -1,17 +1,14 @@
-#ifndef BAZINGA_GUI_SPACER_H
-#define BAZINGA_GUI_SPACER_H
+#ifndef BAZINGA_GUI_PROGRESS_H
+#define BAZINGA_GUI_PROGRESS_H
 
 #include "../gui.h"
 
 namespace bazinga {
 	namespace gui {
-		class Spacer :public Widget {
+		class Progress :public Widget {
+			float position;
 		public:
-			enum Type {VERTICAL, HORIZONTAL, BOTH};
-		private:
-			Type type;
-		public:
-			Spacer(Type);
+			Progress(float);
 
 			void event (Event&);
 			void pack (int, int);
@@ -21,8 +18,11 @@ namespace bazinga {
 			void render(int, int);
 			int getW ();
 			int getH ();
+
+			void setPosition(float);
+			float getPosition();
 		};
 	}
 }
 
-#endif /* BAZINGA_GUI_SPACER_H */
+#endif /* BAZINGA_GUI_PROGRESS_H */

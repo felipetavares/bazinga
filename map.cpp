@@ -54,6 +54,7 @@ void Dialog::render () {
   video::fillRect(-sizeW/2-10, startY-30, sizeW+20, 1.5*size.h*bufferSize+10);
 
   text::setAlign(text::Left);
+  text::setBaseline(text::Alphabetic);
 
   for (int i=0;i<bufferSize;i++)
     text::fillText(buffer[i], -sizeW/2, startY+i*1.5*size.h-10);

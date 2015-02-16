@@ -5,10 +5,8 @@ using namespace bazinga;
 
 gui::Button::Button (string text) {
 	this->text = text;
-}
-
-void gui::Button::event (Event& evt) {
-
+	click = false;
+	hover = false;
 }
 
 void gui::Button::pack (int w, int h) {
@@ -41,8 +39,14 @@ void gui::Button::setPosition (int x, int y) {
 	this->y = y;
 }
 
-void gui::Button::render (int x, int y) {
-	video::setColor(1, 1, 1, 1);
+void gui::Button::rrender (int x, int y) {
+	if (click)
+		video::setColor(0.9, 0.7, 0.4, 1); // Click color
+	else if (hover)
+		video::setColor(0.4, 0.7, 0.9, 1); // Hover color
+	else
+		video::setColor(1, 1, 1, 0.5);
+
 	video::fillRect(this->x+x, this->y+y, w, h);
 
 	auto font = cache::getFont("default");
@@ -60,4 +64,22 @@ int gui::Button::getW () {
 
 int gui::Button::getH () {
 	return h;
+}
+
+void gui::Button::rleave (int x, int y) {
+	hover = false;
+	click = false;
+}
+
+void gui::Button::renter (int x, int y) {
+	hover = true;
+}
+
+void gui::Button::rclick (int x, int y) {
+	click = false;
+	onClick(this);
+}
+
+void gui::Button::ractivate (int x, int y) {
+	click = true;
 }

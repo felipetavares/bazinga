@@ -15,7 +15,13 @@ gui::Container::Container (Flow flow):
 }
 
 void gui::Container::event (Event& evt) {
-
+	if (evt.isValid()) {
+		int i=0;
+		while (evt.isValid() && i<children.size()) {
+			children[i]->event(evt);
+			i++;
+		}
+	}
 }
 
 void gui::Container::pack (int sX, int sY) {
@@ -251,28 +257,33 @@ void gui::Window::event (Event& evt) {
 	if (!evt.isValid())
 		return;
 
+	// In the future: add "&& thisWindowIsFocused"
+	if (inside(evt.x, evt.y, x, y, w, h)) {
+		//evt.invalidate();
+	}
+
 	switch (evt.type) {
 		case Event::MOUSEPRESS:
 		    if (!grabbing && inBar(evt.x, evt.y)) {
-		      gvecx = evt.x-x;
-		      gvecy =  evt.y-y;
-		      grabbing = true;
+				gvecx = evt.x-x;
+				gvecy =  evt.y-y;
+				grabbing = true;
 		    }
 
 		    if (!resizing && inResize(evt.x,evt.y)) {
-		      gvecx = evt.x-this->w;
-		      gvecy = evt.y-this->h;
-		      resizing = true;
+				gvecx = evt.x-this->w;
+				gvecy = evt.y-this->h;
+				resizing = true;
 		    }
 
 		    if (inClose(evt.x, evt.y)) {
-		    	close = true;
+				close = true;
 		    }
 		    if (inMaximize(evt.x, evt.y)) {
-		    	x = -video::windowWidth/2;
-		    	y = -video::windowHeight/2;
-		    	w = video::windowWidth;
-		    	h = video::windowHeight;
+				x = -video::windowWidth/2;
+				y = -video::windowHeight/2;
+				w = video::windowWidth;
+				h = video::windowHeight;
 				if (root)
 					root->pack(w,h-tbar-12);
 				w = root->getW();
@@ -288,8 +299,9 @@ void gui::Window::event (Event& evt) {
 		    overmaximize = inMaximize(evt.x, evt.y);
 
 		    if (grabbing) {
-		      x = evt.x-gvecx;
-		      y = evt.y-gvecy;
+				x = evt.x-gvecx;
+				y = evt.y-gvecy;
+				evt.invalidate();
 		    }
 		    if (resizing) {
 				w = evt.x-gvecx;
@@ -300,8 +312,14 @@ void gui::Window::event (Event& evt) {
 
 				w = root->getW();
 				h = root->getH()+tbar+12;
+				evt.invalidate();
 		  	}
 		break;
+	}
+
+	if (evt.isValid()) {
+		if (root && inside(evt.x, evt.y, x, y+tbar, w, h-12-tbar))
+			root->event(evt);
 	}
 }
 
@@ -335,8 +353,7 @@ bool gui::Window::inResize (int x, int y) {
 }
 
 void gui::Window::render () {
-	// Fill a red rectangle
-	video::setColor(1, 1, 1, 0.8);
+	video::setColor(0.5, 0.8, 1, 1);
 	video::fillRect(x, y, w, h);
 
 	video::setColor(1, 1, 1, 1);
@@ -427,9 +444,11 @@ void gui::mousepress (int button, int x, int y) {
 	}	
 }
 
-void gui::mouseunpress (int button) {
+void gui::mouseunpress (int button, int x, int y) {
 	Event event = Event(Event::MOUSEUNPRESS);
 	event.button = button;
+	event.x = x;
+	event.y = y;
 
 	for (auto w :windows) {
 		w->event(event);

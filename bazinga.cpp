@@ -7,6 +7,8 @@
 #include "gui/label.h"
 #include "gui/button.h"
 #include "gui/spacer.h"
+#include "gui/slider.h"
+#include "gui/progress.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -77,7 +79,9 @@ namespace bazinga {
                              event.button.y-video::windowHeight/2);
         break;
         case SDL_MOUSEBUTTONUP:
-          input::mouseunpress (event.button.button);
+          input::mouseunpress (event.button.button,
+                               event.button.x-video::windowWidth/2,
+                               event.button.y-video::windowHeight/2);
         break;
         case SDL_QUIT:
           return false;
@@ -128,6 +132,7 @@ namespace bazinga {
     auto container = new gui::Container(gui::Container::VERTICAL);
     auto line = new gui::Container(gui::Container::HORIZONTAL);
     auto line2 = new gui::Container(gui::Container::HORIZONTAL);
+    auto line3 = new gui::Container(gui::Container::HORIZONTAL);
 
     line->borderLeft = line->borderRight = 0;
     line->borderTop = line->borderBottom = 0;
@@ -135,18 +140,37 @@ namespace bazinga {
     line2->borderLeft = line2->borderRight = 0;
     line2->borderTop = line2->borderBottom = 0;
 
-    line->add(new gui::Label("A button:"));
-    line->add(new gui::Button("Button 0"));
-    line->add(new gui::Spacer());
+    line3->borderLeft = line3->borderRight = 0;
+    line3->borderTop = line3->borderBottom = 0;
 
-    line->add(new gui::Label("A slider:"));
-    line->add(new gui::Slider(0.5));
-    line->add(new gui::Spacer());
+    line->add(new gui::Label("Set to 100%:"));
+    auto button = new gui::Button("100%");
+    line->add(button);
+
+    line2->add(new gui::Label("Adjust:"));
+    auto slider = new gui::Slider(0.5);
+    line2->add(slider);
+
+    line3->add(new gui::Label("This much:"));
+    auto pbar = new gui::Progress(0.5);
+    line3->add(pbar);
 
     container->add(line);
+    container->add(line2);
+    container->add(line3);
+
+    container->add(new gui::Spacer(gui::Spacer::VERTICAL));
 
     window->setRoot(container);
     gui::add(window);
+
+    slider->onChange = [=] (gui::Widget* wid) {
+      pbar->setPosition(((gui::Slider*)wid)->getPosition());
+    };
+
+    button->onClick = [=] (gui::Widget* wid) {
+      pbar->setPosition(1);
+    };
 
     chrono::high_resolution_clock::time_point t;
     chrono::high_resolution_clock::time_point startTime;

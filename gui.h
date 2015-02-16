@@ -29,6 +29,7 @@ namespace bazinga {
 		protected:
 			int x, y;
 			int w, h;
+			int ux, uy;
 		public:
 			virtual void event (Event&) = 0;
 			virtual void pack (int, int) = 0;
@@ -112,7 +113,7 @@ namespace bazinga {
 		// Handle mouse events
 		void mousemove (int, int);
 		void mousepress (int, int, int);
-		void mouseunpress (int);
+		void mouseunpress (int, int, int);
 	
 		bool inside(int, int,
 					int, int, int, int);

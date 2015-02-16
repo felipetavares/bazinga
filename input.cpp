@@ -108,8 +108,8 @@ void input::mousepress (int button, int x, int y) {
   gui::mousepress(button, x, y);
 }
 
-void input::mouseunpress (int button) {
-  gui::mouseunpress(button);
+void input::mouseunpress (int button, int x, int y) {
+  gui::mouseunpress(button, x, y);
 }
 
 void input::keypress(string key) {
