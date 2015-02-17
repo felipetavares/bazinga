@@ -77,7 +77,9 @@ void gui::Button::renter (int x, int y) {
 
 void gui::Button::rclick (int x, int y) {
 	click = false;
-	onClick(this);
+
+	if (onClick)
+		onClick(this);
 }
 
 void gui::Button::ractivate (int x, int y) {

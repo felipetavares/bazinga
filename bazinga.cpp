@@ -47,10 +47,10 @@ namespace bazinga {
   bool events () {
     SDL_Event event;
 
-    while ( SDL_PollEvent(&event) ) {
-      if (exitFlag)
-        return false;
+    if (exitFlag)
+      return false;
 
+   while ( SDL_PollEvent(&event) ) { 
       switch (event.type) {
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
@@ -65,7 +65,7 @@ namespace bazinga {
           transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
           input::keypress(keyName, event.key.keysym.unicode);
         } else {
-            auto window = new gui::Window("About", 800, 600);
+            auto window = new gui::Window("Opções", 800, 600);
             auto container = new gui::Container(gui::Container::VERTICAL);
             auto line = new gui::Container(gui::Container::HORIZONTAL);
             auto line2 = new gui::Container(gui::Container::HORIZONTAL);
@@ -88,6 +88,10 @@ namespace bazinga {
             auto button = new gui::Button("Sair");
             line->add(button);
 
+            line2->add(new gui::Label("Frames por segundo:"));
+            auto fps = new gui::Label("###");
+            line2->add(fps);
+
             container->add(line);
             container->add(line2);
             container->add(line3);
@@ -96,6 +100,12 @@ namespace bazinga {
 
             window->setRoot(container);
             gui::add(window);
+
+            window->onUpdate = [=] (gui::Window* win) {
+              stringstream ss;
+              ss << 1/delta;
+              fps->setText(ss.str());
+            };
 
             button->onClick = [=] (gui::Widget* wid) {
               bazinga::quit();
@@ -189,13 +199,6 @@ namespace bazinga {
       if (delta > 1.0/30.0) {
         delta = 1.0/30.0;
       }
-
-      /*
-      stringstream ss;
-      ss << 1/delta;
-
-      bazinga::video::setWindowTitleAndIcon(ss.str(),string("12"));
-      */
 
       if (activeMap) {
         activeMap->update();

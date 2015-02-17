@@ -3,6 +3,7 @@
 
 #include "bazinga.h"
 #include <vector>
+#include <stack>
 using namespace std;
 using namespace bazinga;
 
@@ -24,6 +25,16 @@ namespace bazinga {
 			Event (Type);
 			bool isValid();
 			void invalidate();
+		};
+
+		class Scissor {
+		protected:
+			int x, y;
+			int w, h;
+		public:
+			Scissor(int, int, int, int);
+			void apply();
+			Scissor operator+ (const Scissor&);
 		};
 
 		class Widget {
@@ -88,6 +99,8 @@ namespace bazinga {
 
 			Widget* root;
 		public:
+			function <void (Window*)> onUpdate;
+
 			bool close;
 
 			Window(string, int, int);
@@ -102,6 +115,8 @@ namespace bazinga {
 			bool inMaximize(int, int);
 		};
 
+		extern Scissor scissor;
+		extern stack <Scissor> scissors;
 		extern vector <Window*> windows;
 		extern Widget* focus;
 
@@ -124,6 +139,15 @@ namespace bazinga {
 		// Handy function
 		bool inside(int, int,
 					int, int, int, int);
+
+		// Scissorssss, letsss CUTTTT
+		void setScissor(Scissor);
+		void combineScissor(Scissor);
+		void save();
+		void restore();
+
+		// Window organization
+		void bringFront(Window*);
 	}
 }
 

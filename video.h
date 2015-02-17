@@ -44,7 +44,9 @@ namespace bazinga {
 		static void renderMap (Map*);
 	
 		static void fillRect(int, int, int, int);
+		static void strokeRect(int, int, int, int);
 		static void fillCircle(int, int, int);
+		static void strokeCircle(int, int, int);
 		static void setColor(float, float, float, float);
 		static void setBackgroundColor(float, float, float);
 		static void fadeFrom(float, float, float, float);

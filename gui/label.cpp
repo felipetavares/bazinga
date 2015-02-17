@@ -7,6 +7,10 @@ gui::Label::Label (string text) {
 	this->text = text;
 }
 
+void gui::Label::setText (string text) {
+	this->text = text;
+}
+
 void gui::Label::event (Event& evt) {
 
 }

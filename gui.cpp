@@ -5,10 +5,74 @@
 using namespace std;
 using namespace bazinga;
 
+gui::Scissor gui::scissor = Scissor(0,0,0,0);
+stack <gui::Scissor> gui::scissors;
 vector <gui::Window*> gui::windows;
 gui::Widget* gui::focus;
 
-string data = "";
+gui::Scissor::Scissor (int x, int y, int w, int h) {
+	this->x = x;
+	this->y = y;
+	this->w = w;
+	this->h = h;
+}
+
+gui::Scissor gui::Scissor::operator+ (const Scissor& other) {
+	Scissor final = Scissor(0,0,0,0);
+
+	if (other.x > x) {
+		final.x = other.x;
+	} else {
+		final.x = x;
+	}
+
+	if (other.x+other.w > x+w) {
+		final.w = other.x+other.w-final.x;
+	} else {
+		final.w = x+w-final.x;
+	}
+
+	if (other.y > y) {
+		final.y = other.y;
+	} else {
+		final.y = y;
+	}
+
+	if (other.y+other.h > y+h) {
+		final.h = other.y+other.h-final.y;
+	} else {
+		final.h = y+h-final.y;
+	}
+
+	return final;
+}
+
+void gui::Scissor::apply () {
+	// As all operations in the stencil are done like:
+	// op & mask, if we set the mask to 0xff, the op
+	// will be applied, so this is like "enable stencil drawing"
+	glStencilMask(0xff);
+	// Disable writing on the color buffer
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	// Make the test always fail
+	glStencilFunc (GL_NEVER, 1, 0xff);
+	// Now, everywhere we draw, the stencil buffer will be set, because:
+	// stencil = ref & mask = 1 (and also because the test will aways fail)
+	// and so this will aways be executed
+	glStencilOp (GL_REPLACE, GL_KEEP, GL_KEEP);
+	// Now, clear the stencil
+	glClear(GL_STENCIL_BUFFER_BIT);
+
+	// Set the drawable area
+	video::fillRect(x-1, y-1, w+2, h+2);
+
+	// This is like "disable stencil drawing"
+	glStencilMask(0x00);
+	// Enable the color buffer
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	// Only draw in the places the stencil is set
+	glStencilFunc(GL_EQUAL, 1, 0xff);
+}
 
 gui::Container::Container (Flow flow):
 	x(0), y(0), w(0), h(0),
@@ -218,7 +282,8 @@ void gui::Event::invalidate () {
 	captured = true;
 }
 
-gui::Window::Window (string title, int w, int h) {
+gui::Window::Window (string title, int w, int h):
+	onUpdate(NULL) {
 	this->title = title;
 	this->w = w;
 	this->h = h;
@@ -260,11 +325,6 @@ void gui::Window::event (Event& evt) {
 	if (!evt.isValid())
 		return;
 
-	// In the future: add "&& thisWindowIsFocused"
-	if (inside(evt.x, evt.y, x, y, w, h)) {
-		//evt.invalidate();
-	}
-
 	switch (evt.type) {
 		case Event::MOUSEPRESS:
 		    if (!grabbing && inBar(evt.x, evt.y)) {
@@ -292,6 +352,9 @@ void gui::Window::event (Event& evt) {
 				w = root->getW();
 				h = root->getH()+tbar+12;
 		    }
+			if (inside(evt.x, evt.y, x, y, w, h)) {
+				bringFront(this);
+			}
 		break;
 		case Event::MOUSEUNPRESS:
 		    this->grabbing = false;
@@ -323,6 +386,10 @@ void gui::Window::event (Event& evt) {
 	if (evt.isValid()) {
 		if (root && inside(evt.x, evt.y, x, y+tbar, w, h-12-tbar))
 			root->event(evt);
+	}
+
+	if (inside(evt.x, evt.y, x, y, w, h)) {
+		evt.invalidate();
 	}
 }
 
@@ -356,6 +423,11 @@ bool gui::Window::inResize (int x, int y) {
 }
 
 void gui::Window::render () {
+	onUpdate(this);	
+
+	save();
+	combineScissor(Scissor(x, y, w, h));
+
 	video::setColor(0.5, 0.8, 1, 1);
 	video::fillRect(x, y, w, h);
 
@@ -364,9 +436,13 @@ void gui::Window::render () {
 
 	video::setColor(0.8,0,0,1);
 	video::fillCircle(x+tbar/2,y+tbar/2,tbar/4);
+	video::setColor(0.1,0,0,1);
+	video::strokeCircle(x+tbar/2,y+tbar/2,tbar/4);
 
 	video::setColor(0.3,0.8,0.2,1);
 	video::fillCircle(x+tbar/2*3,y+tbar/2,tbar/4);
+	video::setColor(0.3,1.0,0.2,1);
+	video::strokeCircle(x+tbar/2*3,y+tbar/2,tbar/4);
 
 	auto font = cache::getFont("default");
 	font->setColor(0,0,0,1);
@@ -374,7 +450,7 @@ void gui::Window::render () {
 	text::setFont(font);
 	text::setAlign(text::Center);
 	text::setBaseline(text::Middle);
-	text::fillText(data, this->x+this->w/2, this->y+tbar/2);
+	text::fillText(title, this->x+this->w/2, this->y+tbar/2);
 
 	if (overclose) {
 		auto close = cache::getTexture(Path("assets/gui/close.png"));
@@ -392,6 +468,11 @@ void gui::Window::render () {
 	if (root) {
 		root->render(x, y+tbar);
 	}
+
+	video::setColor(0.2, 0.2, 0.2, 1);
+	video::strokeRect(x, y, w, h);
+
+	restore();
 }
 
 void gui::init () {
@@ -399,6 +480,14 @@ void gui::init () {
 }
 
 void gui::render () {
+	// Enable stencil test
+	glEnable(GL_STENCIL_TEST);
+	
+	setScissor(Scissor(-video::windowWidth/2,
+					   -video::windowHeight/2,
+					   video::windowWidth/2,
+					   video::windowHeight/2));
+
 	// Render all windows
 	for (int w=0;w<windows.size();w++) {
 		if (windows[w]->close) {
@@ -408,6 +497,9 @@ void gui::render () {
 			windows[w]->render();
 		}
 	}
+
+	// Disable stencil test
+	glDisable (GL_STENCIL_TEST);
 }
 
 void gui::deinit () {
@@ -431,13 +523,26 @@ void gui::unsetFocus (Widget* wid) {
 	}
 }
 
+void gui::bringFront (Window* window) {
+	for (int i=0;i<windows.size();i++) {
+		if (windows[i] == window) {
+			if (i == windows.size()-1)
+				return;
+			windows.erase(windows.begin()+i);
+			break;
+		}
+	}
+
+	windows.push_back(window);
+}
+
 void gui::mousemove (int x, int y) {
 	Event event = Event(Event::MOUSEMOVE);
 	event.x = x;
 	event.y = y;
 
-	for (auto w :windows) {
-		w->event(event);
+	for (int w=windows.size()-1;w>=0;w--) {
+		windows[w]->event(event);
 
 		if (!event.isValid())
 			break;
@@ -450,8 +555,8 @@ void gui::mousepress (int button, int x, int y) {
 	event.x = x;
 	event.y = y;
 
-	for (auto w :windows) {
-		w->event(event);
+	for (int w=windows.size()-1;w>=0;w--) {
+		windows[w]->event(event);
 
 		if (!event.isValid())
 			break;
@@ -464,8 +569,8 @@ void gui::mouseunpress (int button, int x, int y) {
 	event.x = x;
 	event.y = y;
 
-	for (auto w :windows) {
-		w->event(event);
+	for (int w=windows.size()-1;w>=0;w--) {
+		windows[w]->event(event);
 
 		if (!event.isValid())
 			break;
@@ -487,4 +592,24 @@ bool gui::inside (int px, int py,
 
   return px >= bx && px <= bw &&
          py >= by && py <= bh;
+}
+
+void gui::setScissor (Scissor sc) {
+	scissor = sc;
+	scissor.apply();
+}
+
+void gui::combineScissor (Scissor sc) {
+	scissor = scissor+sc;
+	scissor.apply();
+}
+
+void gui::save() {
+	scissors.push(scissor);
+}
+
+void gui::restore () {
+	auto sc = scissors.top();
+	scissors.pop();
+	setScissor(sc);
 }

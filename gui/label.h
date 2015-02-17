@@ -10,6 +10,8 @@ namespace bazinga {
 		public:
 			Label(string);
 
+			void setText(string);
+
 			void event (Event&);
 			void pack (int, int);
 			void getPreferredSize(int&, int&);

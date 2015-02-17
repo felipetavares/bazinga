@@ -43,6 +43,9 @@ void video::init() {
 	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	//SDL_GL_SetAttribute(SDL_GL_SAMPLE_BUFFERS_ARB, 1);
+	//SDL_GL_SetAttribute(SDL_GL_SAMPLES_ARB, 2);
 
 	anyResolution = false;
 	// Initialize video modes array
@@ -61,11 +64,13 @@ void video::init() {
 	cout << "bazinga: video: window (" << windowWidth << ", " << windowHeight << ")" << endl;
 
 	// CHANGE THAT IF NEED BE
-	glDisable (GL_DEPTH_TEST);
+	//glEnable (GL_DEPTH_TEST);
 
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_BLEND );
 	glEnable( GL_ALPHA );
+	// Antialiased text
+	//glEnable( GL_MULTISAMPLE );
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -194,6 +199,43 @@ void video::fillCircle (int cx, int cy, int r) {
 	float y = 0; 
     
 	glBegin(GL_TRIANGLE_FAN); 
+	glColor4f(cr,cg,cb,ca);
+	for(int i = 0; i < num_segments; i++) { 
+		glVertex2f(x + cx, y + cy); // Output vertex 
+        
+		// Apply the rotation matrix
+		t = x;
+		x = c * x - s * y;
+		y = s * t + c * y;
+	} 
+	glEnd(); 
+}
+
+void video::strokeRect (int x, int y, int w, int h) {
+	glPushMatrix();
+		glColor4f(cr,cg,cb,ca);
+		glTranslatef (x, y, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(0, 0, 0);
+			glVertex3f(w, 0, 0);
+			glVertex3f(w, h, 0);
+			glVertex3f(0, h, 0);
+		glEnd();
+	glPopMatrix();
+}
+
+void video::strokeCircle (int cx, int cy, int r) {
+	int num_segments = 3*r;
+	float theta = 2 * 3.1415926 / float(num_segments); 
+	float c = cosf(theta); // Precalculate the sine and cosine
+	float s = sinf(theta);
+	float t;
+
+	float x = r; // We start at angle = 0 
+	float y = 0; 
+    
+	glBegin(GL_LINES); 
 	glColor4f(cr,cg,cb,ca);
 	for(int i = 0; i < num_segments; i++) { 
 		glVertex2f(x + cx, y + cy); // Output vertex 

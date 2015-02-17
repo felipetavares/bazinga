@@ -61,7 +61,9 @@ void gui::Slider::rmove (int x, int y) {
 
 void gui::Slider::ractivate(int x, int y) {
 	position = float(x)/float(w);	
-	onChange(this);	
+	
+	if (onChange)
+		onChange(this);	
 
 	active = true;
 }
