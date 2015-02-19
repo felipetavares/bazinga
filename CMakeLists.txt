@@ -8,7 +8,7 @@ include(ExternalProject)
 
 ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
-    #-g # Debug, shall we
+    -g # Debug, shall we
 )
 
 #IF (WIN32)
@@ -126,6 +126,7 @@ add_executable (bazinga bazinga.cpp
                         image.cpp
                         text.cpp
                         shader.cpp
+                        console.cpp
                         gl/glwin.cpp
                         gui.cpp
                         gui/label.cpp
@@ -134,7 +135,9 @@ add_executable (bazinga bazinga.cpp
                         gui/slider.cpp
                         gui/progress.cpp
                         gui/rwidget.cpp
-                        gui/entry.cpp)
+                        gui/entry.cpp
+                        gui/bgraph.cpp
+                        gui/scroll.cpp)
 
 # Linka com (opengl, lua, sdl, devil)
 IF (WIN32)

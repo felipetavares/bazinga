@@ -4,13 +4,14 @@
 #include "filesystem.h"
 #include "input.h"
 #include "image.h"
+#include "console.h"
 #include <exception>
 #include <SDL_opengl.h>
 using namespace bazinga;
 
 // The Lua API
 void LAPI_log (string fname) {
-  cout << "bazinga: Lua API: " << fname << "() " << "C" << endl;
+  console << LINEINFO << "" << fname << "() " << "C" << outline;
 }
 
 int LAPI_new_object (lua_State* L) {
@@ -110,7 +111,7 @@ int LAPI_set_zoom (lua_State* L) {
 int LAPI_new_dialog (lua_State* L) {
   LAPI_log ("LAPI_new_dialog");
 
-  lua_pushnumber(L, bazinga::getActiveMap()->newDialog(luaL_checkstring(L, 1), Path(luaL_checkstring(L, 2))));
+  lua_pushnumber(L, bazinga::getActiveMap()->newDialog(luaL_checkstring(L, 1), Path(luaL_checkstring(L, 2)), luaL_checkstring(L,3)));
 
   return 1;
 }
@@ -252,10 +253,10 @@ void Object::loadFile (Path path) {
 
   // Loads the file
   if (luaL_dofile(L, script.getPath().c_str())) {
-    cout << "bazinga: script contains errors" << endl;
+    console << LINEINFO << "script contains errors" << outline;
 
     if (lua_isstring(L, -1)) {
-      cout << "\t" << luaL_checkstring(L, -1) << endl;
+      console << "\t" << luaL_checkstring(L, -1) << outline;
     }
 
     lua_close(L);
@@ -267,7 +268,7 @@ void Object::init () {
   if (str_properties["script"] != "") {
     Path path = Path(str_properties["script"]);
 
-    cout << "bazinga: script: loading from " << path.getPath() << endl;
+    console << LINEINFO << "loading from " << path.getPath() << outline;
 
     loadFile (path);
   }
@@ -351,14 +352,14 @@ void Object::update () {
     lua_setglobal(L, "curt");
 
     if (lua_pcall(L, 1, 1, 0)) {
-      cout << "bazinga: error when calling update() in script " << script.getPath() << endl;
+      console << "bazinga: error when calling update() in script " << script.getPath() << outline;
 
       if (lua_isstring(L, -1)) {
-        cout << "\t" << luaL_checkstring(L, -1) << endl;
+        console << "\t" << luaL_checkstring(L, -1) << outline;
       }
     } else {
       if (lua_gettop(L) < 1) { // This condition is not working ok
-        cout << "bazinga: update() at script " << script.getPath() << " doesn't return self" << endl;
+        console << "bazinga: update() at script " << script.getPath() << " doesn't return self" << outline;
       } else
         updateProperties();
     }
@@ -432,7 +433,7 @@ void Object::updateProperties() {
           else
             anim = NULL;
 
-          cout << "bazinga: object: editing animation to " << string(value) << endl;
+          console << LINEINFO << "editing animation to " << string(value) << outline;
         }
       }
 

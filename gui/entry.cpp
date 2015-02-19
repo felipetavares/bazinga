@@ -5,8 +5,7 @@ using namespace bazinga;
 
 gui::Entry::Entry () {
 	this->text = "";
-	//click = false;
-	//hover = false;
+	focused = false;
 }
 
 void gui::Entry::pack (int w, int h) {
@@ -40,12 +39,12 @@ void gui::Entry::setPosition (int x, int y) {
 }
 
 void gui::Entry::rrender (int x, int y) {
-	//if (click)
-	//	video::setColor(0.9, 0.7, 0.4, 1); // Click color
+	if (focused)
+		video::setColor(0.9, 0.7, 0.4, 1); // Click color
 	//else if (hover)
 	//	video::setColor(0.4, 0.7, 0.9, 1); // Hover color
-	//else
-	video::setColor(1, 1, 1, 0.5);
+	else
+		video::setColor(1, 1, 1, 0.5);
 
 	video::fillRect(this->x+x, this->y+y, w, h);
 
@@ -53,9 +52,9 @@ void gui::Entry::rrender (int x, int y) {
 	font->setColor(0,0,0,1);
 	font->setSize(16);
 	text::setFont(font);
-	text::setAlign(text::Center);
-	text::setBaseline(text::Middle);
-	text::fillText(text, this->x+x+this->w/2, this->y+y+this->h/2);
+	text::setAlign(text::Left);
+	text::setBaseline(text::Alphabetic);
+	text::fillText(text, this->x+x, this->y+y+this->h/2);
 }
 
 int gui::Entry::getW () {
@@ -67,17 +66,20 @@ int gui::Entry::getH () {
 }
 
 //void gui::Entry::rleave (int x, int y) {
-//	hover = false;
-//	click = false;
 //}
 
 //void gui::Entry::renter (int x, int y) {
-//	hover = true;
 //}
 
+void gui::Entry::focus () {
+	focused = true;
+}
+
+void gui::Entry::unfocus () {
+	focused = false;
+}
+
 void gui::Entry::rclick (int x, int y) {
-	//click = false;
-	// Ask for focus
 	gui::setFocus(this);
 }
 

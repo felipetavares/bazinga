@@ -3,6 +3,7 @@
 #include "filesystem.h"
 #include "text.h"
 #include "cache.h"
+#include "console.h"
 #include "gui.h"
 #include "gui/label.h"
 #include "gui/button.h"
@@ -10,6 +11,8 @@
 #include "gui/slider.h"
 #include "gui/progress.h"
 #include "gui/entry.h"
+#include "gui/bgraph.h"
+#include "gui/scroll.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -18,7 +21,7 @@ using namespace std;
 namespace bazinga {
   double delta = 0;
   double curtime = 0;
-  bool console = false;
+  bool consoleFlag = false;
   bool setNewScene = false;
   bool blockNewScene = false;
   bool exitFlag = false;
@@ -41,7 +44,7 @@ namespace bazinga {
   }
 
   void toggleConsole() {
-    console = !console;
+    consoleFlag = !consoleFlag;
   }
 
   bool events () {
@@ -69,7 +72,7 @@ namespace bazinga {
             auto container = new gui::Container(gui::Container::VERTICAL);
             auto line = new gui::Container(gui::Container::HORIZONTAL);
             auto line2 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line3 = new gui::Container(gui::Container::HORIZONTAL);
+            auto line3 = new gui::Container(gui::Container::HORIZONTAL,true);
             auto line4 = new gui::Container(gui::Container::HORIZONTAL);
 
             line->borderLeft = line->borderRight = 0;
@@ -92,23 +95,44 @@ namespace bazinga {
             auto fps = new gui::Label("###");
             line2->add(fps);
 
+            //line3->add(new gui::Label("Objetos na cena:"));
+            //auto objn = new gui::Label("####");
+            //line3->add(objn);
+
+            auto scroll = new gui::Scroll();
+            line4->add(scroll);
+
+            auto bgraph = new gui::BGraph();
+            line3->add(bgraph);
+
             container->add(line);
             container->add(line2);
             container->add(line3);
             container->add(line4);
-            container->add(new gui::Spacer(gui::Spacer::VERTICAL));
 
             window->setRoot(container);
             gui::add(window);
 
             window->onUpdate = [=] (gui::Window* win) {
-              stringstream ss;
-              ss << 1/delta;
-              fps->setText(ss.str());
+              stringstream ss, objectCount;
+
+              //if (int(curtime)%2) {
+                ss << floor(1/delta);
+                fps->setText(ss.str());
+                bgraph->addBar(1/delta);
+              //}
+              
+              //objectCount << activeMap->getObjectCount();
+              //objn->setText(objectCount.str());
             };
 
             button->onClick = [=] (gui::Widget* wid) {
               bazinga::quit();
+            };
+
+            scroll->onChange = [=] (gui::Widget* wid) {
+              auto scroll = ((gui::Scroll*)wid)->getScroll();
+              line3->scrollH(scroll);
             };
         }
         break;
@@ -158,6 +182,7 @@ namespace bazinga {
     bazinga::input::init();
     //bazinga::audio::init();
     bazinga::gui::init();
+    bazinga::console.init();
 
     // On Linux: nothing
     // On Windows: setup OpenGL above 1.1
@@ -174,14 +199,18 @@ namespace bazinga {
     bazinga::cache::createShaderProgram (v, f, "default");
     bazinga::cache::getShaderProgram("default")->loadUniforms({"sampler","color"});
 
+    auto defaultFont = Path("assets/fonts/texgyrecursor-bold.otf");
+    cache::createFont(defaultFont, "default");
+
+    console << LINEINFO << "using '" << defaultFont.getPath() << "' as default font" << outline;
+
     setScene(Path(mainScenePath));
 
     return true;
   }
 
   void gameLoop () {
-    //cout << "gameLoop()" << endl;
-    cache::createFont(Path("assets/fonts/texgyrecursor-bold.otf"), "default");
+    //console << "gameLoop()" << outline;
 
     chrono::high_resolution_clock::time_point t;
     chrono::high_resolution_clock::time_point startTime;
@@ -205,12 +234,11 @@ namespace bazinga {
 
         video::renderMap(activeMap);
      
-        //if (console) {
-        //  video::setColor(1,0,0,1);
-        //  video::fillRect(-100,-100,200,200);
-        //}
-
         gui::render();
+      }
+
+      if (consoleFlag) {
+        console.render();
       }
 
       video::render();
@@ -248,6 +276,7 @@ namespace bazinga {
     bazinga::text::deinit();
     bazinga::cache::deinit();
     bazinga::video::deinit();
+    bazinga::console.deinit();
   }
 
   void quit () {
@@ -263,20 +292,20 @@ void copyMaps () {
   auto dir = bazinga::fs::listDirectory(path, ok);
 
   if (ok) {
-    cout << "bazinga: scene copy: copying the following scenes to scenes/" << endl;
+    console << LINEINFO << "copying the following scenes to scenes/" << outline;
 
     for (auto e :dir) {
       if (!bazinga::fs::isDir(e)) {
-        cout << "\t - " << e.getPath() << " - ";
+        console << "\t - " << e.getPath() << " - ";
         if (bazinga::fs::copyFile(e, bazinga::Path("scenes/"+e.getName()), true)) {
-          cout << "ok" << endl;
+          console << "ok" << outline;
         } else {
-          cout << "fail" << endl;
+          console << "fail" << outline;
         }
       }
     }
   } else {
-    cout << "bazinga: scene copy: can't find any scenes in: " << path.getPath() << endl;
+    console << LINEINFO << "" << path.getPath() << outline;
   }
 #endif
 }
@@ -286,6 +315,9 @@ int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int 
  #else
 int main (int argc, char** argv) {
 #endif /* _WIN32 */ 
+  console << "Bazinga! Engine compiled in " << __DATE__ << " " << __TIME__ << outline;
+  console << outline;
+
   copyMaps();
 
   try {
@@ -293,7 +325,7 @@ int main (int argc, char** argv) {
       bazinga::gameLoop();
     bazinga::deinit();
   } catch (exception e) {
-    cout << "bazinga: exception: " << e.what() << endl;
+    console << LINEINFO << e.what() << outline;
   }
 
   return 0;

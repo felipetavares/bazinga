@@ -10,6 +10,14 @@ stack <gui::Scissor> gui::scissors;
 vector <gui::Window*> gui::windows;
 gui::Widget* gui::focus;
 
+void gui::Widget::focus () {
+
+}
+
+void gui::Widget::unfocus () {
+
+}
+
 gui::Scissor::Scissor (int x, int y, int w, int h) {
 	this->x = x;
 	this->y = y;
@@ -26,7 +34,7 @@ gui::Scissor gui::Scissor::operator+ (const Scissor& other) {
 		final.x = x;
 	}
 
-	if (other.x+other.w > x+w) {
+	if (other.x+other.w < x+w) {
 		final.w = other.x+other.w-final.x;
 	} else {
 		final.w = x+w-final.x;
@@ -38,11 +46,14 @@ gui::Scissor gui::Scissor::operator+ (const Scissor& other) {
 		final.y = y;
 	}
 
-	if (other.y+other.h > y+h) {
+	if (other.y+other.h < y+h) {
 		final.h = other.y+other.h-final.y;
 	} else {
 		final.h = y+h-final.y;
 	}
+
+	if (final.w < 0 or final.h < 0)
+		final = *this;
 
 	return final;
 }
@@ -70,15 +81,17 @@ void gui::Scissor::apply () {
 	glStencilMask(0x00);
 	// Enable the color buffer
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	// Only draw in the places the stencil is set
+	// Only draw in the places where the stencil is set
 	glStencilFunc(GL_EQUAL, 1, 0xff);
 }
 
-gui::Container::Container (Flow flow):
+gui::Container::Container (Flow flow, bool scrollable):
 	x(0), y(0), w(0), h(0),
 	borderLeft(6), borderRight(6), borderTop(6), borderBottom(6),
 	spacing(6) {
 	this->flow = flow;
+	this->scrollable = scrollable;
+	scrollX = scrollY = 0;
 }
 
 void gui::Container::event (Event& evt) {
@@ -97,6 +110,7 @@ void gui::Container::pack (int sX, int sY) {
 	int anynX=0, anynY=0;
 	int minsX, minsY;
 	getMinSize(minsX, minsY);
+	getFullSize(fullW, fullH);
 
 	int posX = x+borderLeft;
 	int posY = y+borderTop;
@@ -109,7 +123,7 @@ void gui::Container::pack (int sX, int sY) {
 	for (auto child :children) {
 		int csizeX,csizeY;
 		child->getPreferredSize(csizeX, csizeY);
-	
+
 		if (csizeX == ANY)
 			anynX++;
 		if (csizeY == ANY)
@@ -178,7 +192,7 @@ void gui::Container::pack (int sX, int sY) {
 
 		child->setPosition(posX, posY);
 		child->pack(rsizeX, rsizeY);
-	
+
 		if (flow == VERTICAL) {
 			posY += rsizeY+spacing;
 		} else {
@@ -187,8 +201,45 @@ void gui::Container::pack (int sX, int sY) {
 	}
 }
 
-void gui::Container::getPreferredSize (int &pw, int &ph) {
+void gui::Container::getFullSize (int &pw, int &ph) {
 	pw = ph = -1;
+
+	for (auto child :children) {
+		int csizeX, csizeY;
+		child->getPreferredSize(csizeX, csizeY);
+
+		if (csizeX == ANY)
+			pw = csizeX;
+		if (csizeY == ANY)
+			ph = csizeY;
+
+		if (flow == VERTICAL) {
+			if (pw != ANY && csizeX != ANY) {
+				pw = csizeX>pw?csizeX:pw;
+			}
+			if (ph != ANY && csizeY != ANY) {
+				ph += csizeY+spacing;
+			}
+		} else {
+			if (ph != ANY && csizeY != ANY) {
+				ph = csizeY>ph?csizeY:ph;
+			}
+			if (pw != ANY && csizeX != ANY) {
+				pw += csizeX+spacing;
+			}
+		}
+	}
+}
+
+void gui::Container::getPreferredSize (int &pw, int &ph) {
+	pw = -1;
+	ph = -1;
+
+	if (scrollable) {
+		pw = ANY;
+		ph = ANY;
+		return;
+	}
 
 	for (auto child :children) {
 		int csizeX, csizeY;
@@ -221,6 +272,12 @@ void gui::Container::getMinSize (int &sX, int &sY) {
 	sX = 0;
 	sY = 0;
 
+	if (scrollable) {
+		sX = 48;
+		sY = 48;
+		return;
+	}
+
 	for (auto child :children) {
 		int csizeX, csizeY;
 		child->getMinSize(csizeX, csizeY);
@@ -252,8 +309,21 @@ void gui::Container::render (int wx, int wy) {
 	//video::setColor (1, 0, 0, 1);
 	//video::fillRect (wx, wy, w, h);
 
+	stringstream titleStream;
+	titleStream << fullW << " / ";
+	titleStream << w << " / ";
+	titleStream << scrollable;
+
+	auto font = cache::getFont("default");
+	font->setColor(0,0,0,1);
+	font->setSize(16);
+	text::setFont(font);
+	text::setAlign(text::Left);
+	text::setBaseline(text::Middle);
+	text::fillText(titleStream.str(), wx+x, wy+y);
+
 	for (auto child :children) {
-		child->render(wx, wy);
+		child->render(wx-scrollX*(fullW-w), wy+scrollY);
 	}
 }
 
@@ -267,6 +337,10 @@ int gui::Container::getW () {
 
 int gui::Container::getH () {
 	return h;
+}
+
+void gui::Container::scrollH (float scrollX) {
+	this->scrollX = scrollX;
 }
 
 gui::Event::Event (Type type) {
@@ -411,7 +485,7 @@ bool gui::Window::inMaximize (int x, int y) {
 
 bool gui::Window::inBar (int x, int y) {
     return inside (x, y,
-    			   this->x, this->y, this->w, this->tbar);	
+    			   this->x, this->y, this->w, this->tbar);
 }
 
 bool gui::Window::inResize (int x, int y) {
@@ -423,7 +497,7 @@ bool gui::Window::inResize (int x, int y) {
 }
 
 void gui::Window::render () {
-	onUpdate(this);	
+	onUpdate(this);
 
 	save();
 	combineScissor(Scissor(x, y, w, h));
@@ -436,13 +510,9 @@ void gui::Window::render () {
 
 	video::setColor(0.8,0,0,1);
 	video::fillCircle(x+tbar/2,y+tbar/2,tbar/4);
-	video::setColor(0.1,0,0,1);
-	video::strokeCircle(x+tbar/2,y+tbar/2,tbar/4);
 
 	video::setColor(0.3,0.8,0.2,1);
 	video::fillCircle(x+tbar/2*3,y+tbar/2,tbar/4);
-	video::setColor(0.3,1.0,0.2,1);
-	video::strokeCircle(x+tbar/2*3,y+tbar/2,tbar/4);
 
 	auto font = cache::getFont("default");
 	font->setColor(0,0,0,1);
@@ -482,11 +552,11 @@ void gui::init () {
 void gui::render () {
 	// Enable stencil test
 	glEnable(GL_STENCIL_TEST);
-	
+
 	setScissor(Scissor(-video::windowWidth/2,
 					   -video::windowHeight/2,
-					   video::windowWidth/2,
-					   video::windowHeight/2));
+					   video::windowWidth,
+					   video::windowHeight));
 
 	// Render all windows
 	for (int w=0;w<windows.size();w++) {
@@ -506,7 +576,7 @@ void gui::deinit () {
 	// Delete all windows
 	for (auto w :windows) {
 		delete w;
-	}	
+	}
 }
 
 void gui::add (gui::Window* window) {
@@ -514,11 +584,15 @@ void gui::add (gui::Window* window) {
 }
 
 void gui::setFocus (Widget* wid) {
+	if (focus)
+		unsetFocus(focus);
 	focus = wid;
+	focus->focus();
 }
 
 void gui::unsetFocus (Widget* wid) {
 	if (focus == wid) {
+		focus->unfocus();
 		focus = NULL;
 	}
 }
@@ -546,7 +620,7 @@ void gui::mousemove (int x, int y) {
 
 		if (!event.isValid())
 			break;
-	}	
+	}
 }
 
 void gui::mousepress (int button, int x, int y) {
@@ -560,7 +634,7 @@ void gui::mousepress (int button, int x, int y) {
 
 		if (!event.isValid())
 			break;
-	}	
+	}
 }
 
 void gui::mouseunpress (int button, int x, int y) {
@@ -574,7 +648,7 @@ void gui::mouseunpress (int button, int x, int y) {
 
 		if (!event.isValid())
 			break;
-	}	
+	}
 }
 
 void gui::keypress (uint16_t unicode) {

@@ -20,6 +20,7 @@ namespace bazinga {
     static const int bufferSize = 4;
     int id;
 
+    string fontName;
     string text;
     int textPosition;
 
@@ -35,7 +36,7 @@ namespace bazinga {
 
     string nextWord;
   public:
-    Dialog(int, string, Path);
+    Dialog(int, string, Path, string);
     void update();
     void render();
     int getID();
@@ -76,7 +77,7 @@ namespace bazinga {
 
     void render();
     void update();
-    int newDialog(string, Path);
+    int newDialog(string, Path, string);
     int searchObject(string);
     void hideObject(int, bool);
     bool isDialogEnded(int);
@@ -91,6 +92,9 @@ namespace bazinga {
     cpBool pmBeginCollision(cpArbiter*, cpSpace*, void *);
 
     cpSpace *getSpace();
+
+    // For help in debugging
+    int getObjectCount();
   };
 }
 

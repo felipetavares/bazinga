@@ -4,6 +4,7 @@
 #include "json.h"
 #include "cache.h"
 #include "bazinga.h"
+#include "console.h"
 #include <SDL_opengl.h>
 using namespace bazinga;
 
@@ -12,15 +13,15 @@ Animation::Animation (Path fpath):
   char *data = fs::getFileData(fpath);
   string sData = string (data);
   BjObject *jObject = json::parse (sData);
-  
+
   // Load the data in jObject
   auto imgValue = jObject->get("file");
 
   if (imgValue->type == BjValue::jString) {
     img = Path(imgValue->str);
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'file'" << endl;
-    cout << "\tmust be String" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'file'" << outline;
+    console << "\tmust be String" << outline;
   }
 
   auto wValue = jObject->get("width");
@@ -28,8 +29,8 @@ Animation::Animation (Path fpath):
   if (wValue->type == BjValue::jNumber) {
     w = wValue->number;
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'width'" << endl;
-    cout << "\tmust be Number" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'width'" << outline;
+    console << "\tmust be Number" << outline;
   }
 
   auto hValue = jObject->get("height");
@@ -37,8 +38,8 @@ Animation::Animation (Path fpath):
   if (hValue->type == BjValue::jNumber) {
     h = hValue->number;
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'height'" << endl;
-    cout << "\tmust be Number" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'height'" << outline;
+    console << "\tmust be Number" << outline;
   }
 
   auto dirValue = jObject->get("direction");
@@ -48,8 +49,8 @@ Animation::Animation (Path fpath):
       dirValue->str == "backward")) {
     direction = dirValue->str == "forward"?1:-1;
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'direction'" << endl;
-    cout << "\tmust be String ('forward' or 'backward')" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'direction'" << outline;
+    console << "\tmust be String ('forward' or 'backward')" << outline;
   }
 
   auto typeValue = jObject->get("type");
@@ -59,8 +60,8 @@ Animation::Animation (Path fpath):
       typeValue->str == "vertical")) {
     type = typeValue->str == "horizontal"?Horizontal:Vertical;
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'type'" << endl;
-    cout << "\tmust be String ('horizontal' or 'vertical')" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'type'" << outline;
+    console << "\tmust be String ('horizontal' or 'vertical')" << outline;
   }
 
   auto durValue = jObject->get("duration");
@@ -68,8 +69,8 @@ Animation::Animation (Path fpath):
   if (durValue->type == BjValue::jNumber) {
     duration = durValue->number;
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'duration'" << endl;
-    cout << "\tmust be Number" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'duration'" << outline;
+    console << "\tmust be Number" << outline;
   }
 
   auto loopValue = jObject->get("loop");
@@ -78,8 +79,8 @@ Animation::Animation (Path fpath):
       loopValue->type == BjValue::jFalse) {
     loop = loopValue->type == BjValue::jTrue;
   } else {
-    cout << "bazinga: anim: incorrect type for paramater 'loop'" << endl;
-    cout << "\tmust be true or false" << endl;
+    console << "bazinga: anim: incorrect type for paramater 'loop'" << outline;
+    console << "\tmust be true or false" << outline;
   }
 
   delete jObject;
@@ -103,7 +104,7 @@ void Animation::render () {
 	  sX = float(0)/((float)image->rw);
 	  sY = float(frame*h)/((float)image->rh);
 	  eX = float(image->w)/((float)image->rw);
-	  eY = float((frame+1)*h)/((float)image->rh);	
+	  eY = float((frame+1)*h)/((float)image->rh);
 	}
 
   glPushMatrix();

@@ -51,7 +51,10 @@ void gui::ResponsiveWidget::render (int x, int y) {
 	ux = this->x+x;
 	uy = this->y+y;
 
+	save();
+	combineScissor(Scissor(ux, uy, w-1, h-1));
 	rrender(x, y);
+	restore();
 }
 
 void gui::ResponsiveWidget::rleave (int x, int y) {

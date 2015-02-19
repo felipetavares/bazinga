@@ -3,12 +3,13 @@
 #include "text.h"
 #include "image.h"
 #include "cache.h"
+#include "console.h"
 #include <ctype.h>
 using namespace bazinga;
 
-Dialog::Dialog (int id, string text, Path path):
+Dialog::Dialog (int id, string text, Path path, string fontName):
   id(id), text(text), textPosition(0), bufferPosition(0), nextTime(0),
-  ended(false), imagePath(path) {
+  ended(false), imagePath(path), fontName(fontName) {
     sizeW = video::windowWidth/2;
     intervalTime = 0.05;
     nextWordSize = 0;
@@ -53,6 +54,8 @@ void Dialog::render () {
   video::setColor(1, 1, 1, 1);
   video::fillRect(-sizeW/2-10, startY-30, sizeW+20, 1.5*size.h*bufferSize+10);
 
+  auto font = cache::getFont(fontName);
+  text::setFont(font);
   text::setAlign(text::Left);
   text::setBaseline(text::Alphabetic);
 
@@ -150,18 +153,18 @@ int Map::did = 0;
 Map::Map (Path file):
   file(file) {
 
-  cout << "bazinga: chipmunk: initializing space...";
+  console << LINEINFO << "initializing space... ";
 
   pSpace = cpSpaceNew();
   cpSpaceSetDamping (pSpace, 0.01);
 
   if (pSpace) {
-    cout << " ok" << endl;
+    console << " ok" << outline;
   } else {
-    cout << " fail" << endl;
+    console << " fail" << outline;
   }
 
-  cout << "bazinga: chipmunk: initializing collision handler..." << endl;
+  console << LINEINFO << "initializing collision handler..." << outline;
 
   cpSpaceSetDefaultCollisionHandler(pSpace, pBeginCollision, NULL, NULL, NULL, NULL);
 
@@ -180,10 +183,10 @@ bool Map::init () {
   
   // Loads the file
   if (luaL_dofile(lScript, (Path("scripts/"+file.getName()+".lua")).getPath().c_str())) {
-    cout << "bazinga: script contains errors" <<  endl;
+    console << LINEINFO << "script contains errors" <<  outline;
 
     if (lua_isstring(lScript, -1)) {
-      cout << "\t" << lua_tostring(lScript, -1) << endl;
+      console << "\t" << lua_tostring(lScript, -1) << outline;
     }
 
     lua_close(lScript);
@@ -200,8 +203,8 @@ bool Map::init () {
     
     delete data;
   } else {
-    cout << "bazinga: scene: could not load " << file.getPath() << endl;
-    cout << "\t" << "aborting" << endl;
+    console << LINEINFO << "could not load " << file.getPath() << outline;
+    console << "\t" << "aborting" << outline;
     return false;
   }
 
@@ -225,7 +228,7 @@ bool Map::init () {
     // Some kind of error
   }
 
-  cout << "bazinga: scene: " << objects.size() << " objects loaded" << endl;
+  console << LINEINFO << "" << objects.size() << " objects loaded" << outline;
 
   delete jMap;
   return true;
@@ -236,10 +239,10 @@ Map::~Map () {
     cpSpaceFree(pSpace);
 }
 
-int Map::newDialog (string text, Path path) {
+int Map::newDialog (string text, Path path, string font) {
   int dialogID = did++;
 
-  dialogs.push_back(new Dialog(dialogID, text, path));
+  dialogs.push_back(new Dialog(dialogID, text, path, font));
 
   return dialogID;
 }
@@ -371,14 +374,14 @@ cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
     ((Object*)cpShapeGetUserData(b))->createLuaProperties(lScript);
 
     if (lua_pcall(lScript, 2, 1, 0)) {
-      cout << "bazinga: error when calling collision_begin() in scene script" << endl;
+      console << LINEINFO << "error when calling collision_begin() in scene script" << outline;
 
       if (lua_isstring(lScript, -1)) {
-        cout << "\t" << lua_tostring(lScript, -1) << endl;
+        console << "\t" << lua_tostring(lScript, -1) << outline;
       }
     } else {
       if (lua_gettop(lScript) < 1) { // This condition is not working ok
-        cout << "bazinga: collision_begin() in scene script doesn't return value" << endl;
+        console << LINEINFO << "collision_begin() in scene script doesn't return value" << outline;
       } else {
         return lua_toboolean(lScript, -1);
       }
@@ -424,4 +427,8 @@ void Map::render() {
   for (int i=0;i<dialogs.size();i++) {
     dialogs[i]->render();
   }
+}
+
+int Map::getObjectCount () {
+  return objects.size();
 }

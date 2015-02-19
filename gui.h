@@ -51,6 +51,8 @@ namespace bazinga {
 			virtual void render(int, int) = 0;
 			virtual int getW () = 0;
 			virtual int getH () = 0;
+			virtual void focus();
+			virtual void unfocus();
 		};
 
 		// The heart of any dynamic GUI:
@@ -65,22 +67,28 @@ namespace bazinga {
 		private:
 			Flow flow;
 
+			float scrollX, scrollY;
 			int x, y;
 			int w, h;
+			int fullW, fullH;
 
 			vector <Widget*> children;
+			bool scrollable;
 		public:
-			Container(Flow);
+			Container(Flow,bool=false);
 
 			void pack (int, int);
 			void getPreferredSize(int&, int&);
 			void getMinSize(int&, int&);
+			void getFullSize(int&, int&);
 			void setPosition(int, int);
 			void render(int, int);
 			void add(Widget*);
 			void event(Event&);
 			int getW();
 			int getH();
+
+			void scrollH(float);
 		};
 
 		class Window {

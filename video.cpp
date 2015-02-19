@@ -1,5 +1,6 @@
 #include "video.h"
 #include "bazinga.h"
+#include "console.h"
 #include <cmath>
 #include <il.h>
 using namespace bazinga;
@@ -28,7 +29,7 @@ video::~video () {
 
 void video::init() {
 	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
-		cout << "bazinga: video: cannot init SDL" << endl;
+		console << LINEINFO << "cannot Init SDL" << outline;
 		exit (-1);
 	}
 
@@ -54,14 +55,10 @@ void video::init() {
 
 	findBestVideoMode();
 
-	icon = Path (".:Assets:BazingaEngineLittle.png");
-	cout << "bazinga: video: loading icon from " << icon.getPath() << endl;
-	// TODO: add SDL_image
-	//SDL_WM_SetIcon(IMG_Load(icon.getPath().c_str()), NULL);
 	screen = SDL_SetVideoMode (windowWidth,windowHeight,windowBpp,videoFlags);
 	SDL_ShowCursor (1);
 
-	cout << "bazinga: video: window (" << windowWidth << ", " << windowHeight << ")" << endl;
+	console << LINEINFO << "window (" << windowWidth <<  ", " << windowHeight << ")" << outline;
 
 	// CHANGE THAT IF NEED BE
 	//glEnable (GL_DEPTH_TEST);
@@ -69,8 +66,11 @@ void video::init() {
 	glEnable( GL_TEXTURE_2D );
 	glEnable( GL_BLEND );
 	glEnable( GL_ALPHA );
-	// Antialiased text
+	// Antialiased polygons
 	//glEnable( GL_MULTISAMPLE );
+	// Antialiasing
+	//glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+	//glEnable( GL_POLYGON_SMOOTH );
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -91,7 +91,7 @@ void video::init() {
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 
-	cout << "bazinga: video: OpenGL: " << glGetString(GL_VERSION) << endl;
+	console << LINEINFO << "OpenGL: " << string((char*)glGetString(GL_VERSION)) << outline;
 }
 
 void video::deinit () {
@@ -101,15 +101,15 @@ void video::deinit () {
 void video::getVideoModes () {
 	SDL_Rect **modeList;
 
-	cout << "bazinga: video: querying video modes" << endl;
+	console << LINEINFO << "querying video modes" << outline;
 
 	modeList = SDL_ListModes (NULL, videoFlags);
 
-	cout << "bazinga: video: loaded video modes from SDL" << endl;
+	console << LINEINFO << "loaded video modes from SDL" << outline;
 
 	if (modeList != NULL) {
 		if (modeList == (SDL_Rect**)-1) {
-			cout << "bazinga: video: all resolutions available" << endl;
+			console << LINEINFO << "all resolutions available" << outline;
 			anyResolution = true;
 		} else {
 			for (int i=0;modeList[i];i++) {
@@ -117,7 +117,7 @@ void video::getVideoModes () {
 			}
 		}
 	} else {
-		cout << "bazinga: video: no video modes found" << endl;
+		console << LINEINFO << "no video modes found" << outline;
 		exit (-1);
 	}
 

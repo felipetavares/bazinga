@@ -1,5 +1,6 @@
 #include "image.h"
 #include "filesystem.h"
+#include "console.h"
 #include <sstream>
 #include <il.h>
 using namespace bazinga;
@@ -59,7 +60,7 @@ Image::Image (Path path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  cout << "bazinga: image: image loaded sucessfully (" << nw << "," << nh << ")" << endl;
+  console << LINEINFO << "image loaded sucessfully (" << nw << "," << nh << ")" << outline;
 
 	// The following is debugging code
 	/*

@@ -1,6 +1,7 @@
 #include "input.h"
 #include "bazinga.h"
 #include "gui.h"
+#include "console.h"
 #include <iostream>
 #include <algorithm>
 using namespace bazinga;
@@ -25,14 +26,14 @@ bool input::Context::keypress (string key) {
 
     // Add key as argument
     if (lua_pcall(L, 2, 1, 0)) {
-      cout << "bazinga: error when calling " << (name+"_keypress") <<" in mapper.lua for context " << name << endl;
+      console <<  "bazinga: error when calling " + (name+"_keypress") + " in mapper.lua for context " + name  << outline;
 
       if (lua_isstring(L, -1)) {
-        cout << "\t" << lua_tostring(L, -1) << endl;
+        console <<  "\t" + string(lua_tostring(L, -1) ) << outline;
       }
     } else {
       if (lua_gettop(L) < 1) { // This condition is not working ok
-        cout << "bazinga: " << (name+"_keypress") << "() in mapper.lua doesn't return self!" << endl;
+        console <<  "bazinga: " + (name+"_keypress") + "() in mapper.lua doesn't return self!"  << outline;
       } else {
         updateArgs();
       }
@@ -51,14 +52,14 @@ bool input::Context::keyunpress (string key) {
 
     // Add key as argument
     if (lua_pcall(L, 2, 1, 0)) {
-      cout << "bazinga: error when calling " << (name+"_keyunpress") <<" in mapper.lua for context " << name << endl;
+      console <<  "bazinga: error when calling " + (name+"_keyunpress") + " in mapper.lua for context " + name  << outline;
 
       if (lua_isstring(L, -1)) {
-        cout << "\t" << lua_tostring(L, -1) << endl;
+        console <<  "\t" + string(lua_tostring(L, -1) ) << outline;
       }
     } else {
       if (lua_gettop(L) < 1) { // This condition is not working ok
-        cout << "bazinga: " << (name+"_keyunpress") << "() in mapper.lua doesn't return self!" << endl;
+        console <<  "bazinga: " + (name+"_keyunpress") + "() in mapper.lua doesn't return self!"  << outline;
       } else {
         updateArgs();
       }
@@ -113,13 +114,24 @@ void input::mouseunpress (int button, int x, int y) {
 }
 
 void input::keypress(string key, uint16_t unicode) {
-  cout << "bazinga: input: keydown: " << key << endl;
-
-  gui::keypress(unicode);
-
   if (key == "tab") {
     toggleConsole();
+    return;
   }
+
+  if (key == "page up") {
+    console.up();
+    return;
+  }
+
+  if (key == "page down") {
+    console.down();
+    return;
+  }
+
+  console << LINEINFO << "" << key  << outline;
+
+  gui::keypress(unicode);
 
   for (auto c :active) {
     c->keypress(key);
@@ -127,7 +139,11 @@ void input::keypress(string key, uint16_t unicode) {
 }
 
 void input::keyunpress(string key) {
-  cout << "bazinga: input: keyup: " << key << endl;
+  if (key == "tab" || key == "page up" || key == "page down") {
+    return;
+  }
+
+  console << LINEINFO << "" << key  << outline;
 
   for (auto c :active) {
     c->keyunpress(key);
@@ -142,17 +158,17 @@ void input::setContextsIn (lua_State *L) {
 }
 
 void input::init () {
-  cout << "bazinga: input: init()" << endl;
+  console << LINEINFO << outline;
 
   L = luaL_newstate();
   luaL_openlibs (L);
 
   // Loads the file
   if (luaL_dofile(L, "mapper.lua")) {
-    cout << "bazinga: mapper.lua contains errors" << endl;
+    console <<  "bazinga: mapper.lua contains errors"  << outline;
 
     if (lua_isstring(L, -1)) {
-      cout << "\t" << lua_tostring(L, -1) << endl;
+      console <<  "\t" + string(lua_tostring(L, -1) ) << outline;
     }
 
     lua_close(L);
@@ -161,7 +177,7 @@ void input::init () {
 }
 
 void input::deinit () {
-  cout << "bazinga: input: deinit()" << endl;
+  console << LINEINFO << outline;
 
   if (L) {
     lua_close(L);

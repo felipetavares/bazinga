@@ -1,6 +1,7 @@
 #include "cache.h"
 #include "text.h"
 #include "gl/glwin.h"
+#include "console.h"
 #include <bitset>
 using namespace bazinga;
 
@@ -64,9 +65,9 @@ vector <text::Area> text::AreaBuffer::createChildren (Area a, int w, int h) {
 text::Font::Font (Path file):
 	cr(1), cg(1), cb(1), ca(1) {
 	if (FT_New_Face(freetype, file.getPath().c_str(), 0, &face)) {
-		cout << "bazinga: text: font: cannot open " << file.getPath() << endl;
+		console << LINEINFO << "bazinga: text: font: cannot open " << file.getPath() << outline;
 	} else {
-		cout << "bazinga: text: font: loaded from " << file.getPath() << endl;
+		console << LINEINFO << "bazinga: text: font: loaded from " << file.getPath() << outline;
 
 		FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 
@@ -77,12 +78,12 @@ text::Font::Font (Path file):
 }
 
 text::Font::~Font () {
-	cout << "bazinga: text: font: closing font...";
+	console << LINEINFO << "bazinga: text: font: closing font...";
 
 	if (FT_Done_Face(face)) {
-		cout << " fail" << endl;
+		console << " fail" << outline;
 	} else {
-		cout << " ok" << endl;
+		console << " ok" << outline;
 	}
 
 	for (auto i :charCache) {
@@ -183,7 +184,7 @@ int text::Font::measure (const char* str, int len, float& w, float& h, float &dh
 	} catch (exception e) { 
 		// Load the character
 		if (FT_Load_Char (face, utf82unicode(c), FT_LOAD_RENDER)) {
-			cout << "bazinga: text: font: cannot load character " << c << endl;
+			console << LINEINFO << "cannot load character " << c << outline;
 		} else {
 			//cout << "bazinga: text: font: loading character " << c << endl;
 		
@@ -246,7 +247,7 @@ int text::Font::render (const char *str, int len) {
 	} catch (exception e) { 
 		// Load the character
 		if (FT_Load_Char (face, utf82unicode(c), FT_LOAD_RENDER)) {
-			cout << "bazinga: text: font: cannot load character " << c << endl;
+			console << LINEINFO << "cannot load character " << c << outline;
 		} else {
 			//cout << "bazinga: text: font: loading character " << c << endl;
 		
@@ -321,7 +322,7 @@ int text::Font::render (const char *str, int len) {
 }
 
 void text::Font::newAtlas () {
-	cout << "bazinga: text: font: creating new atlas" << endl;
+	console << LINEINFO << "creating new atlas" << outline;
 
 	// Init buffer
 	areaManagers.push_back(new AreaBuffer(bufferLen, bufferLen));
@@ -354,12 +355,12 @@ text::Baseline text::baseline;
 
 void text::init() {
 	// Opens the FreeType2 library
-	cout << "bazinga: text: initializing FreeType2...";
+	console << LINEINFO << "initializing FreeType2...";
 
 	if (FT_Init_FreeType(&freetype)) {
-		cout << " fail" << endl;
+		console << " fail" << outline;
 	} else {
-		cout << " ok" << endl;
+		console << " ok" << outline;
 	}
 
 	alignment = Left;
@@ -367,12 +368,12 @@ void text::init() {
 }
 
 void text::deinit() {
-	cout << "bazinga: text: deinitializing FreeType2...";
+	console << LINEINFO << "deinitializing FreeType2...";
 
 	if (FT_Done_FreeType(freetype)) {
-		cout << " fail" << endl;
+		console << " fail" << outline;
 	} else {
-		cout << " ok" << endl;
+		console << " ok" << outline;
 	}
 }
 
@@ -389,6 +390,11 @@ void text::setFont (Font* ft) {
 }
 
 void text::fillText (string text, int x, int y) {
+	if (font == NULL) {
+		console << LINEINFO << "invalid font" << outline;
+		return;
+	}
+
 	const char *str = text.c_str();
 	int len = text.size();
 	TextMetrics metrics;
@@ -438,6 +444,11 @@ void text::fillText (string text, int x, int y) {
 }
 
 text::TextMetrics text::measureText (string text) {
+	if (font == NULL) {
+		console << LINEINFO << "invalid font" << outline;
+		return TextMetrics();
+	}
+
 	const char *str = text.c_str();
 	int len = text.size();
 	float charW, charH, charDH;

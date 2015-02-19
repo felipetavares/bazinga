@@ -1,4 +1,5 @@
 #include "cache.h"
+#include "console.h"
 #include <exception>
 #include <iostream>
 
@@ -14,7 +15,7 @@ namespace bazinga {
       try {
         return cachedData.at(path.getPath());
       } catch (exception e) {
-        cout << "bazinga: cache: loading " << path.getPath() << endl;
+        console << LINEINFO << "loading " << path.getPath() << outline;
 
         Image *image = new Image(path);
         cachedData[path.getPath()] = image;
@@ -27,7 +28,7 @@ namespace bazinga {
       try {
         return cachedVertex.at(path.getPath());
       } catch (exception e) {
-        cout << "bazinga: cache: loading " << path.getPath() << endl;
+        console << LINEINFO << "loading " << path.getPath() << outline;
 
         shader::Vertex *shader = new shader::Vertex(path);
         cachedVertex[path.getPath()] = shader;
@@ -40,7 +41,7 @@ namespace bazinga {
       try {
         return cachedFragment.at(path.getPath());
       } catch (exception e) {
-        cout << "bazinga: cache: loading " << path.getPath() << endl;
+        console << LINEINFO << "loading " << path.getPath() << outline;
 
         shader::Fragment *shader = new shader::Fragment(path);
         cachedFragment[path.getPath()] = shader;
@@ -53,7 +54,7 @@ namespace bazinga {
       try {
         return cachedProgram.at(name);
       } catch (exception e) {
-        cout << "bazinga: cache: shader program not yet created " << name << endl;
+        console << LINEINFO << "shader program not yet created " << name << outline;
         return NULL;
       }      
     }
@@ -62,7 +63,7 @@ namespace bazinga {
       try {
         return cachedFont.at(name);
       } catch (exception e) {
-        cout << "bazinga: cache: font not yet created '" << name << "'" << endl;
+        console << LINEINFO << "font not yet created '" << name << "'" << outline;
         return NULL;
       }
     }
@@ -80,33 +81,33 @@ namespace bazinga {
     }
 
     void init () {
-      cout << "bazinga: cache: init()" << endl;
+      console << LINEINFO << "init()" << outline;
     }
 
     void deinit () {
       map <string, Image*>::iterator i;
       for (i=cachedData.begin();i != cachedData.end(); i++) {
-        cout << "bazinga: cache: deleting " << i->first << endl;
+        console << LINEINFO << "deleting " << i->first << outline;
         delete i->second;
       }
 
       for (auto i :cachedVertex) {
-        cout << "bazinga: cache: deleting " << i.first << endl;
+        console << LINEINFO << "deleting " << i.first << outline;
         delete i.second;
       }
 
       for (auto i :cachedFragment) {
-        cout << "bazinga: cache: deleting " << i.first << endl;
+        console << LINEINFO << "deleting " << i.first << outline;
         delete i.second;
       }
 
       for (auto i :cachedProgram) {
-        cout << "bazinga: cache: deleting shader program '" << i.first << "'" << endl;
+        console << LINEINFO << "deleting shader program '" << i.first << "'" << outline;
         delete i.second;
       }
 
       for (auto i :cachedFont) {
-        cout << "bazinga: cache: deleting font '" << i.first << "'" << endl;
+        console << LINEINFO << "deleting font '" << i.first << "'" << outline;
         delete i.second;
       }
     }
