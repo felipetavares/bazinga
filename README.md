@@ -1,7 +1,7 @@
 Bazinga Testing
 ==============
 
-#### The CCSL team recommends Atom!
+#### The CCSL team recommends [Atom](https://atom.io)!
 
 Testing tech for the Bazinga! Engine.
 Bazinga! Engine is a fully featured engine for 2d games.
@@ -17,6 +17,7 @@ Full lua integration and objects are supported at this stage.
 5. Map Display      - [ok]
 6. Input Support    - [ok]
 7. Physics Support  - [ok]
+8. Scene Support    - [ok]
 
 How to compile (linux)
 ----------------------
@@ -41,7 +42,7 @@ it:
 
 ```bash
 mkdir build
-cp -r tmpbuild build
+cp -r tmpbuild/* build
 cd build
 ```
 
