@@ -5,10 +5,10 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='cygogg-0.dll'
+dlname='libogg.so.0'
 
 # Names of this library.
-library_names='libogg.dll.a'
+library_names='libogg.so.0.8.2 libogg.so.0 libogg.so'
 
 # The name of the static archive.
 old_library='libogg.a'

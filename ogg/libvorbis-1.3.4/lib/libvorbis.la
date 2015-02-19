@@ -5,10 +5,10 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libvorbis-0.dll'
+dlname='libvorbis.so.0'
 
 # Names of this library.
-library_names='libvorbis.dll.a'
+library_names='libvorbis.so.0.4.7 libvorbis.so.0 libvorbis.so'
 
 # The name of the static archive.
 old_library='libvorbis.a'
@@ -17,7 +17,7 @@ old_library='libvorbis.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/usr/local/lib /usr/local/lib/libogg.la'
+dependency_libs=' -lm -L/usr/local/lib /usr/local/lib/libogg.la'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
