@@ -12,7 +12,7 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-MAKE=make
+
 
 
 
@@ -77,8 +77,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = i686-pc-mingw32
-host_triplet = i686-pc-mingw32
+build_triplet = x86_64-unknown-linux-gnu
+host_triplet = x86_64-unknown-linux-gnu
 noinst_PROGRAMS = test_bitwise$(EXEEXT) test_framing$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -206,42 +206,42 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/missing aclocal-1.13
+ACLOCAL = ${SHELL} /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/missing aclocal-1.13
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 AR = ar
-AUTOCONF = ${SHELL} /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/missing autoconf
-AUTOHEADER = ${SHELL} /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/missing autoheader
-AUTOMAKE = ${SHELL} /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/missing automake-1.13
-AWK = gawk
+AUTOCONF = ${SHELL} /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/missing autoconf
+AUTOHEADER = ${SHELL} /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/missing autoheader
+AUTOMAKE = ${SHELL} /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/missing automake-1.13
+AWK = mawk
 CC = gcc
-CCDEPMODE = depmode=none
-CFLAGS = -O20 -fsigned-char -g -O2
+CCDEPMODE = depmode=gcc3
+CFLAGS = -O20 -Wall -ffast-math -fsigned-char -g -O2
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
 DEBUG = -g -Wall -fsigned-char -g -O2
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DLLTOOL = dlltool
+DLLTOOL = false
 DSYMUTIL = 
 DUMPBIN = 
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
-EGREP = /usr/bin/grep -E
-EXEEXT = .exe
-FGREP = /usr/bin/grep -F
-GREP = /usr/bin/grep
+EGREP = /bin/grep -E
+EXEEXT = 
+FGREP = /bin/grep -F
+GREP = /bin/grep
 INCLUDE_INTTYPES_H = 1
 INCLUDE_STDINT_H = 1
 INCLUDE_SYS_TYPES_H = 1
-INSTALL = .././install-sh -c
+INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = c:/mingw/mingw32/bin/ld.exe
+LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -251,13 +251,13 @@ LIB_AGE = 8
 LIB_CURRENT = 8
 LIB_REVISION = 2
 LIPO = 
-LN_S = cp -pR
+LN_S = ln -s
 LTLIBOBJS = 
 MAINT = 
-MAKEINFO = ${SHELL} /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/missing makeinfo
+MAKEINFO = ${SHELL} /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/missing makeinfo
 MANIFEST_TOOL = :
-MKDIR_P = /usr/bin/mkdir -p
-NM = /c/MinGW/bin/nm
+MKDIR_P = /bin/mkdir -p
+NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
 OBJEXT = o
@@ -272,11 +272,11 @@ PACKAGE_TARNAME = libogg
 PACKAGE_URL = 
 PACKAGE_VERSION = 1.3.2
 PATH_SEPARATOR = :
-PROFILE = -O20 -g -pg -fsigned-char -g -O2
+PROFILE = -Wall -W -pg -g -O20 -ffast-math -fsigned-char -g -O2
 RANLIB = ranlib
-SED = /usr/bin/sed
-SET_MAKE = MAKE=make
-SHELL = /bin/sh
+SED = /bin/sed
+SET_MAKE = 
+SHELL = /bin/bash
 SIZE16 = int16_t
 SIZE32 = int32_t
 SIZE64 = int64_t
@@ -284,39 +284,39 @@ STRIP = strip
 USIZE16 = uint16_t
 USIZE32 = uint32_t
 VERSION = 1.3.2
-abs_builddir = /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/src
-abs_srcdir = /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/src
-abs_top_builddir = /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2
-abs_top_srcdir = /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2
+abs_builddir = /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/src
+abs_srcdir = /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/src
+abs_top_builddir = /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2
+abs_top_srcdir = /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
-am__include = #
+am__include = include
 am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 bindir = ${exec_prefix}/bin
-build = i686-pc-mingw32
+build = x86_64-unknown-linux-gnu
 build_alias = 
-build_cpu = i686
-build_os = mingw32
-build_vendor = pc
+build_cpu = x86_64
+build_os = linux-gnu
+build_vendor = unknown
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = i686-pc-mingw32
+host = x86_64-unknown-linux-gnu
 host_alias = 
-host_cpu = i686
-host_os = mingw32
-host_vendor = pc
+host_cpu = x86_64
+host_os = linux-gnu
+host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /c/Users/Felipe/Documents/Development/bazingatesting/ogg/libogg-1.3.2/install-sh
+install_sh = ${SHELL} /home/ccsl/Development/bazingatesting/ogg/libogg-1.3.2/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -440,59 +440,59 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-# ./$(DEPDIR)/bitwise.Plo
-# ./$(DEPDIR)/framing.Plo
-# ./$(DEPDIR)/test_bitwise-bitwise.Po
-# ./$(DEPDIR)/test_framing-framing.Po
+include ./$(DEPDIR)/bitwise.Plo
+include ./$(DEPDIR)/framing.Plo
+include ./$(DEPDIR)/test_bitwise-bitwise.Po
+include ./$(DEPDIR)/test_framing-framing.Po
 
 .c.o:
-#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-	$(AM_V_CC)source='$<' object='$@' libtool=no \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(COMPILE) -c $<
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#	$(AM_V_CC)source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(COMPILE) -c $<
 
 .c.obj:
-#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-	$(AM_V_CC)source='$<' object='$@' libtool=no \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#	$(AM_V_CC)source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-#	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-	$(AM_V_CC)source='$<' object='$@' libtool=yes \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(LTCOMPILE) -c -o $@ $<
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+#	$(AM_V_CC)source='$<' object='$@' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LTCOMPILE) -c -o $@ $<
 
 test_bitwise-bitwise.o: bitwise.c
-#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -MT test_bitwise-bitwise.o -MD -MP -MF $(DEPDIR)/test_bitwise-bitwise.Tpo -c -o test_bitwise-bitwise.o `test -f 'bitwise.c' || echo '$(srcdir)/'`bitwise.c
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bitwise-bitwise.Tpo $(DEPDIR)/test_bitwise-bitwise.Po
-	$(AM_V_CC)source='bitwise.c' object='test_bitwise-bitwise.o' libtool=no \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -c -o test_bitwise-bitwise.o `test -f 'bitwise.c' || echo '$(srcdir)/'`bitwise.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -MT test_bitwise-bitwise.o -MD -MP -MF $(DEPDIR)/test_bitwise-bitwise.Tpo -c -o test_bitwise-bitwise.o `test -f 'bitwise.c' || echo '$(srcdir)/'`bitwise.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bitwise-bitwise.Tpo $(DEPDIR)/test_bitwise-bitwise.Po
+#	$(AM_V_CC)source='bitwise.c' object='test_bitwise-bitwise.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -c -o test_bitwise-bitwise.o `test -f 'bitwise.c' || echo '$(srcdir)/'`bitwise.c
 
 test_bitwise-bitwise.obj: bitwise.c
-#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -MT test_bitwise-bitwise.obj -MD -MP -MF $(DEPDIR)/test_bitwise-bitwise.Tpo -c -o test_bitwise-bitwise.obj `if test -f 'bitwise.c'; then $(CYGPATH_W) 'bitwise.c'; else $(CYGPATH_W) '$(srcdir)/bitwise.c'; fi`
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bitwise-bitwise.Tpo $(DEPDIR)/test_bitwise-bitwise.Po
-	$(AM_V_CC)source='bitwise.c' object='test_bitwise-bitwise.obj' libtool=no \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -c -o test_bitwise-bitwise.obj `if test -f 'bitwise.c'; then $(CYGPATH_W) 'bitwise.c'; else $(CYGPATH_W) '$(srcdir)/bitwise.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -MT test_bitwise-bitwise.obj -MD -MP -MF $(DEPDIR)/test_bitwise-bitwise.Tpo -c -o test_bitwise-bitwise.obj `if test -f 'bitwise.c'; then $(CYGPATH_W) 'bitwise.c'; else $(CYGPATH_W) '$(srcdir)/bitwise.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bitwise-bitwise.Tpo $(DEPDIR)/test_bitwise-bitwise.Po
+#	$(AM_V_CC)source='bitwise.c' object='test_bitwise-bitwise.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_bitwise_CFLAGS) $(CFLAGS) -c -o test_bitwise-bitwise.obj `if test -f 'bitwise.c'; then $(CYGPATH_W) 'bitwise.c'; else $(CYGPATH_W) '$(srcdir)/bitwise.c'; fi`
 
 test_framing-framing.o: framing.c
-#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -MT test_framing-framing.o -MD -MP -MF $(DEPDIR)/test_framing-framing.Tpo -c -o test_framing-framing.o `test -f 'framing.c' || echo '$(srcdir)/'`framing.c
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/test_framing-framing.Tpo $(DEPDIR)/test_framing-framing.Po
-	$(AM_V_CC)source='framing.c' object='test_framing-framing.o' libtool=no \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -c -o test_framing-framing.o `test -f 'framing.c' || echo '$(srcdir)/'`framing.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -MT test_framing-framing.o -MD -MP -MF $(DEPDIR)/test_framing-framing.Tpo -c -o test_framing-framing.o `test -f 'framing.c' || echo '$(srcdir)/'`framing.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_framing-framing.Tpo $(DEPDIR)/test_framing-framing.Po
+#	$(AM_V_CC)source='framing.c' object='test_framing-framing.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -c -o test_framing-framing.o `test -f 'framing.c' || echo '$(srcdir)/'`framing.c
 
 test_framing-framing.obj: framing.c
-#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -MT test_framing-framing.obj -MD -MP -MF $(DEPDIR)/test_framing-framing.Tpo -c -o test_framing-framing.obj `if test -f 'framing.c'; then $(CYGPATH_W) 'framing.c'; else $(CYGPATH_W) '$(srcdir)/framing.c'; fi`
-#	$(AM_V_at)$(am__mv) $(DEPDIR)/test_framing-framing.Tpo $(DEPDIR)/test_framing-framing.Po
-	$(AM_V_CC)source='framing.c' object='test_framing-framing.obj' libtool=no \
-	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -c -o test_framing-framing.obj `if test -f 'framing.c'; then $(CYGPATH_W) 'framing.c'; else $(CYGPATH_W) '$(srcdir)/framing.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -MT test_framing-framing.obj -MD -MP -MF $(DEPDIR)/test_framing-framing.Tpo -c -o test_framing-framing.obj `if test -f 'framing.c'; then $(CYGPATH_W) 'framing.c'; else $(CYGPATH_W) '$(srcdir)/framing.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_framing-framing.Tpo $(DEPDIR)/test_framing-framing.Po
+#	$(AM_V_CC)source='framing.c' object='test_framing-framing.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_framing_CFLAGS) $(CFLAGS) -c -o test_framing-framing.obj `if test -f 'framing.c'; then $(CYGPATH_W) 'framing.c'; else $(CYGPATH_W) '$(srcdir)/framing.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -716,7 +716,7 @@ debug:
 	$(MAKE) all CFLAGS="-g -Wall -fsigned-char -g -O2"
 
 profile:
-	$(MAKE) all CFLAGS="-O20 -g -pg -fsigned-char -g -O2"
+	$(MAKE) all CFLAGS="-Wall -W -pg -g -O20 -ffast-math -fsigned-char -g -O2"
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

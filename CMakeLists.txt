@@ -70,7 +70,7 @@ set_target_properties(ogglib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/o
 
 # Adiciona libs FreeType2
 add_library(freetype2lib STATIC IMPORTED)
-set_target_properties(freetype2lib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/objs/freetype.a")
+set_target_properties(freetype2lib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/objs/libfreetype.a")
 
 add_library(bazingares STATIC IMPORTED)
 set_target_properties(bazingares PROPERTIES IMPORTED_LOCATION "bazinga.res")
@@ -86,7 +86,7 @@ IF (WIN32)
 ExternalProject_Add(
   Chipmunk
   URL ${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/
-  INSTALL_COMMAND ""	
+  INSTALL_COMMAND ""
   CMAKE_ARGS -DCMAKE_CXX_COMPILER=C:/MinGW/bin/g++.exe
              -DCMAKE_C_COMPILER=C:/MinGW/bin/gcc.exe
              -DCMAKE_CXX_FLAGS=-std=c++11
@@ -107,8 +107,8 @@ ExternalProject_Add(
   -DCMAKE_CXX_FLAGS=-std=c++11
   -DCMAKE_MAKE_PROGRAM=make
   -DCMAKE_AR=ar
-  -DCMAKE_C_LINK_EXECUTABLE=ld
-  -DCMAKE_CXX_LINK_EXECUTABLE=ld
+  #-DCMAKE_C_LINK_EXECUTABLE=ld
+  #-DCMAKE_CXX_LINK_EXECUTABLE=ld
 )
 ENDIF(UNIX)
 
@@ -145,21 +145,19 @@ target_link_libraries (bazinga glu32 opengl32)
 target_link_libraries (bazinga libSDLmain)
 target_link_libraries (bazinga libSDL)
 target_link_libraries (bazinga bazingares)
+target_link_libraries (bazinga devil)
 ENDIF (WIN32)
 
+
+target_link_libraries (bazinga freetype2lib)
 target_link_libraries (bazinga lualib)
 target_link_libraries (bazinga chipmunklib)
 target_link_libraries (bazinga vorbisfilelib)
 target_link_libraries (bazinga vorbislib)
 target_link_libraries (bazinga ogglib)
-target_link_libraries (bazinga freetype2lib)
-
-IF (WIN32)
-target_link_libraries (bazinga devil)
-ENDIF (WIN32)
 
 IF (UNIX)
-target_link_libraries (bazinga IL GL SDL)
+  target_link_libraries (bazinga IL SDL GL)
 ENDIF (UNIX)
 
 # Dependencias

@@ -13,3 +13,5 @@ lua
 .*
 # Zedstate (editor)
 .zedstate
+# Zipped files
+.zip
