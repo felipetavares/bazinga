@@ -1,0 +1,9 @@
+{
+	"file"		: 	"assets/images/augusto-slap.png",
+	"width"		: 	30,
+	"height"	: 	71,
+	"direction"	: 	"forward",
+	"type"		:	"horizontal",
+	"duration"	: 	0.02,
+	"loop"		:	false
+}

@@ -1,0 +1,9 @@
+{
+	"file"		: 	"assets/images/alien.png",
+	"width"		: 	8,
+	"height"	: 	8,
+	"direction"	: 	"forward",
+	"type"		:	"horizontal",
+	"duration"	: 	0.5,
+	"loop"		:	true
+}

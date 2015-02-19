@@ -15,3 +15,5 @@ lua
 .zedstate
 # Zipped files
 .zip
+# Windows files
+Thumbs.db

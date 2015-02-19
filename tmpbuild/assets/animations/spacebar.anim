@@ -1,0 +1,9 @@
+{
+	"file"		: 	"assets/images/spacebar.png",
+	"width"		: 	32,
+	"height"	: 	32,
+	"direction"	: 	"forward",
+	"type"		:	"horizontal",
+	"duration"	: 	0.1,
+	"loop"		:	true
+}
