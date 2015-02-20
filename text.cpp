@@ -8,10 +8,10 @@ using namespace bazinga;
 text::AreaBuffer::AreaBuffer (int w, int h) {
 	freeAreas.push_back(Area({0, 0, w, h}));
 
-	cout << "bazinga: area: initial area: (" << freeAreas[0].x << ", " <<
+	console << LINEINFO << "initial area: (" << freeAreas[0].x << ", " <<
 												freeAreas[0].y << ", " <<
 												freeAreas[0].w << ", " <<
-												freeAreas[0].h << ")" << endl; 
+												freeAreas[0].h << ")" << outline;
 }
 
 text::Area text::AreaBuffer::insert (int w, int h) {
@@ -25,7 +25,7 @@ text::Area text::AreaBuffer::insert (int w, int h) {
 
 			for (auto na :newAreas)
 				freeAreas.push_back(na);
-			
+
 			return a;
 		}
 	}
@@ -181,13 +181,13 @@ int text::Font::measure (const char* str, int len, float& w, float& h, float &dh
 
 	try {
 		bchar = charCache.at(c);
-	} catch (exception e) { 
+	} catch (exception e) {
 		// Load the character
 		if (FT_Load_Char (face, utf82unicode(c), FT_LOAD_RENDER)) {
 			console << LINEINFO << "cannot load character " << c << outline;
 		} else {
 			//cout << "bazinga: text: font: loading character " << c << endl;
-		
+
 			// Get the pre-rendered glyph
 			FT_GlyphSlot g = face->glyph;
 
@@ -202,7 +202,7 @@ int text::Font::measure (const char* str, int len, float& w, float& h, float &dh
 			bchar->adh = g->advance.y >> 6;
 
 			Area position = areaManagers[areaManagers.size()-1]->insert(bchar->w, bchar->h);
-			
+
 			if (position.x < 0) {
 				newAtlas();
 				position = areaManagers[areaManagers.size()-1]->insert(bchar->w, bchar->h);
@@ -244,13 +244,13 @@ int text::Font::render (const char *str, int len) {
 
 	try {
 		bchar = charCache.at(c);
-	} catch (exception e) { 
+	} catch (exception e) {
 		// Load the character
 		if (FT_Load_Char (face, utf82unicode(c), FT_LOAD_RENDER)) {
 			console << LINEINFO << "cannot load character " << c << outline;
 		} else {
 			//cout << "bazinga: text: font: loading character " << c << endl;
-		
+
 			// Get the pre-rendered glyph
 			FT_GlyphSlot g = face->glyph;
 
@@ -265,7 +265,7 @@ int text::Font::render (const char *str, int len) {
 			bchar->adh = g->advance.y >> 6;
 
 			Area position = areaManagers[areaManagers.size()-1]->insert(bchar->w, bchar->h);
-			
+
 			if (position.x < 0) {
 				newAtlas();
 				position = areaManagers[areaManagers.size()-1]->insert(bchar->w, bchar->h);
@@ -338,7 +338,7 @@ void text::Font::newAtlas () {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, bufferLen, bufferLen, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -431,7 +431,7 @@ void text::fillText (string text, int x, int y) {
 	glTranslatef(x, y, 0);
 	while (len > 0) {
 		int advance = font->render(str, len);
-		
+
 		if (advance > 0) {
 			str += advance;
 			len -= advance;
@@ -452,7 +452,7 @@ text::TextMetrics text::measureText (string text) {
 	const char *str = text.c_str();
 	int len = text.size();
 	float charW, charH, charDH;
-	
+
 	TextMetrics metrics;
 	metrics.w = 0;
 	metrics.h = 0;
@@ -460,7 +460,7 @@ text::TextMetrics text::measureText (string text) {
 
 	while (len > 0) {
 		int advance = font->measure(str, len, charW, charH, charDH);
-		
+
 		metrics.w += charW;
 		metrics.h = metrics.h>charH?metrics.h:charH;
 		metrics.dh = metrics.dh<charDH?metrics.dh:charDH;

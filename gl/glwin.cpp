@@ -1,12 +1,15 @@
+#include "../console.h"
 #include "glwin.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <GL/glx.h>
-//extern void* glXGetProcAddress(const GLubyte *);
 #endif
+
 #include <iostream>
 using namespace std;
+using namespace bazinga;
 
 #ifdef _WIN32
 void *getGL(const char *name) {
@@ -40,16 +43,21 @@ PFNGLLINKPROGRAMPROC 	  glLinkProgram;
 PFNGLGETPROGRAMIVPROC	  glGetProgramiv;
 PFNGLGETSHADERINFOLOGPROC glGetProgramInfoLog;
 PFNGLUSEPROGRAMPROC		  glUseProgram;
-//PFNGLACTIVETEXTUREPROC	  glActiveTexture;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 PFNGLUNIFORM1IPROC		  glUniform1i;
 PFNGLUNIFORM4FPROC		  glUniform4f;
 
+#ifdef _WIN32
+PFNGLACTIVETEXTUREPROC	  glActiveTexture;
+#endif
+
 void initGL() {
 #ifdef _WIN32
-  cout << "bazinga: opengl: doing some work Lazy Windows can't do by itself" << endl;
+  console << LINEINFO << "doing some work Lazy Windows can't do by itself" << outline;
+  console << "\t" << "loading OpenGL function definitions" << outline;
 #endif
-  cout << "\t" << "loading OpenGL function definitions" << endl;
+
+  console << LINEINFO << "loading OpenGL function definitions" << outline;
 
   glCreateProgram = (PFNGLCREATEPROGRAMPROC)getGL("glCreateProgram");
   glDeleteProgram = (PFNGLDELETEPROGRAMPROC)getGL("glDeleteProgram");
@@ -64,8 +72,11 @@ void initGL() {
   glGetProgramiv = (PFNGLGETPROGRAMIVPROC)getGL("glGetProgramiv");
   glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)getGL("glGetProgramInfoLog");
   glUseProgram = (PFNGLUSEPROGRAMPROC)getGL("glUseProgram");
-  //glActiveTexture = (PFNGLACTIVETEXTUREPROC)getGL("glActiveTexture");
   glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)getGL("glGetUniformLocation");
   glUniform1i = (PFNGLUNIFORM1IPROC)getGL("glUniform1i");
   glUniform4f = (PFNGLUNIFORM4FPROC)getGL("glUniform4f");
+
+#ifdef _WIN32
+  glActiveTexture = (PFNGLACTIVETEXTUREPROC)getGL("glActiveTexture");
+#endif
 }

@@ -53,7 +53,7 @@ namespace bazinga {
     if (exitFlag)
       return false;
 
-   while ( SDL_PollEvent(&event) ) { 
+   while ( SDL_PollEvent(&event) ) {
       switch (event.type) {
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
@@ -121,7 +121,7 @@ namespace bazinga {
                 fps->setText(ss.str());
                 bgraph->addBar(1/delta);
               //}
-              
+
               //objectCount << activeMap->getObjectCount();
               //objn->setText(objectCount.str());
             };
@@ -177,7 +177,6 @@ namespace bazinga {
 
   bool init () {
     bazinga::video::init();
-    bazinga::cache::init();
     bazinga::text::init();
     bazinga::input::init();
     //bazinga::audio::init();
@@ -233,7 +232,7 @@ namespace bazinga {
         activeMap->update();
 
         video::renderMap(activeMap);
-     
+
         gui::render();
       }
 
@@ -255,7 +254,7 @@ namespace bazinga {
 
           activeMap = new Map(newScenePath);
           activeMap->init();
-          
+
           video::fadeFrom(0, 0, 0, 0.5);
 
           blockNewScene = false;
@@ -273,8 +272,8 @@ namespace bazinga {
     bazinga::gui::deinit();
     //bazinga::audio::deinit();
     bazinga::input::deinit();
-    bazinga::text::deinit();
     bazinga::cache::deinit();
+    bazinga::text::deinit();
     bazinga::video::deinit();
     bazinga::console.deinit();
   }
@@ -314,7 +313,7 @@ void copyMaps () {
 int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
  #else
 int main (int argc, char** argv) {
-#endif /* _WIN32 */ 
+#endif /* _WIN32 */
   console << "Bazinga! Engine compiled in " << __DATE__ << " " << __TIME__ << outline;
   console << outline;
 

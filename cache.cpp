@@ -23,7 +23,7 @@ namespace bazinga {
         return image;
       }
     }
-  
+
     shader::Vertex* getVertexShader (Path path) {
       try {
         return cachedVertex.at(path.getPath());
@@ -47,7 +47,7 @@ namespace bazinga {
         cachedFragment[path.getPath()] = shader;
 
         return shader;
-      }      
+      }
     }
 
     shader::Program* getShaderProgram (string name) {
@@ -56,7 +56,7 @@ namespace bazinga {
       } catch (exception e) {
         console << LINEINFO << "shader program not yet created " << name << outline;
         return NULL;
-      }      
+      }
     }
 
     text::Font* getFont (string name) {

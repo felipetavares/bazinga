@@ -1,5 +1,6 @@
 #include "shader.h"
 #include "gl/glwin.h"
+#include "console.h"
 using namespace bazinga;
 
 shader::Vertex::Vertex (Path file) {
@@ -25,14 +26,14 @@ shader::Vertex::Vertex (Path file) {
 		glGetShaderiv(id, GL_COMPILE_STATUS, &status);
 
 	    if (!status) {
-	    	cout << "bazinga: shader: error(s) compiling " << file.getPath() << endl;
+	    	console << LINEINFO << "error(s) compiling " << file.getPath() << outline;
 	        shader::showInfoLog(id);
 	        glDeleteShader(id);
 	    } else {
-			cout << "bazinga: shader: compiled " << file.getPath() << endl;	    	
+			console << LINEINFO << "compiled " << file.getPath() << outline;
 	    }
 	} else {
-		cout << "bazinga: shader: vertex: file not found: " << file.getPath() << endl;
+		console << LINEINFO << "file not found: " << file.getPath() << outline;
 	}
 }
 
@@ -67,14 +68,14 @@ shader::Fragment::Fragment (Path file) {
 		glGetShaderiv(id, GL_COMPILE_STATUS, &status);
 
 	    if (!status) {
-			cout << "bazinga: shader: error(s) compiling " << file.getPath() << endl;
+			console << LINEINFO <<  "error(s) compiling " << file.getPath() << outline;
 	        shader::showInfoLog(id);
 	        glDeleteShader(id);
 	    } else {
-			cout << "bazinga: shader: compiled " << file.getPath() << endl;	    	
+			console << LINEINFO << "compiled " << file.getPath() << outline;
 	    }
 	} else {
-		cout << "bazinga: shader: fragment: file not found: " << file.getPath() << endl;
+		console << LINEINFO << "file not found: " << file.getPath() << outline;
 	}
 }
 
@@ -98,11 +99,11 @@ shader::Program::Program (shader::Vertex *vert, shader::Fragment* frag) {
 
 	glGetProgramiv(id, GL_LINK_STATUS, &status);
     if (!status) {
-		cout << "bazinga: shader: error(s) linking " << endl;
+		console << LINEINFO << "error(s) linking " << outline;
         shader::showProgramInfoLog(id);
         glDeleteProgram(id);
     } else {
-		cout << "bazinga: shader: linked program" << endl;    	
+		console << LINEINFO << "linked program" << outline;
     }
 }
 
@@ -137,9 +138,9 @@ void shader::showInfoLog (GLuint id) {
 	char *log;
 
 	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
-	
+
 	log = new char[log_length];
-	
+
 	glGetShaderInfoLog(id, log_length, NULL, log);
 
 	cout << "\t" << log << endl;
@@ -152,9 +153,9 @@ void shader::showProgramInfoLog (GLuint id) {
 	char *log;
 
 	glGetProgramiv(id, GL_INFO_LOG_LENGTH, &log_length);
-	
+
 	log = new char[log_length];
-	
+
 	glGetProgramInfoLog(id, log_length, NULL, log);
 
 	cout << "\t" << log << endl;
