@@ -69,8 +69,14 @@ add_library(ogglib STATIC IMPORTED)
 set_target_properties(ogglib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ogg/libogg-1.3.2/src/.libs/libogg.a")
 
 # Adiciona libs FreeType2
+IF(WIN32)
+add_library(freetype2lib STATIC IMPORTED)
+set_target_properties(freetype2lib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/objs/freetype.a")
+ENDIF(WIN32)
+IF(UNIX)
 add_library(freetype2lib STATIC IMPORTED)
 set_target_properties(freetype2lib PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/freetype/freetype-2.5.5/objs/libfreetype.a")
+ENDIF(UNIX)
 
 add_library(bazingares STATIC IMPORTED)
 set_target_properties(bazingares PROPERTIES IMPORTED_LOCATION "bazinga.res")
