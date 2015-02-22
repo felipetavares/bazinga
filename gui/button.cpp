@@ -40,17 +40,22 @@ void gui::Button::setPosition (int x, int y) {
 }
 
 void gui::Button::rrender (int x, int y) {
-	if (click)
-		video::setColor(0.9, 0.7, 0.4, 1); // Click color
-	else if (hover)
-		video::setColor(0.4, 0.7, 0.9, 1); // Hover color
-	else
-		video::setColor(1, 1, 1, 0.5);
+	if (click) {
+		video::setColor1(*gui::colors["active"]);
+		video::setColor2(*gui::colors["active.contrast"]);
+	} else if (hover) {
+		video::setColor1(*gui::colors["foreground"]);
+		video::setColor2(*gui::colors["foreground.contrast"]);
+	}
+	else {
+		video::setColor1(*gui::colors["background"]);
+		video::setColor2(*gui::colors["background.contrast"]);
+	}
 
-	video::fillRect(this->x+x, this->y+y, w, h);
+	video::fillVGradient(this->x+x, this->y+y, w, h);
 
 	auto font = cache::getFont("default");
-	font->setColor(0,0,0,1);
+	font->setColor(*gui::colors["text.regular"]);
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Center);

@@ -146,3 +146,7 @@ int Animation::getHeight() {
 bool Animation::isEnded () {
   return ended;
 }
+
+int Animation::getFrame () {
+  return frame;
+}

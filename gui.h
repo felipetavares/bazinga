@@ -3,6 +3,7 @@
 
 #include "bazinga.h"
 #include <vector>
+#include <map>
 #include <stack>
 using namespace std;
 using namespace bazinga;
@@ -89,6 +90,7 @@ namespace bazinga {
 			int getH();
 
 			void scrollH(float);
+			void scrollV(float);
 		};
 
 		class Window {
@@ -126,6 +128,7 @@ namespace bazinga {
 		extern Scissor scissor;
 		extern stack <Scissor> scissors;
 		extern vector <Window*> windows;
+		extern map <string, video::Color*> colors;
 		extern Widget* focus;
 
 		void init();

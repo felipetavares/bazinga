@@ -51,7 +51,7 @@ void gui::Label::setPosition (int x, int y) {
 
 void gui::Label::render (int x, int y) {
 	auto font = cache::getFont("default");
-	font->setColor(0,0,0,1);
+	font->setColor(*gui::colors["text.regular"]);
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Center);

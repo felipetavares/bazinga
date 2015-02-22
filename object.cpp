@@ -30,6 +30,42 @@ int LAPI_del_object (lua_State* L) {
   return 0;
 }
 
+int LAPI_set_propertie (lua_State* L) {
+  //LAPI_log ("LAPI_set_propertie");
+
+  if (lua_isnumber(L, 3)) {
+    bazinga::getActiveMap()->setPropertie(luaL_checknumber(L, 1),
+                                          luaL_checkstring(L, 2),
+                                          lua_tonumber(L, 3));
+  } else
+  if (lua_isstring(L, 3)) {
+    bazinga::getActiveMap()->setPropertie(luaL_checknumber(L, 1),
+                                          luaL_checkstring(L, 2),
+                                          lua_tostring(L, 3));
+  }
+
+  return 0;
+}
+
+int LAPI_get_propertie (lua_State* L) {
+  //LAPI_log ("LAPI_get_propertie");
+
+  string str;
+  float num;
+
+  bool type = bazinga::getActiveMap()->getPropertie(luaL_checknumber(L, 1), luaL_checkstring(L, 2), str, num);
+
+  if (type) { // str
+    lua_pushstring (L, str.c_str());
+    return 1;
+  } else { // num
+    lua_pushnumber (L, num);
+    return 1;
+  }
+
+  return 0;
+}
+
 int LAPI_new_font (lua_State* L) {
   LAPI_log ("LAPI_new_font");
 
@@ -62,10 +98,11 @@ int LAPI_set_font_color (lua_State* L) {
   LAPI_log("LAPI_set_font_color");
 
   string internalName = string(luaL_checkstring(L, 1));
-  cache::getFont(internalName)->setColor(luaL_checknumber(L, 2),
+  cache::getFont(internalName)->setColor(video::Color(
+                                         luaL_checknumber(L, 2),
                                          luaL_checknumber(L, 3),
                                          luaL_checknumber(L, 4),
-                                         luaL_checknumber(L, 5));
+                                         luaL_checknumber(L, 5)));
 
   return 0;
 }
@@ -173,9 +210,10 @@ int LAPI_set_scene (lua_State* L) {
 int LAPI_set_background_color (lua_State* L) {
   LAPI_log ("LAPI_set_background_color");
 
-  video::setBackgroundColor(luaL_checknumber(L, 1),
+  video::setBackgroundColor(video::Color(
+                            luaL_checknumber(L, 1),
                             luaL_checknumber(L, 2),
-                            luaL_checknumber(L, 3));
+                            luaL_checknumber(L, 3)));
 
   return 0;
 }
@@ -338,7 +376,7 @@ void Object::update () {
     }
 
     if (anim) {
-      num_properties["anim_ended"] = (int)anim->isEnded();
+      num_properties["anim_frame"] = (int)anim->getFrame();
     }
 
     input::setContextsIn(L);
@@ -586,6 +624,18 @@ void Object::createLuaAPI (lua_State* L) {
   // set_scene (fileName)
   lua_pushstring(L, "set_scene");
   lua_pushcfunction(L, LAPI_set_scene);
+  lua_settable(L, -3);
+
+  // Get prop
+  // get_propertie (oid, name)
+  lua_pushstring(L, "get_propertie");
+  lua_pushcfunction(L, LAPI_get_propertie);
+  lua_settable(L, -3);
+
+  // set prop
+  // set_propertie (oid, name)
+  lua_pushstring(L, "set_propertie");
+  lua_pushcfunction(L, LAPI_set_propertie);
   lua_settable(L, -3);
 
   // Set background (clear) color

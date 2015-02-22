@@ -6,6 +6,7 @@ using namespace std;
 using namespace bazinga;
 
 gui::Scissor gui::scissor = Scissor(0,0,0,0);
+map <string, video::Color*> gui::colors;
 stack <gui::Scissor> gui::scissors;
 vector <gui::Window*> gui::windows;
 gui::Widget* gui::focus;
@@ -122,7 +123,11 @@ void gui::Container::pack (int sX, int sY) {
 
 	for (auto child :children) {
 		int csizeX,csizeY;
-		child->getPreferredSize(csizeX, csizeY);
+		if (scrollable) {
+			csizeX = ANY;
+			csizeY = ANY;
+		} else
+			child->getPreferredSize(csizeX, csizeY);
 
 		if (csizeX == ANY)
 			anynX++;
@@ -145,6 +150,7 @@ void gui::Container::pack (int sX, int sY) {
 	} else {
 		freeX = sX-usedX-spacing*(children.size()-1)
 				-(borderLeft+borderRight);
+ 	    freeY = sY-(borderTop+borderBottom);
 	}
 
 	if (freeX > 0 && freeY > 0) {
@@ -306,24 +312,8 @@ void gui::Container::setPosition (int x, int y) {
 }
 
 void gui::Container::render (int wx, int wy) {
-	//video::setColor (1, 0, 0, 1);
-	//video::fillRect (wx, wy, w, h);
-
-	stringstream titleStream;
-	titleStream << fullW << " / ";
-	titleStream << w << " / ";
-	titleStream << scrollable;
-
-	auto font = cache::getFont("default");
-	font->setColor(0,0,0,1);
-	font->setSize(16);
-	text::setFont(font);
-	text::setAlign(text::Left);
-	text::setBaseline(text::Middle);
-	text::fillText(titleStream.str(), wx+x, wy+y);
-
 	for (auto child :children) {
-		child->render(wx-scrollX*(fullW-w), wy+scrollY);
+		child->render(wx-scrollX*(fullW-w), wy-scrollY*(fullH-h));
 	}
 }
 
@@ -341,6 +331,10 @@ int gui::Container::getH () {
 
 void gui::Container::scrollH (float scrollX) {
 	this->scrollX = scrollX;
+}
+
+void gui::Container::scrollV (float scrollY) {
+	this->scrollY = scrollY;
 }
 
 gui::Event::Event (Type type) {
@@ -499,23 +493,24 @@ bool gui::Window::inResize (int x, int y) {
 void gui::Window::render () {
 	onUpdate(this);
 
+	video::setColor1(video::Color(0, 0, 0, 0));
+	video::setColor2(video::Color(0, 0, 0, 0.2));
+	video::shadow(x, y, w, h, 5);
+
 	save();
 	combineScissor(Scissor(x, y, w, h));
 
-	video::setColor(0.5, 0.8, 1, 1);
+	video::setColor1(*gui::colors["background"]);
 	video::fillRect(x, y, w, h);
 
-	video::setColor(1, 1, 1, 1);
-	video::fillRect(x, y, w, tbar);
-
-	video::setColor(0.8,0,0,1);
+	video::setColor1(video::Color(0.8,0,0,0.8));
 	video::fillCircle(x+tbar/2,y+tbar/2,tbar/4);
 
-	video::setColor(0.3,0.8,0.2,1);
+	video::setColor1(video::Color(0.3,0.8,0.2,0.8));
 	video::fillCircle(x+tbar/2*3,y+tbar/2,tbar/4);
 
 	auto font = cache::getFont("default");
-	font->setColor(0,0,0,1);
+	font->setColor(*gui::colors["text.regular"]);
 	font->setSize(tbar/4*3);
 	text::setFont(font);
 	text::setAlign(text::Center);
@@ -539,14 +534,22 @@ void gui::Window::render () {
 		root->render(x, y+tbar);
 	}
 
-	video::setColor(0.2, 0.2, 0.2, 1);
-	video::strokeRect(x, y, w, h);
+	//video::setColor1(video::Color(0.2, 0.2, 0.2, 1));
+	//video::strokeRect(x, y, w, h);
 
 	restore();
 }
 
 void gui::init () {
 	focus = NULL;
+
+	colors["background"] = new video::Color (1, 1 , 1, 1);
+	colors["background.contrast"] = new video::Color (0.9, 0.9 , 0.9, 1);
+	colors["foreground"] = new video::Color (0,0.8,0, 0.5);
+	colors["foreground.contrast"] = new video::Color (0,0.7,0, 0.5);
+	colors["active"] = new video::Color (0,0.8,0, 1);
+	colors["active.contrast"] = new video::Color (0,0.7,0, 1);
+	colors["text.regular"] = new video::Color(0.4,0.4,0.4,1);
 }
 
 void gui::render () {

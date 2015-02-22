@@ -4,6 +4,7 @@
 #include "object.h"
 #include "json.h"
 #include <chipmunk.h>
+#include <unordered_map>
 
 namespace bazinga {
   class Map;
@@ -85,6 +86,9 @@ namespace bazinga {
     void setReorder(bool);
     void setGravity(float, float);
     int getNewID();
+    bool getPropertie(int, string, string&, float&);
+    void setPropertie(int, string, float);
+    void setPropertie(int, string, string);
 
     void setCamera (float, float);
     void setZoom (float, float);

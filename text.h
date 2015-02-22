@@ -2,6 +2,7 @@
 #define BAZINGA_TEXT_H
 
 #include "filesystem.h"
+#include "video.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -61,14 +62,14 @@ namespace bazinga {
 
 			map <uint64_t, Char*> charCache;
 
-			float cr,cg,cb,ca;
+			video::Color color;
 		public:
 			Font (Path);
 			~Font();
 			void setSize (int);
 			int render (const char*, int);
 			int measure (const char*, int, float&, float&, float&);
-			void setColor (float, float, float, float);
+			void setColor (video::Color);
 		private:
 			uint32_t utf82unicode(uint32_t);
 			int utf8asint(const char*, int, uint32_t&);
@@ -108,7 +109,7 @@ namespace bazinga {
 		void setFont (Font*); 	// ctx.font = font		
 		void setAlign (Align); 	// ctx.textAlign = ('center'|'left'|'right')
 		// Not fully implemented
-		void setBaseline (Baseline); // ctx.textBaseline = ('top'|'middle'|'bottom'|'alphabetic')		
+		void setBaseline (Baseline); // ctx.textBaseline = ('top'|'middle'|'bottom'|'alphabetic')
 		// Fill an UTF-8 encoded string
 		void fillText (string, int, int); // ctx.fillText(str, x, y)
 		// Measures an UTF-8 encoded strnig

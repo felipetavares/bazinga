@@ -72,7 +72,7 @@ namespace bazinga {
             auto container = new gui::Container(gui::Container::VERTICAL);
             auto line = new gui::Container(gui::Container::HORIZONTAL);
             auto line2 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line3 = new gui::Container(gui::Container::HORIZONTAL,true);
+            auto line3 = new gui::Container(gui::Container::HORIZONTAL);
             auto line4 = new gui::Container(gui::Container::HORIZONTAL);
 
             line->borderLeft = line->borderRight = 0;
@@ -92,7 +92,7 @@ namespace bazinga {
             line->add(button);
 
             line2->add(new gui::Label("Frames por segundo:"));
-            auto fps = new gui::Label("###");
+            auto fps = new gui::Label("####");
             line2->add(fps);
 
             //line3->add(new gui::Label("Objetos na cena:"));
@@ -108,7 +108,7 @@ namespace bazinga {
             container->add(line);
             container->add(line2);
             container->add(line3);
-            container->add(line4);
+            //container->add(line4);
 
             window->setRoot(container);
             gui::add(window);
@@ -191,14 +191,13 @@ namespace bazinga {
     bazinga::input::activateContext("main");
 
     bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
-    bazinga::video::setWindowIcon(Path("assets/images/icon.bmp"));
 
     auto v = bazinga::cache::getVertexShader(bazinga::Path("shaders/default-vert.glsl"));
     auto f = bazinga::cache::getFragmentShader(bazinga::Path("shaders/default-frag.glsl"));
     bazinga::cache::createShaderProgram (v, f, "default");
     bazinga::cache::getShaderProgram("default")->loadUniforms({"sampler","color"});
 
-    auto defaultFont = Path("assets/fonts/texgyrecursor-bold.otf");
+    auto defaultFont = Path("assets/fonts/texgyrecursor-regular.otf");
     cache::createFont(defaultFont, "default");
 
     console << LINEINFO << "using '" << defaultFont.getPath() << "' as default font" << outline;
@@ -255,11 +254,12 @@ namespace bazinga {
           activeMap = new Map(newScenePath);
           activeMap->init();
 
-          video::fadeFrom(0, 0, 0, 0.5);
+          video::fadeFrom(video::Color(0, 0, 0), 0.5);
 
           blockNewScene = false;
         };
-        video::fadeTo(0, 0, 0, 0.5);
+
+        video::fadeTo(video::Color(0, 0, 0), 0.5);
       }
     }
   }

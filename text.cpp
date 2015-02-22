@@ -63,7 +63,7 @@ vector <text::Area> text::AreaBuffer::createChildren (Area a, int w, int h) {
 
 // Font
 text::Font::Font (Path file):
-	cr(1), cg(1), cb(1), ca(1) {
+	color(1,1,1,1) {
 	if (FT_New_Face(freetype, file.getPath().c_str(), 0, &face)) {
 		console << LINEINFO << "bazinga: text: font: cannot open " << file.getPath() << outline;
 	} else {
@@ -98,11 +98,8 @@ text::Font::~Font () {
 	}
 }
 
-void text::Font::setColor (float r, float g, float b, float a) {
-	cr = r;
-	cg = g;
-	cb = b;
-	ca = a;
+void text::Font::setColor (video::Color color) {
+	this->color = color;
 }
 
 void text::Font::setSize (int size) {
@@ -288,7 +285,6 @@ int text::Font::render (const char *str, int len) {
 
     bazinga::cache::getShaderProgram("default")->use();
 
-	glDisable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -297,7 +293,7 @@ int text::Font::render (const char *str, int len) {
 	glBindTexture(GL_TEXTURE_2D, textures[bchar->tn]);
 
 	cache::getShaderProgram("default")->setUniform("sampler", 0);
-	cache::getShaderProgram("default")->setUniform("color", cr, cg, cb, ca);
+	cache::getShaderProgram("default")->setUniform("color", color.r, color.g, color.b, 1);
 
 	float sx = float(bchar->x)/float(bufferLen);
 	float sy = float(bchar->y)/float(bufferLen);

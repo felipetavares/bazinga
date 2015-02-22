@@ -14,8 +14,8 @@ void gui::BGraph::pack (int w, int h) {
 }
 
 void gui::BGraph::getPreferredSize (int& w, int& h) {
-	w = 1000;
-	h = 200;
+	w = ANY;
+	h = ANY;
 }
 
 void gui::BGraph::getMinSize (int& w, int& h) {
@@ -29,13 +29,13 @@ void gui::BGraph::setPosition (int x, int y) {
 }
 
 void gui::BGraph::rrender (int x, int y) {
-	video::setColor(1, 1, 1, 0.5);
+	video::setColor1(video::Color(1, 1, 1, 0.5));
 	video::fillRect(this->x+x, this->y+y, w, h);
 
 	float pX = this->x+x;
 	float pY = this->y+y+h;
 	float avg = 0;
-	video::setColor(0.4, 0.7, 0.9, 1); // Hover color
+	video::setColor1(*gui::colors["foreground"]);
 
 	float newmax = 0;
 
@@ -43,7 +43,7 @@ void gui::BGraph::rrender (int x, int y) {
 		if (bar > newmax)
 			newmax = bar;
 
-		video::fillRect(pX,pY-h*(bar/max),size,h*(bar/max));
+		video::fillRect(pX,pY-h*(bar/max),size,ceil(h*(bar/max)));
 		avg += bar/float(bars.size());
 		pX += size;
 	}
@@ -52,11 +52,11 @@ void gui::BGraph::rrender (int x, int y) {
 	ss << avg;
 	avg = this->y+y+h-h*(avg/max);
 
-	video::setColor(1.0, 0.0, 0.0, 1);
+	video::setColor1(*gui::colors["active"]);
 	video::fillRect(this->x+x,avg,w,1);
 
 	auto font = cache::getFont("default");
-	font->setColor(0,0,0,1);
+	font->setColor(*gui::colors["text.regular"]);
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Center);

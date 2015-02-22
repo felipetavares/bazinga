@@ -13,6 +13,14 @@ using namespace std;
 
 namespace bazinga {
 	class video {
+	public:
+		class Color {
+		public:
+			float r,g,b,a;
+
+			Color(float,float,float,float=1);
+		};
+	private:
 		static vector <SDL_Rect> *videoModes;
 		static bool anyResolution;
 
@@ -21,9 +29,10 @@ namespace bazinga {
 		static const Uint32 videoFlags = SDL_FULLSCREEN | SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 		static Path icon;
 
-		static float cr, cg, cb, ca;
-		static float bcr, bcg, bcb;
-		static float fcr, fcg, fcb;
+		static Color c1;
+		static Color c2;
+		static Color backgroundColor;
+		static Color foregroundColor;
 		static float endtime,starttime;
 		static bool fadedirection;
 	public:
@@ -37,20 +46,24 @@ namespace bazinga {
 
 		static void init();
 		static void deinit();
-
 		static void setWindowTitleAndIcon (string,string="");
 		static void setWindowIcon(Path);
 		static void render ();
 		static void renderMap (Map*);
-	
+		static void shadow(int,int,int,int,int);
+		static void fillVGradient(int, int, int, int);
+		static void fillHGradient(int, int, int, int);
 		static void fillRect(int, int, int, int);
 		static void strokeRect(int, int, int, int);
 		static void fillCircle(int, int, int);
 		static void strokeCircle(int, int, int);
-		static void setColor(float, float, float, float);
-		static void setBackgroundColor(float, float, float);
-		static void fadeFrom(float, float, float, float);
-		static void fadeTo(float, float, float, float);
+		
+		static void setColor1(Color);
+		static void setColor2(Color);
+		static void setBackgroundColor(Color);
+		
+		static void fadeFrom(Color, float);
+		static void fadeTo(Color, float);
 	private:
 		static void getVideoModes ();
 		static void findBestVideoMode ();

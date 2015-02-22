@@ -67,13 +67,13 @@ void Console::log (string message) {
 }
 
 void Console::render () {
-    video::setColor(0, 0 ,0 , 0.8);
+    video::setColor1(video::Color(0.2 , 0.4, 0.1, 0.5));
     video::fillRect(-video::windowWidth/2, -video::windowHeight/2,
                     video::windowWidth, video::windowHeight);
 
     auto font = cache::getFont("default");
     font->setSize(16);
-    font->setColor(1, 1, 1, 1);
+    font->setColor(video::Color(1, 1, 1, 1));
     text::setAlign(text::Left);
     text::setBaseline(text::Top);
     text::setFont(font);

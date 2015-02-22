@@ -30,9 +30,9 @@ void gui::Slider::setPosition (int x, int y) {
 }
 
 void gui::Slider::rrender (int x, int y) {
-	video::setColor(1, 1, 1, 0.5);
+	video::setColor1(video::Color(1, 1, 1, 0.5));
 	video::fillRect(this->x+x, this->y+y+3, w, 6);
-	video::setColor(0.4, 0.7, 0.9, 1);
+	video::setColor1(video::Color(0.4, 0.7, 0.9, 1));
 	video::fillCircle(this->x+x+w*position, this->y+y+6, 6);
 }
 

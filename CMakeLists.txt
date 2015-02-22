@@ -7,8 +7,8 @@ include(ExternalProject)
 # O CMAKE!
 
 ADD_DEFINITIONS(
-    -std=c++11 # Or -std=c++0x
-    -g # Debug, shall we
+    #-std=c++11 # Or -std=c++0x
+    #-g # Debug, shall we
 )
 
 #IF (WIN32)

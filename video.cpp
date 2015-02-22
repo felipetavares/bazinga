@@ -5,9 +5,10 @@
 #include <il.h>
 using namespace bazinga;
 
-float video::cr = 0, video::cg = 0, video::cb = 0, video::ca = 0;
-float video::bcr = 0, video::bcg = 0, video::bcb = 0;
-float video::fcr = 0, video::fcg = 0, video::fcb = 0;
+video::Color video::c1 = video::Color(0, 0, 0, 0);
+video::Color video::c2 = video::Color(0, 0, 0, 0);
+video::Color video::foregroundColor = video::Color(0, 0, 0, 0);
+video::Color video::backgroundColor = video::Color(0, 0, 0, 0);
 float video::endtime = 0, video::starttime = 0;
 bool video::fadedirection;
 int video::windowBpp = 0;
@@ -18,6 +19,13 @@ function <void(void)> video::onFinish = NULL;
 vector <SDL_Rect> *video::videoModes = NULL;
 Path video::icon;
 SDL_Surface *video::screen = NULL;
+
+video::Color::Color (float r, float g, float b, float a) {
+	this->r = r;
+	this->g = g;
+	this->b = b;
+	this->a = a;
+}
 
 video::video () {
 	endtime = -1;
@@ -32,6 +40,10 @@ void video::init() {
 		console << LINEINFO << "cannot Init SDL" << outline;
 		exit (-1);
 	}
+
+	auto iconPath = Path("assets/images/icon.bmp");
+	console << LINEINFO << "using " << iconPath.getPath() << " as icon" << outline;
+    bazinga::video::setWindowIcon(iconPath);
 
 	SDL_EnableUNICODE(1);
 
@@ -150,33 +162,65 @@ void video::setWindowTitleAndIcon (	string _title,
 }
 
 void video::setWindowIcon (Path icon) {
-	SDL_WM_SetIcon(SDL_LoadBMP(icon.getPath().c_str()), NULL);
+	SDL_Surface* iconI = SDL_LoadBMP(icon.getPath().c_str());
+	SDL_SetColorKey (iconI, SDL_SRCCOLORKEY, SDL_MapRGB(iconI->format, 255, 0, 0));
+
+	SDL_WM_SetIcon(iconI, NULL);
 }
 
 void video::renderMap (Map *map) {
-	glClearColor (bcr,bcg,bcb,1);
+	glClearColor (backgroundColor.r,backgroundColor.g,backgroundColor.b,backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
 	map->render();
 }
 
-void video::setColor (float r, float g, float b, float a) {
-	cr = r;
-	cg = g;
-	cb = b;
-	ca = a;
+void video::setColor1 (Color c1) {
+	video::c1 = c1;
 }
 
-void video::setBackgroundColor (float r, float g, float b) {
-	bcr = r;
-	bcg = g;
-	bcb = b;
+void video::setColor2 (Color c2) {
+	video::c2 = c2;
+}
+
+void video::fillVGradient (int x, int y, int w, int h) {
+	glPushMatrix();
+		glTranslatef (x, y, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glColor4f(c1.r,c1.g,c1.b,c1.a);
+			glVertex3f(0, 0, 0);
+			glVertex3f(w, 0, 0);
+			glColor4f(c2.r,c2.g,c2.b,c2.a);
+			glVertex3f(w, h, 0);
+			glVertex3f(0, h, 0);
+		glEnd();
+	glPopMatrix();	
+}
+
+void video::fillHGradient (int x, int y, int w, int h) {
+	glPushMatrix();
+		glTranslatef (x, y, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glColor4f(c2.r,c2.g,c2.b,c2.a);
+			glVertex3f(w, 0, 0);
+			glVertex3f(w, h, 0);
+			glColor4f(c1.r,c1.g,c1.b,c1.a);
+			glVertex3f(0, h, 0);
+			glVertex3f(0, 0, 0);
+		glEnd();
+	glPopMatrix();	
+}
+
+void video::setBackgroundColor (Color backgroundColor) {
+	video::backgroundColor = backgroundColor;
 }
 
 void video::fillRect (int x, int y, int w, int h) {
 	glPushMatrix();
-		glColor4f(cr,cg,cb,ca);
+		glColor4f(c1.r,c1.g,c1.b,c1.a);
 		glTranslatef (x, y, 0);
 		glDisable (GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
@@ -199,8 +243,8 @@ void video::fillCircle (int cx, int cy, int r) {
 	float y = 0; 
     
 	glBegin(GL_TRIANGLE_FAN); 
-	glColor4f(cr,cg,cb,ca);
-	for(int i = 0; i < num_segments; i++) { 
+	glColor4f(c1.r,c1.g,c1.b,c1.a);
+	for(int i = 0; i < num_segments; i++) {
 		glVertex2f(x + cx, y + cy); // Output vertex 
         
 		// Apply the rotation matrix
@@ -213,7 +257,7 @@ void video::fillCircle (int cx, int cy, int r) {
 
 void video::strokeRect (int x, int y, int w, int h) {
 	glPushMatrix();
-		glColor4f(cr,cg,cb,ca);
+		glColor4f(c1.r,c1.g,c1.b,c1.a);
 		glTranslatef (x, y, 0);
 		glDisable (GL_TEXTURE_2D);
 		glBegin(GL_LINE_LOOP);
@@ -236,7 +280,7 @@ void video::strokeCircle (int cx, int cy, int r) {
 	float y = 0; 
     
 	glBegin(GL_LINES); 
-	glColor4f(cr,cg,cb,ca);
+	glColor4f(c1.r,c1.g,c1.b,c1.a);
 	for(int i = 0; i < num_segments; i++) { 
 		glVertex2f(x + cx, y + cy); // Output vertex 
         
@@ -266,29 +310,85 @@ void video::render () {
 			}
 		}
 
-		video::setColor(fcr,fcg,fcb, factor);
+		video::setColor1(video::Color(foregroundColor.r,foregroundColor.g,foregroundColor.b, factor));
 		video::fillRect(-windowWidth/2, -windowHeight/2, windowWidth, windowHeight);
 	}
 
 	SDL_GL_SwapBuffers();
 }
 
-void video::fadeFrom (float r, float g, float b, float time) {
-	fcr = r;
-	fcg = g;
-	fcb = b;
+void video::fadeFrom (Color foregroundColor, float time) {
+	video::foregroundColor = foregroundColor;
 
 	endtime = bazinga::curtime+time;
 	starttime = bazinga::curtime;
 	fadedirection = true;
 }
 
-void video::fadeTo (float r, float g, float b, float time) {
-	fcr = r;
-	fcg = g;
-	fcb = b;
+void video::fadeTo (Color foregroundColor, float time) {
+	video::foregroundColor = foregroundColor;
 
 	endtime = bazinga::curtime+time;
 	starttime = bazinga::curtime;
 	fadedirection = false;
+}
+
+void video::shadow (int x, int y, int w, int h, int size) {
+	// Compute shadow's bounding box
+	int x2 = x - size;
+	int y2 = y - size;
+	int w2 = w + size*2;
+	int h2 = h + size*2;
+
+	glPushMatrix();
+		glTranslatef (x2, y2, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glColor4f(c1.r,c1.g,c1.b,c1.a);
+			glVertex3f(0, 0, 0);
+			glVertex3f(w2, 0, 0);
+			glColor4f(c2.r,c2.g,c2.b,c2.a);
+			glVertex3f(w+size, size, 0);
+			glVertex3f(size, size, 0);
+		glEnd();
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef (x2, y2, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glColor4f(c2.r,c2.g,c2.b,c2.a);
+			glVertex3f(size, h+size, 0);
+			glVertex3f(size+w, h+size, 0);
+			glColor4f(c1.r,c1.g,c1.b,c1.a);
+			glVertex3f(w2, h2, 0);
+			glVertex3f(0, h2, 0);
+		glEnd();
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef (x2, y2, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glColor4f(c2.r,c2.g,c2.b,c2.a);
+			glVertex3f(w+size, size, 0);
+			glVertex3f(w+size, h+size, 0);
+			glColor4f(c1.r,c1.g,c1.b,c1.a);
+			glVertex3f(w2, h2, 0);
+			glVertex3f(w2, 0, 0);
+		glEnd();
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef (x2, y2, 0);
+		glDisable (GL_TEXTURE_2D);
+		glBegin(GL_QUADS);
+			glColor4f(c2.r,c2.g,c2.b,c2.a);
+			glVertex3f(size, size, 0);
+			glVertex3f(size, h+size, 0);
+			glColor4f(c1.r,c1.g,c1.b,c1.a);
+			glVertex3f(0, h2, 0);
+			glVertex3f(0, 0, 0);
+		glEnd();
+	glPopMatrix();
 }

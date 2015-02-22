@@ -40,16 +40,16 @@ void gui::Entry::setPosition (int x, int y) {
 
 void gui::Entry::rrender (int x, int y) {
 	if (focused)
-		video::setColor(0.9, 0.7, 0.4, 1); // Click color
+		video::setColor1(video::Color(0.9, 0.7, 0.4, 1)); // Click color
 	//else if (hover)
-	//	video::setColor(0.4, 0.7, 0.9, 1); // Hover color
+	//	video::setColor1(video::Color(0.4, 0.7, 0.9, 1)); // Hover color
 	else
-		video::setColor(1, 1, 1, 0.5);
+		video::setColor1(video::Color(1, 1, 1, 0.5));
 
 	video::fillRect(this->x+x, this->y+y, w, h);
 
 	auto font = cache::getFont("default");
-	font->setColor(0,0,0,1);
+	font->setColor(video::Color(0,0,0,1));
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Left);

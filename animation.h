@@ -24,6 +24,7 @@ namespace bazinga {
 		int getHeight();
 
 		bool isEnded();
+		int getFrame();
 	};
 }
 

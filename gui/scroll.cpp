@@ -30,11 +30,11 @@ void gui::Scroll::setPosition (int x, int y) {
 }
 
 void gui::Scroll::rrender (int x, int y) {
-	video::setColor(1, 1, 1, 0.5);
+	video::setColor1(video::Color(1, 1, 1, 0.5));
 	video::fillRect(this->x+x, this->y+y, w, h);
 
 	int start = position*(w-handleSize);
-	video::setColor(0.4, 0.7, 0.9, 1);
+	video::setColor1(video::Color(0.4, 0.7, 0.9, 1));
 	video::fillRect(this->x+x+start, this->y+y, handleSize, h);
 }
 

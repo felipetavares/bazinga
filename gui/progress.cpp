@@ -45,9 +45,9 @@ void gui::Progress::setPosition (int x, int y) {
 }
 
 void gui::Progress::render (int x, int y) {
-	video::setColor(1, 1, 1, 0.5);
+	video::setColor1(video::Color(1, 1, 1, 0.5));
 	video::fillRect(this->x+x, this->y+y, w, h);
-	video::setColor(0.4, 0.7, 0.9, 1);
+	video::setColor1(video::Color(0.4, 0.7, 0.9, 1));
 	video::fillRect(this->x+x, this->y+y,
 					w*position, h);
 
@@ -55,7 +55,7 @@ void gui::Progress::render (int x, int y) {
 	percent << floor(position*100) << "%";
 
 	auto font = cache::getFont("default");
-	font->setColor(1,1,1,1);
+	font->setColor(video::Color(1,1,1,1));
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Center);

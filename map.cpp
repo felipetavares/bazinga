@@ -49,9 +49,9 @@ void Dialog::render () {
 
   img->render(-sizeW/2+img->w/2, startY-20-img->h/2-10);
 
-  video::setColor(0, 0, 0, 0.5);
+  video::setColor1(video::Color(0, 0, 0, 0.5));
   video::fillRect(-sizeW/2, startY-20, sizeW+20, 1.5*size.h*bufferSize+10);
-  video::setColor(1, 1, 1, 1);
+  video::setColor1(video::Color(1, 1, 1, 1));
   video::fillRect(-sizeW/2-10, startY-30, sizeW+20, 1.5*size.h*bufferSize+10);
 
   auto font = cache::getFont(fontName);
@@ -284,27 +284,19 @@ cpSpace* Map::getSpace () {
 }
 
 void Map::deleteObject (int id) {
-  for (int i=0;i<objects.size();i++) {
-    if (objects[i]->num_properties["id"] == id) {
-      objects[i]->num_properties["delete"] = 1;
-    }
-  }    
+  objects[id]->num_properties["delete"] = 1;
 }
 
 int Map::searchObject (string name) {
-  for (int i=0;i<objects.size();i++) {
-    if (objects[i]->str_properties["name"] == name) {
-      return objects[i]->num_properties["id"];
+  for (auto i=objects.begin();i!=objects.end();i++) {
+    if ((*i)->str_properties["name"] == name) {
+      return (int)((*i));
     }    
   }
 }
 
 void Map::hideObject (int id, bool hide) {
-  for (int i=0;i<objects.size();i++) {
-    if (objects[i]->num_properties["id"] == id) {
-      objects[i]->num_properties["hidden"] = (int)hide;
-    }    
-  }
+  ((Object*)id)->num_properties["hidden"] = (int)hide;
 }
 
 // Creates an object from an object description file
@@ -362,6 +354,29 @@ void Map::addObject (Object *object) {
   objects.push_back(object);
 }
 
+bool Map::getPropertie(int id, string prop, string& str, float& num) {
+  try {
+      str = ((Object*)id)->str_properties.at(prop); 
+      return true;
+  } catch (exception) {
+    try {
+      num = ((Object*)id)->num_properties.at(prop); 
+      return false;
+    } catch (exception) {
+      num = 0;
+      return false;
+    }
+  }
+}
+
+void Map::setPropertie(int id, string prop, float num) {
+  ((Object*)id)->num_properties[prop] = num;
+}
+
+void Map::setPropertie(int id, string prop, string str) {
+  ((Object*)id)->str_properties[prop] = str;
+}
+
 cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
     //cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepAct, arb, NULL);
 
@@ -392,13 +407,13 @@ cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
 }
 
 void Map::update() {
-  for (int i=0;i<objects.size();i++) {
-    if (objects[i]->num_properties["delete"]) {
-      delete objects[i];
-      objects.erase(objects.begin()+i);
+  for (auto i=objects.begin();i!=objects.end();i++) {
+    if ((*i)  ->num_properties["delete"]) {
+      delete (*i);
+      objects.erase(i);
       i--;
     } else
-      objects[i]->update();
+      (*i)->update();
   }
 
   for (int i=0;i<dialogs.size();i++) {
@@ -417,9 +432,8 @@ void Map::render() {
   if (reorder)
     sort (objects.begin(), objects.end(), compareObjects);
 
-  for (int i=0;i<objects.size();i++) {
-    if (!objects[i]->num_properties["hidden"])
-      objects[i]->render();
+  for (auto o :objects) {
+    o->render();
   }
 
   glPopMatrix();
