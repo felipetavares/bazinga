@@ -7,7 +7,7 @@ include(ExternalProject)
 # O CMAKE!
 
 ADD_DEFINITIONS(
-    #-std=c++11 # Or -std=c++0x
+    -std=c++11 # Or -std=c++0x
     #-g # Debug, shall we
 )
 
@@ -113,8 +113,6 @@ ExternalProject_Add(
   -DCMAKE_CXX_FLAGS=-std=c++11
   -DCMAKE_MAKE_PROGRAM=make
   -DCMAKE_AR=ar
-  -DCMAKE_C_LINK_EXECUTABLE=ld
-  -DCMAKE_CXX_LINK_EXECUTABLE=ld
 )
 ENDIF(UNIX)
 

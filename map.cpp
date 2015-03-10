@@ -290,7 +290,7 @@ void Map::deleteObject (int id) {
 int Map::searchObject (string name) {
   for (auto i=objects.begin();i!=objects.end();i++) {
     if ((*i)->str_properties["name"] == name) {
-      return (int)((*i));
+      return (int)((long)(*i));
     }    
   }
 }
