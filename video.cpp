@@ -9,6 +9,7 @@ video::Color video::c1 = video::Color(0, 0, 0, 0);
 video::Color video::c2 = video::Color(0, 0, 0, 0);
 video::Color video::foregroundColor = video::Color(0, 0, 0, 0);
 video::Color video::backgroundColor = video::Color(0, 0, 0, 0);
+Uint32 video::videoFlags;
 float video::endtime = 0, video::starttime = 0;
 bool video::fadedirection;
 int video::windowBpp = 0;
@@ -36,6 +37,8 @@ video::~video () {
 }
 
 void video::init() {
+	videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
+
 	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
 		console << LINEINFO << "cannot Init SDL" << outline;
 		exit (-1);
@@ -57,6 +60,8 @@ void video::init() {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	// Enable VSync
+	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
 	//SDL_GL_SetAttribute(SDL_GL_SAMPLE_BUFFERS_ARB, 1);
 	//SDL_GL_SetAttribute(SDL_GL_SAMPLES_ARB, 2);
 

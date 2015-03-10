@@ -7,23 +7,25 @@ gui::ResponsiveWidget::ResponsiveWidget () {
 
 void gui::ResponsiveWidget::event (Event& evt) {
 	if (evt.type != Event::KEYPRESS) {
-		if (inside(evt.x, evt.y, ux, uy, w, h)) {
+		if (inside(evt.x, evt.y, ux, uy, w, h) ||
+			mouseFocus == this) {
 			switch (evt.type) {
 				case Event::MOUSEPRESS:
 					ractivate(evt.x-ux, evt.y-uy);
+					evt.invalidate();
 				break;
 				case Event::MOUSEUNPRESS:
 					rclick(evt.x-ux, evt.y-uy);
+					evt.invalidate();
 				break;
 				case Event::MOUSEMOVE:
 					if (outside)
 						renter(evt.x-ux, evt.y-uy);
 					rmove(evt.x-ux, evt.y-uy);
 					outside = false;
+					//evt.invalidate();
 				break;
 			}
-
-			evt.invalidate();
 		} else {
 			if (!outside)
 				rleave(evt.x-ux, evt.y-uy);
@@ -55,10 +57,10 @@ void gui::ResponsiveWidget::render (int x, int y) {
 	video::setColor2(video::Color(0, 0, 0, 0.2));
 	video::shadow(ux, uy, w, h, 3);
 
-	save();
-	combineScissor(Scissor(ux, uy, w-1, h-1));
+	//save();
+	//combineScissor(Scissor(ux, uy, w-1, h-1));
 	rrender(x, y);
-	restore();
+	//restore();
 }
 
 void gui::ResponsiveWidget::rleave (int x, int y) {
@@ -78,6 +80,10 @@ void gui::ResponsiveWidget::ractivate (int x, int y) {
 }
 
 void gui::ResponsiveWidget::rmove (int x, int y) {
+	
+}
+
+void gui::ResponsiveWidget::rdisable (int x, int y) {
 	
 }
 

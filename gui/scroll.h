@@ -10,10 +10,11 @@ namespace bazinga {
 			float position;
 			int handleSize;
 			int drag;
+			Container::Flow flow;
 		public:
 			function <void(Widget*)> onChange;
 
-			Scroll();
+			Scroll(Container::Flow);
 
 			void pack (int, int);
 			void getPreferredSize(int&, int&);

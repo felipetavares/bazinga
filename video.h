@@ -26,7 +26,7 @@ namespace bazinga {
 
 		static SDL_Surface *screen;
 
-		static const Uint32 videoFlags = SDL_FULLSCREEN | SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
+		static Uint32 videoFlags;
 		static Path icon;
 
 		static Color c1;

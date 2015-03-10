@@ -19,8 +19,8 @@ void gui::BGraph::getPreferredSize (int& w, int& h) {
 }
 
 void gui::BGraph::getMinSize (int& w, int& h) {
-	w = 12;
-	h = 12;
+	w = 72;
+	h = 72;
 }
 
 void gui::BGraph::setPosition (int x, int y) {

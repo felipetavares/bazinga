@@ -283,7 +283,7 @@ int text::Font::render (const char *str, int len) {
 		}
 	}
 
-    bazinga::cache::getShaderProgram("default")->use();
+    bazinga::cache::getShaderProgram("text")->use();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -292,8 +292,8 @@ int text::Font::render (const char *str, int len) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textures[bchar->tn]);
 
-	cache::getShaderProgram("default")->setUniform("sampler", 0);
-	cache::getShaderProgram("default")->setUniform("color", color.r, color.g, color.b, 1);
+	cache::getShaderProgram("text")->setUniform("sampler", 0);
+	cache::getShaderProgram("text")->setUniform("color", color.r, color.g, color.b, 1);
 
 	float sx = float(bchar->x)/float(bufferLen);
 	float sy = float(bchar->y)/float(bufferLen);
@@ -312,7 +312,7 @@ int text::Font::render (const char *str, int len) {
 
 	glTranslatef(bchar->adw,bchar->adh,0);
 
-    bazinga::cache::getShaderProgram("default")->stopUse();
+    bazinga::cache::getShaderProgram("text")->stopUse();
 
     return advance;
 }

@@ -133,6 +133,12 @@ add_executable (bazinga bazinga.cpp
                         text.cpp
                         shader.cpp
                         console.cpp
+                        editor.cpp
+                        render.cpp
+                        math/sm4/sm4.cpp
+                        math/vec2/vec2.cpp
+                        math/vec3/vec3.cpp
+                        math/vec4/vec4.cpp
                         gl/glwin.cpp
                         gui.cpp
                         gui/label.cpp

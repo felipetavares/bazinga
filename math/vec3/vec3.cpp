@@ -64,7 +64,7 @@ double vec3::operator [] (const int i) {
   case 2:
     return z;
   default:
-    return (*this)[abs(i%3)]; // This allows a lot more flexibility in the input number
+    return (*this)[std::abs(i%3)]; // This allows a lot more flexibility in the input number
   }
 }
 

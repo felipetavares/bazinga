@@ -21,7 +21,7 @@ void gui::Button::getPreferredSize (int& w, int& h) {
 	auto size = text::measureText(text);
 
 	w = size.w+12;
-	h = size.h+12;
+	h = 16+12;
 }
 
 void gui::Button::getMinSize (int& w, int& h) {
@@ -31,7 +31,7 @@ void gui::Button::getMinSize (int& w, int& h) {
 	auto size = text::measureText(text);
 
 	w = size.w+12;
-	h = size.h+12;
+	h = 16+12;
 }
 
 void gui::Button::setPosition (int x, int y) {

@@ -17,6 +17,7 @@
   along with Render TRI.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
+#define M_PI 3.14159265358979323846
 #include "sm4.h"
 
 sm4::sm4 () {
@@ -204,7 +205,7 @@ vec4 sm4::getColumn (const unsigned int i) {
   case 3:
     return vec4 {a.w,b.w,c.w,d.w};
   default:
-    return getColumn (abs(i%4));
+    return getColumn (std::abs(i%4));
   }
 }
 
@@ -229,12 +230,12 @@ std::string sm4::str () {
 }
 
 sm4 sm4::rotateX (double a) {
-  a = a*M_PI/180;
+  a = a*M_PI/180;  
 
   return sm4 {
     {1,0,0,0},
-      {0,cos(a),-sin(a),0},
-	{0,sin(a),cos(a),0},
+    {0,cos(a),-sin(a),0},
+  	{0,sin(a),cos(a),0},
 	  {0,0,0,1}
   };
 }
@@ -244,8 +245,8 @@ sm4 sm4::rotateY (double a) {
 
   return sm4 {
     {cos(a),0,sin(a),0},
-      {0,1,0,0},
-	{-sin(a),0,cos(a),0},
+    {0,1,0,0},
+  	{-sin(a),0,cos(a),0},
 	  {0,0,0,1}
   };
 }
@@ -255,8 +256,26 @@ sm4 sm4::rotateZ (double a) {
 
   return sm4 {
     {cos(a),-sin(a),0,0},
-      {sin(a),cos(a),0,0},
-	{0,0,1,0},
+    {sin(a),cos(a),0,0},
+    {0,0,1,0},
 	  {0,0,0,1}
+  };
+}
+
+sm4 sm4::translate (const vec3& v) {
+  return sm4 {
+    {1,0,0,0},
+    {0,1,0,0},
+    {0,0,1,0},
+    {v.x,v.y,v.z,1}
+  };
+}
+
+sm4 sm4::scale (const vec3& v) {
+  return sm4 {
+    {v.x,0,0,0},
+    {0,v.y,0,0},
+    {0,0,v.z,0},
+    {0,0,0,1}
   };
 }

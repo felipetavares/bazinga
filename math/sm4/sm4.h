@@ -57,6 +57,8 @@ public:
   static sm4 rotateY (double);
   static sm4 rotateZ (double);
   
+  static sm4 translate(const vec3&);
+  static sm4 scale(const vec3&);
 
   sm4 t();
   void identity();

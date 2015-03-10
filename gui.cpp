@@ -10,6 +10,7 @@ map <string, video::Color*> gui::colors;
 stack <gui::Scissor> gui::scissors;
 vector <gui::Window*> gui::windows;
 gui::Widget* gui::focus;
+gui::Widget* gui::mouseFocus;
 
 void gui::Widget::focus () {
 
@@ -86,12 +87,13 @@ void gui::Scissor::apply () {
 	glStencilFunc(GL_EQUAL, 1, 0xff);
 }
 
-gui::Container::Container (Flow flow, bool scrollable):
+gui::Container::Container (Flow flow, bool scrollable, bool alignCenter):
 	x(0), y(0), w(0), h(0),
 	borderLeft(6), borderRight(6), borderTop(6), borderBottom(6),
 	spacing(6) {
 	this->flow = flow;
 	this->scrollable = scrollable;
+	this->alignCenter = alignCenter;
 	scrollX = scrollY = 0;
 }
 
@@ -196,7 +198,15 @@ void gui::Container::pack (int sX, int sY) {
 			}
 		}
 
-		child->setPosition(posX, posY);
+		if (alignCenter) {
+			if (flow == VERTICAL)
+				child->setPosition(posX+(w-rsizeX)/2, posY);
+			else
+				child->setPosition(posX, posY+(h-rsizeY)/2);
+		} else {
+			child->setPosition (posX, posY);
+		}
+
 		child->pack(rsizeX, rsizeY);
 
 		if (flow == VERTICAL) {
@@ -312,9 +322,16 @@ void gui::Container::setPosition (int x, int y) {
 }
 
 void gui::Container::render (int wx, int wy) {
+	save();
+	combineScissor(Scissor(x+wx, y+wy, w, h), scrollable);
 	for (auto child :children) {
-		child->render(wx-scrollX*(fullW-w), wy-scrollY*(fullH-h));
+		if (scrollable) {
+			child->render(wx-scrollX*(fullW-w), wy-scrollY*(fullH-h));
+		} else {
+			child->render(wx, wy);
+		}
 	}
+	restore();
 }
 
 void gui::Container::add (Widget *widget) {
@@ -497,8 +514,8 @@ void gui::Window::render () {
 	video::setColor2(video::Color(0, 0, 0, 0.2));
 	video::shadow(x, y, w, h, 5);
 
-	save();
-	combineScissor(Scissor(x, y, w, h));
+	//save();
+	//combineScissor(Scissor(x, y, w, h));
 
 	video::setColor1(*gui::colors["background"]);
 	video::fillRect(x, y, w, h);
@@ -534,10 +551,7 @@ void gui::Window::render () {
 		root->render(x, y+tbar);
 	}
 
-	//video::setColor1(video::Color(0.2, 0.2, 0.2, 1));
-	//video::strokeRect(x, y, w, h);
-
-	restore();
+	//restore();
 }
 
 void gui::init () {
@@ -559,7 +573,7 @@ void gui::render () {
 	setScissor(Scissor(-video::windowWidth/2,
 					   -video::windowHeight/2,
 					   video::windowWidth,
-					   video::windowHeight));
+					   video::windowHeight), false);
 
 	// Render all windows
 	for (int w=0;w<windows.size();w++) {
@@ -600,6 +614,20 @@ void gui::unsetFocus (Widget* wid) {
 	}
 }
 
+void gui::setMouseFocus (Widget* wid) {
+	if (mouseFocus)
+		unsetFocus(mouseFocus);
+	mouseFocus = wid;
+	mouseFocus->focus();
+}
+
+void gui::unsetMouseFocus (Widget* wid) {
+	if (mouseFocus == wid) {
+		mouseFocus->unfocus();
+		mouseFocus = NULL;
+	}
+}
+
 void gui::bringFront (Window* window) {
 	for (int i=0;i<windows.size();i++) {
 		if (windows[i] == window) {
@@ -618,6 +646,11 @@ void gui::mousemove (int x, int y) {
 	event.x = x;
 	event.y = y;
 
+	if (mouseFocus) {
+		mouseFocus->event(event);
+		return;
+	}
+
 	for (int w=windows.size()-1;w>=0;w--) {
 		windows[w]->event(event);
 
@@ -632,6 +665,11 @@ void gui::mousepress (int button, int x, int y) {
 	event.x = x;
 	event.y = y;
 
+	if (mouseFocus) {
+		mouseFocus->event(event);
+		return;
+	}
+
 	for (int w=windows.size()-1;w>=0;w--) {
 		windows[w]->event(event);
 
@@ -645,6 +683,11 @@ void gui::mouseunpress (int button, int x, int y) {
 	event.button = button;
 	event.x = x;
 	event.y = y;
+
+	if (mouseFocus) {
+		mouseFocus->event(event);
+		return;
+	}
 
 	for (int w=windows.size()-1;w>=0;w--) {
 		windows[w]->event(event);
@@ -671,14 +714,18 @@ bool gui::inside (int px, int py,
          py >= by && py <= bh;
 }
 
-void gui::setScissor (Scissor sc) {
+void gui::setScissor (Scissor sc, bool apply) {
 	scissor = sc;
-	scissor.apply();
+
+	if (apply)
+		scissor.apply();
 }
 
-void gui::combineScissor (Scissor sc) {
+void gui::combineScissor (Scissor sc, bool apply) {
 	scissor = scissor+sc;
-	scissor.apply();
+	
+	if (apply)
+		scissor.apply();
 }
 
 void gui::save() {

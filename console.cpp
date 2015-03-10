@@ -73,7 +73,7 @@ void Console::render () {
 
     auto font = cache::getFont("default");
     font->setSize(16);
-    font->setColor(video::Color(1, 1, 1, 1));
+    font->setColor(video::Color(0, 0, 0, 0));
     text::setAlign(text::Left);
     text::setBaseline(text::Top);
     text::setFont(font);

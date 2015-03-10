@@ -3,7 +3,9 @@
 #include "filesystem.h"
 #include "text.h"
 #include "cache.h"
+#include "editor.h"
 #include "console.h"
+#include "render.h"
 #include "gui.h"
 #include "gui/label.h"
 #include "gui/button.h"
@@ -95,44 +97,35 @@ namespace bazinga {
             auto fps = new gui::Label("####");
             line2->add(fps);
 
-            //line3->add(new gui::Label("Objetos na cena:"));
-            //auto objn = new gui::Label("####");
-            //line3->add(objn);
-
-            auto scroll = new gui::Scroll();
-            line4->add(scroll);
-
             auto bgraph = new gui::BGraph();
             line3->add(bgraph);
+
+            auto newWindow = new gui::Button("Abrir nova janela");
+            line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+            line4->add(newWindow);
+            line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
 
             container->add(line);
             container->add(line2);
             container->add(line3);
-            //container->add(line4);
+            container->add(line4);
 
             window->setRoot(container);
             gui::add(window);
 
             window->onUpdate = [=] (gui::Window* win) {
-              stringstream ss, objectCount;
-
-              //if (int(curtime)%2) {
-                ss << floor(1/delta);
-                fps->setText(ss.str());
-                bgraph->addBar(1/delta);
-              //}
-
-              //objectCount << activeMap->getObjectCount();
-              //objn->setText(objectCount.str());
+              stringstream ss;
+              ss << floor(1/delta);
+              fps->setText(ss.str());
+              bgraph->addBar(1/delta);
             };
 
             button->onClick = [=] (gui::Widget* wid) {
               bazinga::quit();
             };
 
-            scroll->onChange = [=] (gui::Widget* wid) {
-              auto scroll = ((gui::Scroll*)wid)->getScroll();
-              line3->scrollH(scroll);
+            newWindow->onClick = [=] (gui::Widget* wid) {
+              editor::openPropertiesWindow();
             };
         }
         break;
@@ -177,6 +170,7 @@ namespace bazinga {
 
   bool init () {
     bazinga::video::init();
+    bazinga::render::init();
     bazinga::text::init();
     bazinga::input::init();
     //bazinga::audio::init();
@@ -192,15 +186,15 @@ namespace bazinga {
 
     bazinga::video::setWindowTitleAndIcon("Bazinga! Engine", "Bazinga! Engine");
 
-    auto v = bazinga::cache::getVertexShader(bazinga::Path("shaders/default-vert.glsl"));
-    auto f = bazinga::cache::getFragmentShader(bazinga::Path("shaders/default-frag.glsl"));
-    bazinga::cache::createShaderProgram (v, f, "default");
-    bazinga::cache::getShaderProgram("default")->loadUniforms({"sampler","color"});
-
     auto defaultFont = Path("assets/fonts/texgyrecursor-regular.otf");
     cache::createFont(defaultFont, "default");
 
     console << LINEINFO << "using '" << defaultFont.getPath() << "' as default font" << outline;
+
+    auto v = bazinga::cache::getVertexShader(bazinga::Path("shaders/text-vert.glsl"));
+    auto f = bazinga::cache::getFragmentShader(bazinga::Path("shaders/text-frag.glsl"));
+    bazinga::cache::createShaderProgram (v, f, "text");
+    bazinga::cache::getShaderProgram("text")->loadUniforms({"sampler","color"});
 
     setScene(Path(mainScenePath));
 
@@ -223,9 +217,9 @@ namespace bazinga {
       curtime = (chrono::duration_cast<chrono::microseconds>((t0-startTime))).count()/1000000.0;
       delta = ((chrono::duration_cast<chrono::microseconds>(elapsed)).count()/1000000.0);
 
-      if (delta > 1.0/30.0) {
-        delta = 1.0/30.0;
-      }
+      //if (delta > 1.0/30.0) {
+      //  delta = 1.0/30.0;
+      //}
 
       if (activeMap) {
         activeMap->update();
@@ -274,6 +268,7 @@ namespace bazinga {
     bazinga::input::deinit();
     bazinga::cache::deinit();
     bazinga::text::deinit();
+    bazinga::render::deinit();
     bazinga::video::deinit();
     bazinga::console.deinit();
   }

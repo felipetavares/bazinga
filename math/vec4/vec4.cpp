@@ -92,7 +92,7 @@ double vec4::operator [] (const int i) {
   case 3:
     return w;
   default:
-    return (*this)[abs(i%4)]; // This allows a lot more flexibility in the input number
+    return (*this)[std::abs(i%4)]; // This allows a lot more flexibility in the input number
   }
 }
 

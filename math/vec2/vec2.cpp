@@ -46,7 +46,7 @@ double vec2::operator [] (const int i) {
   case 1:
     return y;
   default:
-    return (*this)[abs(i%2)]; // This allows a lot more flexibility in the input number
+    return (*this)[std::abs(i%2)]; // This allows a lot more flexibility in the input number
   }
 }
 

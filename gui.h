@@ -75,8 +75,9 @@ namespace bazinga {
 
 			vector <Widget*> children;
 			bool scrollable;
+			bool alignCenter;
 		public:
-			Container(Flow,bool=false);
+			Container(Flow,bool=false,bool=false);
 
 			void pack (int, int);
 			void getPreferredSize(int&, int&);
@@ -130,6 +131,7 @@ namespace bazinga {
 		extern vector <Window*> windows;
 		extern map <string, video::Color*> colors;
 		extern Widget* focus;
+		extern Widget* mouseFocus;
 
 		void init();
 		void render();
@@ -138,13 +140,16 @@ namespace bazinga {
 		// Add a new window to the interface
 		void add(Window*);
 		// Set/Unset focus
-		void setFocus(Widget*);
+		void setFocus(Widget*); 
 		void unsetFocus(Widget*);
+		void setMouseFocus(Widget*);
+		void unsetMouseFocus(Widget*);
 
 		// Handle mouse events
 		void mousemove (int, int);
 		void mousepress (int, int, int);
 		void mouseunpress (int, int, int);
+		// Handle keyboard events
 		void keypress(uint16_t);
 
 		// Handy function
@@ -152,8 +157,8 @@ namespace bazinga {
 					int, int, int, int);
 
 		// Scissorssss, letsss CUTTTT
-		void setScissor(Scissor);
-		void combineScissor(Scissor);
+		void setScissor(Scissor, bool=true);
+		void combineScissor(Scissor, bool=true);
 		void save();
 		void restore();
 
