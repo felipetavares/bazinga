@@ -131,7 +131,7 @@ void input::keypress(string key, uint16_t unicode) {
 
   console << LINEINFO << "" << key  << outline;
 
-  gui::keypress(unicode);
+  gui::keypress(unicode, key);
 
   for (auto c :active) {
     c->keypress(key);

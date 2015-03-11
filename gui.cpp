@@ -697,10 +697,11 @@ void gui::mouseunpress (int button, int x, int y) {
 	}
 }
 
-void gui::keypress (uint16_t unicode) {
+void gui::keypress (uint16_t unicode, string key) {
 	if (focus) {
 		Event evt = Event(Event::KEYPRESS);
 		evt.unicode = unicode;
+		evt.keyname = key;
 		focus->event(evt);
 	}
 }

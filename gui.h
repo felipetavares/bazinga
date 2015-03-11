@@ -22,6 +22,7 @@ namespace bazinga {
 			int button;
 			int x, y;
 			uint16_t unicode;
+			string keyname;
 
 			Event (Type);
 			bool isValid();
@@ -150,7 +151,7 @@ namespace bazinga {
 		void mousepress (int, int, int);
 		void mouseunpress (int, int, int);
 		// Handle keyboard events
-		void keypress(uint16_t);
+		void keypress(uint16_t, string);
 
 		// Handy function
 		bool inside(int, int,

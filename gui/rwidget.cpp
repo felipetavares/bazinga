@@ -43,7 +43,7 @@ void gui::ResponsiveWidget::event (Event& evt) {
 			//utf8 += (unicode & 0x7FF) >> 8;
 		}
 
-		rkey(utf8);
+		rkey(utf8, evt.keyname);
 
 		evt.invalidate();
 	}
@@ -87,6 +87,6 @@ void gui::ResponsiveWidget::rdisable (int x, int y) {
 	
 }
 
-void gui::ResponsiveWidget::rkey (string key) {
+void gui::ResponsiveWidget::rkey (string keyValue, string keyName) {
 	
 }

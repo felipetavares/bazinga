@@ -432,7 +432,7 @@ void text::fillText (string text, int x, int y) {
 			str += advance;
 			len -= advance;
 		} else {
-			cout << "bazinga: text: invalid utf8 string '" << text << "'" << endl;
+			console << "bazinga: text: invalid utf8 string '" << text << "'" << outline;
 			break;
 		}
 	}
@@ -465,7 +465,7 @@ text::TextMetrics text::measureText (string text) {
 			str += advance;
 			len -= advance;
 		} else {
-			cout << "bazinga: text: invalid utf8 string '" << text << "'" << endl;
+			console << "bazinga: text: invalid utf8 string '" << text << "'" << outline;
 			break;
 		}
 	}

@@ -7,8 +7,12 @@
 namespace bazinga {
 	namespace gui {
 		class Entry :public ResponsiveWidget {
+			int cam;
+
+			int cursor;
 			string text;
 			bool focused;
+			float timeSinceLastType;
 		public:
 			Entry();
 
@@ -23,10 +27,14 @@ namespace bazinga {
 			//void rleave(int, int);
 			//void renter(int, int);
 			void rclick(int, int);
-			void rkey(string);
+			void rkey(string, string);
 			//void ractivate(int, int);
 			void focus();
 			void unfocus();
+		private:
+			void insert(string);
+			void remove();
+			void move(bool);
 		};
 	}
 }
