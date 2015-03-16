@@ -1,5 +1,5 @@
-#ifndef BAZINGA_GUI_BUTTON_H
-#define BAZINGA_GUI_BUTTON_H
+#ifndef BAZINGA_GUI_CHECKBOX_H
+#define BAZINGA_GUI_CHECKBOX_H
 
 #include "../gui.h"
 // Full-featured event-enabled widget
@@ -8,16 +8,17 @@
 
 namespace bazinga {
 	namespace gui {
-		class Button :public ResponsiveWidget {
+		class CheckBox :public ResponsiveWidget {
 			Image *image;
 			string text;
 			bool click;
 			bool hover;
+			bool checked;
 		public:
 			function <void(Widget*)> onClick;
 
-			Button(string);
-			Button(Path);
+			CheckBox(string);
+			CheckBox(Path);
 
 			void pack (int, int);
 			void getPreferredSize(int&, int&);
@@ -31,8 +32,11 @@ namespace bazinga {
 			void renter(int, int);
 			void rclick(int, int);
 			void ractivate(int, int);
+
+			bool isChecked();
+			void setChecked(bool);
 		};
 	}
 }
 
-#endif /* BAZINGA_GUI_BUTTON_H */
+#endif /* BAZINGA_GUI_CHECKBOX_H */

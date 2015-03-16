@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "json.h"
+#include "editor.h"
 #include <chipmunk.h>
 #include <unordered_map>
 
@@ -60,18 +61,23 @@ namespace bazinga {
     // tem como prefixo 'p'
     cpSpace *pSpace = NULL;
 
-    float camx, camy;
-    float zoomX, zoomY;
-
     bool reorder = true;
 
     vector <Dialog*> dialogs;
+
   public:
+    // Editor
+    editor::Editor *edit;
+
+    float camx, camy;
+    float zoomX, zoomY;
+
     Map (Path);
     ~Map();
     bool init ();
 
     int newObject (lua_State*);
+    void newObject(Path);
     void addObject(Object*);
 
     void deleteObject(int);
@@ -99,6 +105,15 @@ namespace bazinga {
 
     // For help in debugging
     int getObjectCount();
+
+    // For editing
+    void mousemove(int, int);
+    void mousepress(int, int, int);
+    void mouseunpress(int, int, int);
+
+    BjObject* toJSON(float*);
+
+    void save (Path);
   };
 }
 

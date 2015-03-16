@@ -4,7 +4,10 @@
 #include "image.h"
 #include "cache.h"
 #include "console.h"
+#include "editor.h"
+#include "gui.h"
 #include <ctype.h>
+#include <thread>
 using namespace bazinga;
 
 Dialog::Dialog (int id, string text, Path path, string fontName):
@@ -151,8 +154,8 @@ int Map::oid = 0;
 int Map::did = 0;
 
 Map::Map (Path file):
-  file(file) {
-
+  file(file),
+  edit(NULL) {
   console << LINEINFO << "initializing space... ";
 
   pSpace = cpSpaceNew();
@@ -230,6 +233,8 @@ bool Map::init () {
 
   console << LINEINFO << "" << objects.size() << " objects loaded" << outline;
 
+  edit = new editor::Editor();
+
   delete jMap;
   return true;
 }
@@ -237,6 +242,8 @@ bool Map::init () {
 Map::~Map () {
   if (pSpace)
     cpSpaceFree(pSpace);
+  if (edit)
+    delete edit;
 }
 
 int Map::newDialog (string text, Path path, string font) {
@@ -342,6 +349,23 @@ int Map::newObject (lua_State *L) {
   return 0;
 }
 
+// Creates an object from an object description file
+// NOT Called from Lua
+void Map::newObject (Path fpath) {
+  char *data = fs::getFileData(fpath);
+  string sData = string (data);
+
+  BjObject *object = json::parse (sData);
+  
+  Object *o = new Object(object, 0);
+
+  o->init();
+  addObject(o);
+
+  delete object;
+  delete data;
+}
+
 void Map::setGravity (float x, float y) {
   pSpace->gravity = cpv(x, y);
 }
@@ -424,6 +448,13 @@ void Map::update() {
 }
 
 void Map::render() {
+  glClearColor (video::backgroundColor.r,
+                video::backgroundColor.g,
+                video::backgroundColor.b,
+                video::backgroundColor.a);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
   glPushMatrix();
   glScalef(zoomX, zoomY, 0);
 
@@ -436,6 +467,8 @@ void Map::render() {
     o->render();
   }
 
+  edit->render();
+
   glPopMatrix();
 
   for (int i=0;i<dialogs.size();i++) {
@@ -445,4 +478,88 @@ void Map::render() {
 
 int Map::getObjectCount () {
   return objects.size();
+}
+
+void Map::mousemove(int x, int y) {
+  if (edit)
+    edit->drag(vec2(x/zoomX, y/zoomY));
+}
+
+void Map::mousepress(int bt, int x, int y) {
+  if (bt == 1) {
+    bool selected = false;
+
+    for (int i=objects.size()-1;i>=0;i--) {
+      auto o = objects[i];
+      if (gui::inside(x, y, (o->num_properties["x"]-camx)*zoomX, (o->num_properties["y"]-camy)*zoomY,o->num_properties["w"]*zoomX, o->num_properties["h"]*zoomY)) {
+        editor::openPropertiesWindow(o);
+        if (edit) {
+          edit->select(o);
+        }
+        selected = true;
+        break;
+      }
+    }
+
+    if (!selected) {
+      if (edit) {
+        edit->select(NULL);
+      }
+    }
+
+    if (edit) {
+      edit->setDrag(true, vec2(x/zoomX, y/zoomY));
+    }
+  }
+}
+
+void Map::mouseunpress(int, int, int) {
+  if (edit)
+    edit->setDrag(false);
+}
+
+BjObject* Map::toJSON(float *progress) {
+  BjArray *layers = new BjArray();
+  BjObject *map = new BjObject();
+  BjObject *layer = new BjObject();
+  BjArray *array = new BjArray();
+
+  map->keys.push_back("layers");
+  map->values.push_back(new BjValue(layers));
+
+  layer->keys.push_back("active");
+  layer->values.push_back(new BjValue(true));
+
+  layer->keys.push_back("data");
+  layer->values.push_back(new BjValue(array));
+
+  layers->array.push_back(new BjValue(layer));
+
+  int i;
+  for (auto o :objects) {
+    array->array.push_back(new BjValue(o->toJSON()));
+  
+    *progress = float(i)/float(objects.size());
+    i++;
+  }
+
+  return map;
+}
+
+void Map::save (Path fileName) {
+  auto progress = new float(0);
+  editor::openProgressWindow(progress);
+
+  thread t ([this, progress, fileName] () {    
+    auto data = toJSON(progress);
+    auto dump = json::dumpjson(data);
+
+    fs::setFileData(fileName, dump.c_str(), dump.size());
+
+    delete data;
+
+    *progress = 1;
+  });
+
+  t.detach();
 }

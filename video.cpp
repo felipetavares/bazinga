@@ -37,7 +37,7 @@ video::~video () {
 }
 
 void video::init() {
-	videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
+	videoFlags = SDL_FULLSCREEN | SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 
 	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
 		console << LINEINFO << "cannot Init SDL" << outline;
@@ -73,7 +73,7 @@ void video::init() {
 	findBestVideoMode();
 
 	screen = SDL_SetVideoMode (windowWidth,windowHeight,windowBpp,videoFlags);
-	SDL_ShowCursor (1);
+	SDL_ShowCursor (0);
 
 	console << LINEINFO << "window (" << windowWidth <<  ", " << windowHeight << ")" << outline;
 
@@ -173,14 +173,6 @@ void video::setWindowIcon (Path icon) {
 	SDL_WM_SetIcon(iconI, NULL);
 }
 
-void video::renderMap (Map *map) {
-	glClearColor (backgroundColor.r,backgroundColor.g,backgroundColor.b,backgroundColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-
-	map->render();
-}
-
 void video::setColor1 (Color c1) {
 	video::c1 = c1;
 }
@@ -266,7 +258,7 @@ void video::strokeRect (int x, int y, int w, int h) {
 		glTranslatef (x, y, 0);
 		glDisable (GL_TEXTURE_2D);
 		glBegin(GL_LINE_LOOP);
-			glVertex3f(0, 0, 0);
+			glVertex3f(-1, -1, 0);
 			glVertex3f(w, 0, 0);
 			glVertex3f(w, h, 0);
 			glVertex3f(0, h, 0);

@@ -45,17 +45,23 @@ void gui::Progress::setPosition (int x, int y) {
 }
 
 void gui::Progress::render (int x, int y) {
-	video::setColor1(video::Color(1, 1, 1, 0.5));
-	video::fillRect(this->x+x, this->y+y, w, h);
-	video::setColor1(video::Color(0.4, 0.7, 0.9, 1));
-	video::fillRect(this->x+x, this->y+y,
+	video::setColor1(video::Color(0, 0, 0, 0));
+	video::setColor2(video::Color(0, 0, 0, 0.2));
+	video::shadow(this->x+x, this->y+y, w, h, 1);
+
+	video::setColor1(*gui::colors["background.contrast"]);
+	video::setColor2(*gui::colors["background"]);
+	video::fillVGradient(this->x+x, this->y+y, w, h);
+	video::setColor1(*gui::colors["foreground"]);
+	video::setColor2(*gui::colors["foreground.contrast"]);
+	video::fillVGradient(this->x+x, this->y+y,
 					w*position, h);
 
 	stringstream percent;
 	percent << floor(position*100) << "%";
 
 	auto font = cache::getFont("default");
-	font->setColor(video::Color(1,1,1,1));
+	font->setColor(*gui::colors["text.regular"]);
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Center);

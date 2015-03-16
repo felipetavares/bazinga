@@ -32,6 +32,7 @@ namespace bazinga {
 
     extern map <string, Context*> contexts;
     extern vector <Context*> active;
+    extern map <string, bool> keyboard;
 
     void addContext (string, Context*);
     void activateContext (string);

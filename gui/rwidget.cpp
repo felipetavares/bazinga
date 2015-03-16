@@ -53,10 +53,6 @@ void gui::ResponsiveWidget::render (int x, int y) {
 	ux = this->x+x;
 	uy = this->y+y;
 
-	video::setColor1(video::Color(0, 0, 0, 0));
-	video::setColor2(video::Color(0, 0, 0, 0.2));
-	video::shadow(ux, uy, w, h, 3);
-
 	//save();
 	//combineScissor(Scissor(ux, uy, w-1, h-1));
 	rrender(x, y);

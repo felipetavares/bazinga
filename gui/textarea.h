@@ -1,22 +1,18 @@
-#ifndef BAZINGA_GUI_ENTRY_H
-#define BAZINGA_GUI_ENTRY_H
+#ifndef BAZINGA_TEXTAREA_H
+#define BAZINGA_TEXTAREA_H
 
 #include "../gui.h"
 #include "rwidget.h"
 
 namespace bazinga {
 	namespace gui {
-		class Entry :public ResponsiveWidget {
-			int cam;
-
-			int cursor;
+		class TextArea :public ResponsiveWidget {
 			string text;
 			bool focused;
-			float timeSinceLastType;
-		public:
-			function <void(Widget*)> onChange;
 
-			Entry(string="");
+			vector<string> screen;
+		public:
+			TextArea(string="");
 
 			void pack (int, int);
 			void getPreferredSize(int&, int&);
@@ -35,11 +31,9 @@ namespace bazinga {
 			void focus();
 			void unfocus();
 		private:
-			void insert(string);
-			void remove();
-			void move(bool);
+			void X(int, int);
 		};
 	}
 }
 
-#endif /* BAZINGA_GUI_ENTRY_H */
+#endif /* BAZINGA_TEXTAREA_H */

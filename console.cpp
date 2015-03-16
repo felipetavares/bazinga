@@ -57,13 +57,13 @@ void Console::log (string message) {
         messages[messages.size()-1].increaseNumber();
     } else {
         messages.push_back(Message(message));
-    }
 
-    int height = video::windowHeight/lineHeight;
-    
-    if (video::windowHeight > 0 && messages.size()>=height && !manualScrolling) {
-        offset--;
-    }    
+        int height = video::windowHeight/lineHeight;
+        
+        if (video::windowHeight > 0 && messages.size()>=height && !manualScrolling) {
+            offset--;
+        }    
+    }
 }
 
 void Console::render () {

@@ -1,6 +1,7 @@
 #include "input.h"
 #include "bazinga.h"
 #include "gui.h"
+#include "map.h"
 #include "console.h"
 #include <iostream>
 #include <algorithm>
@@ -8,6 +9,7 @@ using namespace bazinga;
 
 lua_State *input::L = NULL;
 map <string, input::Context*> input::contexts;
+map <string, bool> input::keyboard;
 vector <input::Context*> input::active;
 
 input::Context::Context (string name) {
@@ -102,15 +104,24 @@ void input::activateContext (string name) {
 }
 
 void input::mousemove (int x, int y) {
-  gui::mousemove(x, y);
+ if (!gui::mousemove(x, y)) {
+  if (getActiveMap())
+    getActiveMap()->mousemove(x, y);
+ }
 }
 
 void input::mousepress (int button, int x, int y) {
-  gui::mousepress(button, x, y);
+  if (!gui::mousepress(button, x, y)) {
+    if (getActiveMap())
+      getActiveMap()->mousepress(button, x, y);
+  }
 }
 
 void input::mouseunpress (int button, int x, int y) {
-  gui::mouseunpress(button, x, y);
+  if (!gui::mouseunpress(button, x, y)) {
+    if (getActiveMap())
+      getActiveMap()->mouseunpress(button, x, y);
+  }
 }
 
 void input::keypress(string key, uint16_t unicode) {
@@ -131,7 +142,10 @@ void input::keypress(string key, uint16_t unicode) {
 
   console << LINEINFO << "" << key  << outline;
 
-  gui::keypress(unicode, key);
+  keyboard[key] = true;
+
+  if (gui::keypress(unicode, key))
+    return;
 
   for (auto c :active) {
     c->keypress(key);
@@ -144,6 +158,8 @@ void input::keyunpress(string key) {
   }
 
   console << LINEINFO << "" << key  << outline;
+
+  keyboard[key] = false;
 
   for (auto c :active) {
     c->keyunpress(key);

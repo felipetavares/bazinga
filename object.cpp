@@ -5,6 +5,7 @@
 #include "input.h"
 #include "image.h"
 #include "console.h"
+#include "map.h"
 #include <exception>
 #include <SDL_opengl.h>
 using namespace bazinga;
@@ -358,6 +359,9 @@ void Object::init () {
 }
 
 void Object::update () {
+  if (!bazinga::scriptsEnabled)
+    return;
+
   // If we have an script attached
   if (L) {
     if (num_properties["col"]) {
@@ -445,6 +449,27 @@ void Object::render () {
           glEnd();
       glPopMatrix();
     }
+}
+
+void Object::renderSelected (int level) {
+    float scaleX = num_properties["sx"]==0?1:num_properties["sx"];
+    float scaleY = num_properties["sy"]==0?1:num_properties["sy"];
+
+    glPushMatrix();
+        glRotatef(num_properties["ang"], 0, 0, 1);
+        glScalef(scaleX, scaleY, 0);
+        video::Color color(0,0,0);
+        
+        if (level == 0)
+          color = *gui::colors["active.secondary"];
+        else
+          color = *gui::colors["active"];
+
+        video::setColor1(video::Color(color.r, color.g, color.b, 0));
+        video::setColor2(video::Color(color.r, color.g, color.b, 0.8));
+        video::shadow(num_properties["x"], num_properties["y"],
+                        num_properties["w"], num_properties["h"], 2);
+    glPopMatrix();
 }
 
 void Object::updateProperties() {
@@ -633,7 +658,7 @@ void Object::createLuaAPI (lua_State* L) {
   lua_settable(L, -3);
 
   // set prop
-  // set_propertie (oid, name)
+  // set_propertie (oid, name, value)
   lua_pushstring(L, "set_propertie");
   lua_pushcfunction(L, LAPI_set_propertie);
   lua_settable(L, -3);
@@ -650,4 +675,25 @@ void Object::createLuaAPI (lua_State* L) {
 bool bazinga::compareObjects (Object *obj, Object *obj2) {
     return ((obj->num_properties["y"]+obj->num_properties["h"]-obj->num_properties["z"]) <
            (obj2->num_properties["y"]+obj2->num_properties["h"]-obj2->num_properties["z"]));
+}
+
+BjObject *Object::toJSON () {
+  BjObject* object = new BjObject();
+  BjObject* properties = new BjObject();
+  BjValue* jProperties = new BjValue(properties);
+
+  object->keys.push_back("properties");
+  object->values.push_back(jProperties);
+
+  for (auto i=num_properties.begin();i!=num_properties.end();i++) {
+    properties->keys.push_back(i->first);
+    properties->values.push_back(new BjValue(i->second));
+  }
+
+  for (auto i=str_properties.begin();i!=str_properties.end();i++) {
+    properties->keys.push_back(i->first);
+    properties->values.push_back(new BjValue(i->second));
+  }
+
+  return object;
 }

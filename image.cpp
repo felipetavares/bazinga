@@ -91,9 +91,8 @@ void Image::render (int x, int y) {
   float sX = float(w)/((float)rw);
   float sY = float(h)/((float)rh);
 
-  glScalef(1, 1, 0);
-
   glPushMatrix();
+      glScalef(1, 1, 0);
       glColor4f(1,1,1,1);
       glTranslatef (x, y, 0);
       glEnable (GL_TEXTURE);

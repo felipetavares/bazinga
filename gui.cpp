@@ -1,6 +1,7 @@
 #include "gui.h"
 #include "video.h"
 #include "cache.h"
+#include "console.h"
 #include <sstream>
 using namespace std;
 using namespace bazinga;
@@ -11,6 +12,33 @@ stack <gui::Scissor> gui::scissors;
 vector <gui::Window*> gui::windows;
 gui::Widget* gui::focus;
 gui::Widget* gui::mouseFocus;
+
+gui::LI::LI () {
+	x0 = y0 = x1 = y1 = 1;
+}
+
+gui::LI::LI (float x0, float y0, float x1, float y1) {
+	this->x0 = x0;
+	this->x1 = x1;
+	this->y0 = y0;
+	this->y1 = y1;
+}
+
+float gui::LI::v (float x) {
+	if (x < x0)
+		return y0;
+	if (x > x1)
+		return y1;
+
+	return y0+(y1-y0)*(x-x0)/(x1-x0);
+}
+
+void gui::LI::set (float x0, float y0, float x1, float y1) {
+	this->x0 = x0;
+	this->x1 = x1;
+	this->y0 = y0;
+	this->y1 = y1;
+}
 
 void gui::Widget::focus () {
 
@@ -61,6 +89,9 @@ gui::Scissor gui::Scissor::operator+ (const Scissor& other) {
 }
 
 void gui::Scissor::apply () {
+	glPushMatrix();
+	glLoadIdentity();
+
 	// As all operations in the stencil are done like:
 	// op & mask, if we set the mask to 0xff, the op
 	// will be applied, so this is like "enable stencil drawing"
@@ -76,6 +107,7 @@ void gui::Scissor::apply () {
 	// Now, clear the stencil
 	glClear(GL_STENCIL_BUFFER_BIT);
 
+
 	// Set the drawable area
 	video::fillRect(x-1, y-1, w+2, h+2);
 
@@ -85,16 +117,19 @@ void gui::Scissor::apply () {
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	// Only draw in the places where the stencil is set
 	glStencilFunc(GL_EQUAL, 1, 0xff);
+
+	glPopMatrix();
 }
 
 gui::Container::Container (Flow flow, bool scrollable, bool alignCenter):
-	x(0), y(0), w(0), h(0),
 	borderLeft(6), borderRight(6), borderTop(6), borderBottom(6),
 	spacing(6) {
 	this->flow = flow;
 	this->scrollable = scrollable;
 	this->alignCenter = alignCenter;
 	scrollX = scrollY = 0;
+	x = y = 0;
+	w = h = 0;
 }
 
 void gui::Container::event (Event& evt) {
@@ -245,6 +280,8 @@ void gui::Container::getFullSize (int &pw, int &ph) {
 			}
 		}
 	}
+
+	ph += borderBottom + borderTop + 2*spacing;
 }
 
 void gui::Container::getPreferredSize (int &pw, int &ph) {
@@ -322,20 +359,49 @@ void gui::Container::setPosition (int x, int y) {
 }
 
 void gui::Container::render (int wx, int wy) {
-	save();
-	combineScissor(Scissor(x+wx, y+wy, w, h), scrollable);
+	if (scrollable) {
+		save();
+		combineScissor(Scissor(x+wx, y+wy, w, h), scrollable);
+	}
 	for (auto child :children) {
-		if (scrollable) {
-			child->render(wx-scrollX*(fullW-w), wy-scrollY*(fullH-h));
+		if (scrollable && (fullH > h)) {
+			if (inside(child->x-scrollX*(fullW-w), child->y+child->h-scrollY*(fullH-h),
+						x, y, w, h))
+				child->render(wx-scrollX*(fullW-w), wy-scrollY*(fullH-h));
 		} else {
 			child->render(wx, wy);
 		}
 	}
-	restore();
+	if (scrollable)
+		restore(scrollable);
 }
 
 void gui::Container::add (Widget *widget) {
 	children.push_back(widget);
+	pack(w, h);
+}
+
+void gui::Container::remove (Widget *widget) {
+	int i = 0;
+	for (auto child :children) {
+		if (child == widget) {
+			delete *(children.begin()+i);
+			children.erase(children.begin()+i);
+			break;
+		}
+		i++;
+	}
+
+	pack(w, h);
+}
+
+void gui::Container::clear () {
+	for (auto child :children)
+		delete child;
+
+	children.erase(children.begin(), children.end());
+
+	pack(w, h);
 }
 
 int gui::Container::getW () {
@@ -368,7 +434,8 @@ void gui::Event::invalidate () {
 }
 
 gui::Window::Window (string title, int w, int h):
-	onUpdate(NULL) {
+	onUpdate(NULL),
+	onClose(NULL) {
 	this->title = title;
 	this->w = w;
 	this->h = h;
@@ -397,6 +464,9 @@ gui::Window::Window (string title, int w, int h):
 
 	// Root widget
 	root = NULL;
+
+	scale = new LI(curtime, 		0,
+			  	   curtime+0.1, 	1);
 }
 
 void gui::Window::setRoot (Widget *root) {
@@ -425,7 +495,10 @@ void gui::Window::event (Event& evt) {
 		    }
 
 		    if (inClose(evt.x, evt.y)) {
+				if (onClose)
+					onClose(this);
 				close = true;
+				evt.invalidate();
 		    }
 		    if (inMaximize(evt.x, evt.y)) {
 				x = -video::windowWidth/2;
@@ -436,6 +509,7 @@ void gui::Window::event (Event& evt) {
 					root->pack(w,h-tbar-12);
 				w = root->getW();
 				h = root->getH()+tbar+12;
+				evt.invalidate();
 		    }
 			if (inside(evt.x, evt.y, x, y, w, h)) {
 				bringFront(this);
@@ -510,20 +584,24 @@ bool gui::Window::inResize (int x, int y) {
 void gui::Window::render () {
 	onUpdate(this);
 
+	glPushMatrix();
+	glTranslatef(w/2,h/2,0);
+	glScalef(this->scale->v(curtime), this->scale->v(curtime), 0);
+	glTranslatef(-w/2,-h/2,0);
+	int x = (this->x)/this->scale->v(curtime);
+	int y = (this->y)/this->scale->v(curtime);
+
 	video::setColor1(video::Color(0, 0, 0, 0));
 	video::setColor2(video::Color(0, 0, 0, 0.2));
-	video::shadow(x, y, w, h, 5);
-
-	//save();
-	//combineScissor(Scissor(x, y, w, h));
+	video::shadow(x, y, w, h, 6);
 
 	video::setColor1(*gui::colors["background"]);
 	video::fillRect(x, y, w, h);
 
-	video::setColor1(video::Color(0.8,0,0,0.8));
+	video::setColor1(video::Color(0.8,0,0,0.5));
 	video::fillCircle(x+tbar/2,y+tbar/2,tbar/4);
 
-	video::setColor1(video::Color(0.3,0.8,0.2,0.8));
+	video::setColor1(video::Color(0.3,0.8,0.2,0.5));
 	video::fillCircle(x+tbar/2*3,y+tbar/2,tbar/4);
 
 	auto font = cache::getFont("default");
@@ -532,7 +610,7 @@ void gui::Window::render () {
 	text::setFont(font);
 	text::setAlign(text::Center);
 	text::setBaseline(text::Middle);
-	text::fillText(title, this->x+this->w/2, this->y+tbar/2);
+	text::fillText(title, x+this->w/2, y+tbar/2);
 
 	if (overclose) {
 		auto close = cache::getTexture(Path("assets/gui/close.png"));
@@ -551,18 +629,19 @@ void gui::Window::render () {
 		root->render(x, y+tbar);
 	}
 
-	//restore();
+	glPopMatrix();
 }
 
 void gui::init () {
 	focus = NULL;
 
 	colors["background"] = new video::Color (1, 1 , 1, 1);
-	colors["background.contrast"] = new video::Color (0.9, 0.9 , 0.9, 1);
-	colors["foreground"] = new video::Color (0,0.8,0, 0.5);
+	colors["background.contrast"] = new video::Color (0.95, 0.95, 0.95, 1);
+	colors["foreground"] = new video::Color (0,1,0, 0.5);
 	colors["foreground.contrast"] = new video::Color (0,0.7,0, 0.5);
 	colors["active"] = new video::Color (0,0.8,0, 1);
 	colors["active.contrast"] = new video::Color (0,0.7,0, 1);
+	colors["active.secondary"] = new video::Color (0.8,0,0, 1);
 	colors["text.regular"] = new video::Color(0.4,0.4,0.4,1);
 }
 
@@ -580,6 +659,9 @@ void gui::render () {
 		if (windows[w]->close) {
 			delete windows[w];
 			windows.erase(windows.begin()+w);
+
+			if (windows.size() == 0)
+				SDL_ShowCursor (0);
 		} else {
 			windows[w]->render();
 		}
@@ -596,8 +678,13 @@ void gui::deinit () {
 	}
 }
 
-void gui::add (gui::Window* window) {
+void gui::add (gui::Window* window, int x, int y) {
+	if (x != 0)
+		window->x = x;
+	if (y != 0)
+		window->y = y;
 	windows.push_back(window);
+	SDL_ShowCursor (1);
 }
 
 void gui::setFocus (Widget* wid) {
@@ -641,14 +728,14 @@ void gui::bringFront (Window* window) {
 	windows.push_back(window);
 }
 
-void gui::mousemove (int x, int y) {
+bool gui::mousemove (int x, int y) {
 	Event event = Event(Event::MOUSEMOVE);
 	event.x = x;
 	event.y = y;
 
 	if (mouseFocus) {
 		mouseFocus->event(event);
-		return;
+		return true;
 	}
 
 	for (int w=windows.size()-1;w>=0;w--) {
@@ -657,9 +744,11 @@ void gui::mousemove (int x, int y) {
 		if (!event.isValid())
 			break;
 	}
+
+	return !event.isValid();
 }
 
-void gui::mousepress (int button, int x, int y) {
+bool gui::mousepress (int button, int x, int y) {
 	Event event = Event(Event::MOUSEPRESS);
 	event.button = button;
 	event.x = x;
@@ -667,18 +756,21 @@ void gui::mousepress (int button, int x, int y) {
 
 	if (mouseFocus) {
 		mouseFocus->event(event);
-		return;
+		return true;
 	}
 
 	for (int w=windows.size()-1;w>=0;w--) {
 		windows[w]->event(event);
 
-		if (!event.isValid())
+		if (!event.isValid()) {
 			break;
+		}
 	}
+
+	return !event.isValid();
 }
 
-void gui::mouseunpress (int button, int x, int y) {
+bool gui::mouseunpress (int button, int x, int y) {
 	Event event = Event(Event::MOUSEUNPRESS);
 	event.button = button;
 	event.x = x;
@@ -686,7 +778,7 @@ void gui::mouseunpress (int button, int x, int y) {
 
 	if (mouseFocus) {
 		mouseFocus->event(event);
-		return;
+		return true;
 	}
 
 	for (int w=windows.size()-1;w>=0;w--) {
@@ -695,15 +787,21 @@ void gui::mouseunpress (int button, int x, int y) {
 		if (!event.isValid())
 			break;
 	}
+
+	return !event.isValid();
 }
 
-void gui::keypress (uint16_t unicode, string key) {
+bool gui::keypress (uint16_t unicode, string key) {
 	if (focus) {
 		Event evt = Event(Event::KEYPRESS);
 		evt.unicode = unicode;
 		evt.keyname = key;
 		focus->event(evt);
+	
+		return !evt.isValid();
 	}
+
+	return false;
 }
 
 bool gui::inside (int px, int py,
@@ -733,8 +831,8 @@ void gui::save() {
 	scissors.push(scissor);
 }
 
-void gui::restore () {
+void gui::restore (bool apply) {
 	auto sc = scissors.top();
 	scissors.pop();
-	setScissor(sc);
+	setScissor(sc, apply);
 }

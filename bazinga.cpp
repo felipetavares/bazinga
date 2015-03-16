@@ -7,6 +7,7 @@
 #include "console.h"
 #include "render.h"
 #include "gui.h"
+#include "map.h"
 #include "gui/label.h"
 #include "gui/button.h"
 #include "gui/spacer.h"
@@ -15,6 +16,9 @@
 #include "gui/entry.h"
 #include "gui/bgraph.h"
 #include "gui/scroll.h"
+#include "gui/textarea.h"
+#include "gui/checkbox.h"
+#include "gui/filemanager.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -27,6 +31,7 @@ namespace bazinga {
   bool setNewScene = false;
   bool blockNewScene = false;
   bool exitFlag = false;
+  bool scriptsEnabled = true;
   Path newScenePath;
   string mainScenePath = "scenes/main.scene";
 
@@ -70,12 +75,14 @@ namespace bazinga {
           transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
           input::keypress(keyName, event.key.keysym.unicode);
         } else {
-            auto window = new gui::Window("Opções", 800, 600);
+            auto window = new gui::Window("Opções", 500, 400);
             auto container = new gui::Container(gui::Container::VERTICAL);
             auto line = new gui::Container(gui::Container::HORIZONTAL);
             auto line2 = new gui::Container(gui::Container::HORIZONTAL);
             auto line3 = new gui::Container(gui::Container::HORIZONTAL);
             auto line4 = new gui::Container(gui::Container::HORIZONTAL);
+            auto line5 = new gui::Container(gui::Container::HORIZONTAL);
+            auto line6 = new gui::Container(gui::Container::HORIZONTAL);
 
             line->borderLeft = line->borderRight = 0;
             line->borderTop = line->borderBottom = 0;
@@ -89,6 +96,12 @@ namespace bazinga {
             line4->borderLeft = line4->borderRight = 0;
             line4->borderTop = line4->borderBottom = 0;
 
+            line5->borderLeft = line5->borderRight = 0;
+            line5->borderTop = line5->borderBottom = 0;
+
+            line6->borderLeft = line6->borderRight = 0;
+            line6->borderTop = line6->borderBottom = 0;
+
             line->add(new gui::Label("Sair da demo:"));
             auto button = new gui::Button("Sair");
             line->add(button);
@@ -100,18 +113,45 @@ namespace bazinga {
             auto bgraph = new gui::BGraph();
             line3->add(bgraph);
 
-            auto newWindow = new gui::Button("Abrir nova janela");
+            auto enableGrid = new gui::CheckBox("Grade");
+            auto enableScripts = new gui::CheckBox("Scripts");
+            enableScripts->setChecked(scriptsEnabled);
+            auto gridX = new gui::Entry("80");
+            auto gridY = new gui::Entry("80");
+            auto newObject = new gui::Button("Novo objeto");
             line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
-            line4->add(newWindow);
+            line4->add(enableScripts);
+            line4->add(enableGrid);
+            line4->add(new gui::Label("X:"));
+            line4->add(gridX);
+            line4->add(new gui::Label("Y:"));
+            line4->add(gridY);
+            line4->add(newObject);
             line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+
+            auto savePath = new gui::Entry();
+            auto saveName = new gui::Entry();
+            auto saveAs = new gui::Button("Salvar");
+            auto findFile = new gui::Button(Path("assets/gui/document.png"));
+            line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+            line5->add(findFile);
+            line5->add(savePath);
+            //line5->add(saveName);
+            line5->add(saveAs);
+            line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+
+            auto zoomSlider = new gui::Slider(0);
+            line6->add(zoomSlider);
 
             container->add(line);
             container->add(line2);
             container->add(line3);
             container->add(line4);
+            container->add(line5);
+            container->add(line6);
 
             window->setRoot(container);
-            gui::add(window);
+            gui::add(window, -video::windowWidth/2, video::windowHeight/2-400);
 
             window->onUpdate = [=] (gui::Window* win) {
               stringstream ss;
@@ -120,12 +160,61 @@ namespace bazinga {
               bgraph->addBar(1/delta);
             };
 
+            zoomSlider->onChange = [] (gui::Widget *wid) {
+              auto slider = (gui::Slider*)wid;
+
+              getActiveMap()->zoomX = 10*slider->getPosition();
+              getActiveMap()->zoomY = 10*slider->getPosition();
+            };
+ 
+            enableScripts->onClick = [] (gui::Widget *wid) {
+              auto checkbox = (gui::CheckBox*)wid;
+
+              bazinga::scriptsEnabled = checkbox->isChecked();
+            };
+
+            newObject->onClick = [] (gui::Widget *wid) {
+              getActiveMap()->newObject(Path("objects/table.obj"));
+            };
+
+            saveAs->onClick = [savePath] (gui::Widget *wid) {
+              getActiveMap()->save(Path(savePath->getText()));
+            };
+
+            findFile->onClick = [savePath] (gui::Widget* wid) {
+              new gui::FileManager(savePath);
+            };
+
             button->onClick = [=] (gui::Widget* wid) {
               bazinga::quit();
             };
 
-            newWindow->onClick = [=] (gui::Widget* wid) {
-              editor::openPropertiesWindow();
+            enableGrid->onClick = [=] (gui::Widget* wid) {
+              getActiveMap()->edit->setGrid(((gui::CheckBox*)wid)->isChecked());
+            };
+
+            gridX->onChange = [=] (gui::Widget* wid) {
+              gui::Entry *entry = (gui::Entry*)wid;
+              try {
+                float x = stof(entry->getText());
+                vec2 grid = getActiveMap()->edit->getGridSize();
+                grid.x = x;
+                getActiveMap()->edit->setGridSize(grid);
+              } catch (exception e) {
+
+              }
+            };
+
+            gridY->onChange = [=] (gui::Widget* wid) {
+              gui::Entry *entry = (gui::Entry*)wid;
+              try {
+                float y = stof(entry->getText());
+                vec2 grid = getActiveMap()->edit->getGridSize();
+                grid.y = y;
+                getActiveMap()->edit->setGridSize(grid);
+              } catch (exception e) {
+                
+              }
             };
         }
         break;
@@ -224,7 +313,7 @@ namespace bazinga {
       if (activeMap) {
         activeMap->update();
 
-        video::renderMap(activeMap);
+        activeMap->render();
 
         gui::render();
       }

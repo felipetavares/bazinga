@@ -29,6 +29,10 @@ void gui::BGraph::setPosition (int x, int y) {
 }
 
 void gui::BGraph::rrender (int x, int y) {
+	video::setColor1(video::Color(0, 0, 0, 0));
+	video::setColor2(video::Color(0, 0, 0, 0.2));
+	video::shadow(ux, uy, w, h, 1);
+
 	video::setColor1(video::Color(1, 1, 1, 0.5));
 	video::fillRect(this->x+x, this->y+y, w, h);
 

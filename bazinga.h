@@ -4,14 +4,17 @@
 #include "filesystem.h"
 #include "json.h"
 #include "object.h"
-#include "map.h"
 #include "video.h"
 #include "input.h"
 #include "audio.h"
 
+
 namespace bazinga {
+	class Map;
+
 	extern double delta;
 	extern double curtime;
+	extern bool scriptsEnabled;
 
 	bool init ();
 	void gameLoop();

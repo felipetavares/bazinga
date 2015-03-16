@@ -34,10 +34,13 @@ namespace bazinga {
     void init();
     void update();
     void render();
+    void renderSelected(int);
 
     bool operator< (const Object&);
     void createLuaProperties(lua_State*);
     static void createLuaAPI(lua_State*);
+
+    BjObject *toJSON();
   private:
     void loadFile(Path);
     void updateProperties();

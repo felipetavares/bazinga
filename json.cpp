@@ -106,7 +106,7 @@ string json::dumpjson (BjObject* _json) {
 
 string json::dumpObject (BjObject* _obj) {
 	string str;
-	str += "{\n";
+	str += "{";
 
 	int i=0;
 	for (auto& e :_obj->keys) {
@@ -115,7 +115,6 @@ string json::dumpObject (BjObject* _obj) {
 		str += dumpValue (_obj->values[i]);
 		if (i<_obj->keys.size()-1)
 			str += ",";
-		str += "\n";
 		i++;
 	}
 
@@ -125,15 +124,14 @@ string json::dumpObject (BjObject* _obj) {
 
 string json::dumpArray (BjArray* _arr) {
 	string str;
-	str += "[\n";
+	str += "[";
 
 	int i=0;
 	for (auto& e :_arr->array) {
-		str += "\"" +dumpValue (e) + "\"";
+		str += dumpValue (e);
 		if (i<_arr->array.size()-1)
 			str += ",";
-		str += ",";
-		str += "\n";
+		str += "";
 		i++;
 	}
 

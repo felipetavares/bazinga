@@ -30,6 +30,14 @@ namespace bazinga {
 	class Path {
 		string path; // plataform-specific string
 		string oPath; // non plataform-specific string
+	
+		class Terminal {
+			string value;
+		public:
+			Terminal(string);
+			string getValue();
+			string getLiteralValue();
+		};
 	public:
 		Path (string="");
 		~Path ();

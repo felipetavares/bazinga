@@ -5,6 +5,12 @@ using namespace bazinga;
 
 gui::Label::Label (string text) {
 	this->text = text;
+	image = NULL;
+}
+
+gui::Label::Label (Path path) {
+	text = "";
+	image = cache::getTexture(path);
 }
 
 void gui::Label::setText (string text) {
@@ -57,6 +63,10 @@ void gui::Label::render (int x, int y) {
 	text::setAlign(text::Center);
 	text::setBaseline(text::Middle);
 	text::fillText(text, this->x+x+this->w/2, this->y+y+this->h/2);
+
+	if (image) {
+		image->render(this->x+x+this->w/2, this->y+y+this->h/2);
+	}
 }
 
 int gui::Label::getW () {

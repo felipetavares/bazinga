@@ -2,6 +2,7 @@
 #define BAZINGA_GUI_H
 
 #include "bazinga.h"
+#include "video.h"
 #include <vector>
 #include <map>
 #include <stack>
@@ -10,8 +11,18 @@ using namespace bazinga;
 
 namespace bazinga {
 	namespace gui {
+		#define ANY 0
 
-#define ANY 0
+		class LI {
+			float x0, y0;
+			float x1, y1;
+		public:
+			LI();
+			LI (float, float, float, float);
+			void set(float, float, float, float);
+			float v(float);
+		};
+
 
 		class Event {
 			bool captured;
@@ -40,7 +51,7 @@ namespace bazinga {
 		};
 
 		class Widget {
-		protected:
+		public:
 			int x, y;
 			int w, h;
 			int ux, uy;
@@ -70,14 +81,13 @@ namespace bazinga {
 			Flow flow;
 
 			float scrollX, scrollY;
-			int x, y;
-			int w, h;
 			int fullW, fullH;
 
-			vector <Widget*> children;
 			bool scrollable;
 			bool alignCenter;
 		public:
+			vector <Widget*> children;
+
 			Container(Flow,bool=false,bool=false);
 
 			void pack (int, int);
@@ -87,6 +97,8 @@ namespace bazinga {
 			void setPosition(int, int);
 			void render(int, int);
 			void add(Widget*);
+			void remove(Widget*);
+			void clear();
 			void event(Event&);
 			int getW();
 			int getH();
@@ -96,7 +108,11 @@ namespace bazinga {
 		};
 
 		class Window {
+		public:
 			int x, y;
+		private:
+			LI *scale;
+
 			int w, h;
 			int tbar;
 
@@ -112,6 +128,7 @@ namespace bazinga {
 			Widget* root;
 		public:
 			function <void (Window*)> onUpdate;
+			function <void (Window*)> onClose;
 
 			bool close;
 
@@ -139,7 +156,7 @@ namespace bazinga {
 		void deinit();
 
 		// Add a new window to the interface
-		void add(Window*);
+		void add(Window*, int=0, int=0);
 		// Set/Unset focus
 		void setFocus(Widget*); 
 		void unsetFocus(Widget*);
@@ -147,11 +164,11 @@ namespace bazinga {
 		void unsetMouseFocus(Widget*);
 
 		// Handle mouse events
-		void mousemove (int, int);
-		void mousepress (int, int, int);
-		void mouseunpress (int, int, int);
+		bool mousemove (int, int);
+		bool mousepress (int, int, int);
+		bool mouseunpress (int, int, int);
 		// Handle keyboard events
-		void keypress(uint16_t, string);
+		bool keypress(uint16_t, string);
 
 		// Handy function
 		bool inside(int, int,
@@ -161,7 +178,7 @@ namespace bazinga {
 		void setScissor(Scissor, bool=true);
 		void combineScissor(Scissor, bool=true);
 		void save();
-		void restore();
+		void restore(bool=true);
 
 		// Window organization
 		void bringFront(Window*);

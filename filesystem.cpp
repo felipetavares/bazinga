@@ -1,5 +1,6 @@
 #include "filesystem.h"
-
+#include "console.h"
+#include <stack>
 using namespace bazinga;
 
 #ifdef WIN32
@@ -7,6 +8,24 @@ using namespace bazinga;
 #else
 #define _stat stat
 #endif
+
+Path::Terminal::Terminal (string value) {
+	this->value = value;
+}
+
+string Path::Terminal::getValue () {
+	if (value[value.size()-1] == '/') {
+		return value.substr(0, value.size()-1);
+	} else
+		return value;
+}
+
+string Path::Terminal::getLiteralValue () {
+	if (value[value.size()-1] == '/') {
+		return value;
+	} else
+		return value+'/';
+}
 
 Path::Path (string _path) {
 	oPath = string(_path);
@@ -88,13 +107,56 @@ string Path::getName () {
 }
 
 void Path::normalize() {
-	for (int i=0;i<oPath.size()-1;i++) {
-		if (oPath[i] == '.' && oPath[i+1] == ':') {
-                        oPath = oPath.substr(0,i)+oPath.substr(i+2, oPath.size()-i-2);
-                        i-=2;
+	vector <Terminal> tpath;
+	stack <Terminal> fpath;
+	stack <Terminal> reverse;
+	string buffer;
+	string final;
+	
+	for (auto c :oPath) {
+		if (c == '/') {
+			tpath.push_back(Terminal(buffer+c));
+			buffer = "";
+		} else {
+			buffer += c;
 		}
 	}
-	setPath(oPath);
+
+	if (buffer != "")
+		tpath.push_back(Terminal(buffer));
+
+	if (tpath.size() > 1 && tpath[0].getValue() == ".") {
+		tpath.erase(tpath.begin());
+	}
+
+	for (auto t :tpath) {
+		if (t.getValue() == "..") {
+			if (fpath.size() > 0 && fpath.top().getValue() != "..")
+				fpath.pop();
+			else
+				fpath.push(t);
+		} else {
+			fpath.push(t);
+		}
+	}
+
+	while (fpath.size() > 0) {
+		reverse.push(fpath.top());
+		fpath.pop();
+	}
+	while (reverse.size() > 0) {
+		final += reverse.top().getLiteralValue();
+		reverse.pop();
+	}
+
+	if (final == "") {
+		final = "./";
+	}
+
+	oPath = final;
+	setPath(final);
+
+	console << "\"" << final << "\"" << outline;
 }
 
 fs::fs () {

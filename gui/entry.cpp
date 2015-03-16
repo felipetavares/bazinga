@@ -3,8 +3,8 @@
 #include "../text.h"
 using namespace bazinga;
 
-gui::Entry::Entry () {
-	this->text = "";
+gui::Entry::Entry (string text) {
+	this->text = text;
 	focused = false;
 	cursor = 0;
 	cam = 0;
@@ -41,37 +41,47 @@ void gui::Entry::setPosition (int x, int y) {
 }
 
 void gui::Entry::rrender (int x, int y) {
-	save();
-	combineScissor(Scissor(ux, uy, w-1, h-1));
+	//save();
+	//combineScissor(Scissor(ux, uy, w-1, h-1));
+
+	video::setColor1(video::Color(0, 0, 0, 0));
+	video::setColor2(video::Color(0, 0, 0, 0.2));
+	video::shadow(ux, uy, w, h, 1);
 
 	timeSinceLastType += bazinga::delta;
 
-	if (focused)
-		video::setColor1(video::Color(0.9, 0.7, 0.4, 1)); // Click color
-	//else if (hover)
-	//	video::setColor1(video::Color(0.4, 0.7, 0.9, 1)); // Hover color
-	else
-		video::setColor1(video::Color(1, 1, 1, 0.5));
-
+	video::setColor1(video::Color(1, 1, 1, 0.5));
 	video::fillRect(this->x+x, this->y+y, w, h);
 
+	if (focused) {
+		int shadowSize = 2;
+		video::Color c = *gui::colors["active"];
+		video::setColor1(video::Color(c.r, c.g, c.b, 0.5));
+		video::setColor2(video::Color(c.r, c.g, c.b, 0));
+		video::shadow(ux+shadowSize, uy+shadowSize, w-2*shadowSize, h-2*shadowSize, shadowSize);
+	}
+
 	auto font = cache::getFont("default");
-	font->setColor(video::Color(0,0,0,1));
+	font->setColor(*gui::colors["text.regular"]);
 	font->setSize(16);
 	text::setFont(font);
 	text::setAlign(text::Left);
 	text::setBaseline(text::Middle);
-	text::fillText(text.substr(cam, text.size()), this->x+x, this->y+y+this->h/2);
 
+	int n;
+	for (n=cam+w/12;n<text.size();n++)
+		if (text::measureText(text.substr(cam, n)).w > w)
+			break;
+
+	text::fillText(text.substr(cam, n), this->x+x, this->y+y+this->h/2);
 
 	int cursorX = ux+text::measureText(text.substr(cam, cursor)).w;
 
-	if (int(bazinga::curtime*4)%2 == 0 ||
-		!focused ||
-		timeSinceLastType < 0.5) {
-		video::setColor1(video::Color(0,0,0,1));
-		video::fillRect(cursorX,uy,
-						1,h);
+	if ((int(bazinga::curtime)%2 == 0 ||
+		timeSinceLastType < 0.5) && focused) {
+		video::setColor1(*gui::colors["text.regular"]);
+		video::fillRect(cursorX,uy+2,
+						1,h-4);
 	}
 
 	if (text::measureText(text.substr(cam, cursor)).w > w) {
@@ -79,7 +89,7 @@ void gui::Entry::rrender (int x, int y) {
 		cursor--;
 	}
 
-	restore();
+	//restore();
 }
 
 int gui::Entry::getW () {
@@ -90,8 +100,9 @@ int gui::Entry::getH () {
 	return h;
 }
 
-//void gui::Entry::rleave (int x, int y) {
-//}
+void gui::Entry::rleave (int x, int y) {
+	//gui::unsetFocus(this);
+}
 
 //void gui::Entry::renter (int x, int y) {
 //}
@@ -102,7 +113,7 @@ void gui::Entry::focus () {
 
 void gui::Entry::unfocus () {
 	focused = false;
-}    
+}
 
 void gui::Entry::rclick (int x, int y) {
 	gui::setFocus(this);
@@ -118,7 +129,14 @@ void gui::Entry::rkey (string value, string key) {
 	if (key == "left shift" ||
 		key == "right shift" ||
 		key == "left ctrl" ||
-		key == "right ctrl") {
+		key == "right ctrl" ||
+		key == "left alt" ||
+		key == "right alt" ||
+		key == "left super" ||
+		key == "right super" ||
+		key == "numlock" ||
+		key == "down" ||
+		key == "up") {
 		return;
 	}
 
@@ -136,6 +154,9 @@ void gui::Entry::rkey (string value, string key) {
 void gui::Entry::insert (string data) {
 	text = text.substr(0, cam+cursor)+data+text.substr(cam+cursor, text.size());
 	cursor ++;
+
+	if (onChange)
+		onChange(this);
 }
 
 void gui::Entry::remove () {
@@ -148,6 +169,9 @@ void gui::Entry::remove () {
 			cam --;
 		}
 	}
+
+	if (onChange)
+		onChange(this);
 }
 
 void gui::Entry::move (bool dir) {
@@ -162,4 +186,12 @@ void gui::Entry::move (bool dir) {
 			cam --;
 		}
 	}
+}
+
+string gui::Entry::getText () {
+	return text;
+}
+
+void gui::Entry::setText (string text) {
+	this->text = text;
 }
