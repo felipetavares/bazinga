@@ -813,6 +813,17 @@ bool gui::inside (int px, int py,
          py >= by && py <= bh;
 }
 
+bool gui::insideRect (int px, int py, int pw, int ph,
+				  	  int bx, int by, int bw, int bh) {
+  pw += px;
+  ph += py;
+
+  return inside(px, py, bx, by, bw, bh) &&
+  		 inside(pw, py, bx, by, bw, bh) &&
+  		 inside(pw, ph, bx, by, bw, bh) &&
+  		 inside(px, ph, bx, by, bw, bh);
+}
+
 void gui::setScissor (Scissor sc, bool apply) {
 	scissor = sc;
 

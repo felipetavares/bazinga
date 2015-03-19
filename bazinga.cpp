@@ -83,6 +83,7 @@ namespace bazinga {
             auto line4 = new gui::Container(gui::Container::HORIZONTAL);
             auto line5 = new gui::Container(gui::Container::HORIZONTAL);
             auto line6 = new gui::Container(gui::Container::HORIZONTAL);
+            auto line7 = new gui::Container(gui::Container::HORIZONTAL);
 
             line->borderLeft = line->borderRight = 0;
             line->borderTop = line->borderBottom = 0;
@@ -102,6 +103,9 @@ namespace bazinga {
             line6->borderLeft = line6->borderRight = 0;
             line6->borderTop = line6->borderBottom = 0;
 
+            line7->borderLeft = line7->borderRight = 0;
+            line7->borderTop = line7->borderBottom = 0;
+
             line->add(new gui::Label("Sair da demo:"));
             auto button = new gui::Button("Sair");
             line->add(button);
@@ -118,7 +122,6 @@ namespace bazinga {
             enableScripts->setChecked(scriptsEnabled);
             auto gridX = new gui::Entry("80");
             auto gridY = new gui::Entry("80");
-            auto newObject = new gui::Button("Novo objeto");
             line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
             line4->add(enableScripts);
             line4->add(enableGrid);
@@ -126,16 +129,15 @@ namespace bazinga {
             line4->add(gridX);
             line4->add(new gui::Label("Y:"));
             line4->add(gridY);
-            line4->add(newObject);
             line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
 
-            auto savePath = new gui::Entry();
-            auto saveName = new gui::Entry();
+            //auto savePath = new gui::Entry();
+            //auto saveName = new gui::Entry();
             auto saveAs = new gui::Button("Salvar");
-            auto findFile = new gui::Button(Path("assets/gui/document.png"));
+            //auto findFile = new gui::Button(Path("assets/gui/document.png"));
             line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
-            line5->add(findFile);
-            line5->add(savePath);
+            //line5->add(findFile);
+            //line5->add(savePath);
             //line5->add(saveName);
             line5->add(saveAs);
             line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
@@ -143,12 +145,22 @@ namespace bazinga {
             auto zoomSlider = new gui::Slider(0);
             line6->add(zoomSlider);
 
+            auto newObject = new gui::Button("Novo objeto");
+            auto copyObject = new gui::Button("Copiar Objeto");
+            auto deleteObject = new gui::Button("Deletar Objeto");
+            auto newScene = new gui::Button("Nova cena");
+            line7->add(newObject);
+            line7->add(copyObject);
+            line7->add(deleteObject);
+            line7->add(newScene);
+
             container->add(line);
             container->add(line2);
             container->add(line3);
             container->add(line4);
             container->add(line5);
             container->add(line6);
+            container->add(line7);
 
             window->setRoot(container);
             gui::add(window, -video::windowWidth/2, video::windowHeight/2-400);
@@ -177,13 +189,25 @@ namespace bazinga {
               getActiveMap()->newObject(Path("objects/table.obj"));
             };
 
-            saveAs->onClick = [savePath] (gui::Widget *wid) {
-              getActiveMap()->save(Path(savePath->getText()));
+            copyObject->onClick = [] (gui::Widget *wid) {
+              getActiveMap()->edit->copyObject();
             };
 
-            findFile->onClick = [savePath] (gui::Widget* wid) {
-              new gui::FileManager(savePath);
+            deleteObject->onClick = [] (gui::Widget *wid) {
+              getActiveMap()->edit->deleteObject();
             };
+
+            newScene->onClick = [] (gui::Widget *wid) {
+              editor::openNewSceneWindow();
+            };
+
+            saveAs->onClick = [] (gui::Widget *wid) {
+              getActiveMap()->save();
+            };
+
+            //findFile->onClick = [savePath] (gui::Widget* wid) {
+            //  new gui::FileManager(savePath);
+            //};
 
             button->onClick = [=] (gui::Widget* wid) {
               bazinga::quit();

@@ -10,6 +10,7 @@ ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
     #-pthread # Multithreaded
     -gdwarf-3 # Debug, shall we
+    -Wl,-rpath=lib
 )
 
 #IF (WIN32)
@@ -56,6 +57,11 @@ set_target_properties(libSDLmain PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DI
 add_library(devil STATIC IMPORTED)
 set_target_properties(devil PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/build/DevIL.lib")
 ENDIF(WIN32)
+
+#IF (UNIX)
+#add_library(devil DYNAMIC IMPORTED)
+#set_target_properties(devil PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/build/libIL.so.1.1.0")
+#ENDIF(UNIX)
 
 # Adiciona lib Chipmunk
 add_library(chipmunklib STATIC IMPORTED)
@@ -114,6 +120,7 @@ ExternalProject_Add(
   -DCMAKE_CXX_FLAGS=-std=c++11
   -DCMAKE_MAKE_PROGRAM=make
   -DCMAKE_AR=ar
+  -DCMAKE_LINK_PROGRAM=""
 )
 ENDIF(UNIX)
 
@@ -162,7 +169,6 @@ target_link_libraries (bazinga bazingares)
 target_link_libraries (bazinga devil)
 ENDIF (WIN32)
 
-
 target_link_libraries (bazinga freetype2lib)
 target_link_libraries (bazinga lualib)
 target_link_libraries (bazinga chipmunklib)
@@ -171,7 +177,12 @@ target_link_libraries (bazinga vorbislib)
 target_link_libraries (bazinga ogglib)
 
 IF (UNIX)
-  target_link_libraries (bazinga IL SDL GL)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libSDL-1.2.so.0.11.4 GL)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libIL.so.1.1.0)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libpng15.so.15)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libmng.so.1)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/liblcms.so.1)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libjpeg.so.62)
 ENDIF (UNIX)
 
 # Dependencias

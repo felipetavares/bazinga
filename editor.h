@@ -9,6 +9,7 @@ namespace bazinga {
 		extern gui::Window *currentPropWindow;
 		void openPropertiesWindow(Object*);
 		void openProgressWindow(float*);
+		void openNewSceneWindow();
 
 		class Editor {
 			vector <Object*> selection;
@@ -24,6 +25,9 @@ namespace bazinga {
 			bool enableGrid;
 
 			int dragType;
+
+			vec2 srectPosition;
+			vec2 srectSize;
 		public:
 			Editor();
 
@@ -39,6 +43,9 @@ namespace bazinga {
 
 			vec2 getGridSize();
 			void setGridSize(vec2);
+
+			void copyObject();
+			void deleteObject();
 		private:
 			void toGrid1(Object*);
 			void toGrid2(Object*);

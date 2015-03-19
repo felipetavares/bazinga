@@ -196,6 +196,8 @@ bool Map::init () {
     lScript = NULL;
   }
 
+  edit = new editor::Editor();
+
   BjObject *jMap;
 
   if (fs::fileExists(file)) {
@@ -232,8 +234,6 @@ bool Map::init () {
   }
 
   console << LINEINFO << "" << objects.size() << " objects loaded" << outline;
-
-  edit = new editor::Editor();
 
   delete jMap;
   return true;
@@ -291,7 +291,7 @@ cpSpace* Map::getSpace () {
 }
 
 void Map::deleteObject (int id) {
-  objects[id]->num_properties["delete"] = 1;
+  ((Object*)(long)id)->num_properties["delete"] = 1;
 }
 
 int Map::searchObject (string name) {
@@ -303,7 +303,7 @@ int Map::searchObject (string name) {
 }
 
 void Map::hideObject (int id, bool hide) {
-  ((Object*)id)->num_properties["hidden"] = (int)hide;
+  ((Object*)(long)id)->num_properties["hidden"] = (int)hide;
 }
 
 // Creates an object from an object description file
@@ -380,11 +380,11 @@ void Map::addObject (Object *object) {
 
 bool Map::getPropertie(int id, string prop, string& str, float& num) {
   try {
-      str = ((Object*)id)->str_properties.at(prop); 
+      str = ((Object*)(long)id)->str_properties.at(prop); 
       return true;
   } catch (exception) {
     try {
-      num = ((Object*)id)->num_properties.at(prop); 
+      num = ((Object*)(long)id)->num_properties.at(prop); 
       return false;
     } catch (exception) {
       num = 0;
@@ -394,11 +394,11 @@ bool Map::getPropertie(int id, string prop, string& str, float& num) {
 }
 
 void Map::setPropertie(int id, string prop, float num) {
-  ((Object*)id)->num_properties[prop] = num;
+  ((Object*)(long)id)->num_properties[prop] = num;
 }
 
 void Map::setPropertie(int id, string prop, string str) {
-  ((Object*)id)->str_properties[prop] = str;
+  ((Object*)(long)id)->str_properties[prop] = str;
 }
 
 cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
@@ -546,7 +546,9 @@ BjObject* Map::toJSON(float *progress) {
   return map;
 }
 
-void Map::save (Path fileName) {
+void Map::save () {
+  auto fileName = file;
+
   auto progress = new float(0);
   editor::openProgressWindow(progress);
 

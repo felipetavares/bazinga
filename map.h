@@ -54,7 +54,6 @@ namespace bazinga {
     Path file;
     lua_State *lScript;
 
-    vector <Object*> objects;
     static int oid;
     static int did;
     // Tudo relacionado à física
@@ -66,6 +65,8 @@ namespace bazinga {
     vector <Dialog*> dialogs;
 
   public:
+    // Objects
+    vector <Object*> objects;
     // Editor
     editor::Editor *edit;
 
@@ -113,7 +114,7 @@ namespace bazinga {
 
     BjObject* toJSON(float*);
 
-    void save (Path);
+    void save ();
   };
 }
 

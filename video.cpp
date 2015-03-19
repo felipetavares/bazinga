@@ -258,7 +258,7 @@ void video::strokeRect (int x, int y, int w, int h) {
 		glTranslatef (x, y, 0);
 		glDisable (GL_TEXTURE_2D);
 		glBegin(GL_LINE_LOOP);
-			glVertex3f(-1, -1, 0);
+			glVertex3f(0, 0, 0);
 			glVertex3f(w, 0, 0);
 			glVertex3f(w, h, 0);
 			glVertex3f(0, h, 0);

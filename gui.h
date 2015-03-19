@@ -170,9 +170,11 @@ namespace bazinga {
 		// Handle keyboard events
 		bool keypress(uint16_t, string);
 
-		// Handy function
+		// Handy functions
 		bool inside(int, int,
 					int, int, int, int);
+		bool insideRect(int, int, int, int,
+						int, int, int, int);
 
 		// Scissorssss, letsss CUTTTT
 		void setScissor(Scissor, bool=true);

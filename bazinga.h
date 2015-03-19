@@ -16,6 +16,8 @@ namespace bazinga {
 	extern double curtime;
 	extern bool scriptsEnabled;
 
+	extern Map* activeMap;
+
 	bool init ();
 	void gameLoop();
 	void deinit ();

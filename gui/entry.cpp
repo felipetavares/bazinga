@@ -6,7 +6,7 @@ using namespace bazinga;
 gui::Entry::Entry (string text) {
 	this->text = text;
 	focused = false;
-	cursor = 0;
+	cursor = text.size();
 	cam = 0;
 }
 
@@ -194,4 +194,5 @@ string gui::Entry::getText () {
 
 void gui::Entry::setText (string text) {
 	this->text = text;
+	cursor = text.size();
 }

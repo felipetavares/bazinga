@@ -465,10 +465,9 @@ void Object::renderSelected (int level) {
         else
           color = *gui::colors["active"];
 
-        video::setColor1(video::Color(color.r, color.g, color.b, 0));
-        video::setColor2(video::Color(color.r, color.g, color.b, 0.8));
-        video::shadow(num_properties["x"], num_properties["y"],
-                        num_properties["w"], num_properties["h"], 2);
+        video::setColor1(color);
+        video::strokeRect(num_properties["x"], num_properties["y"],
+                          num_properties["w"], num_properties["h"]);
     glPopMatrix();
 }
 

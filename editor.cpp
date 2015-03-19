@@ -18,6 +18,50 @@ using namespace bazinga;
 
 gui::Window *editor::currentPropWindow = NULL;
 
+void editor::openNewSceneWindow () {
+	auto window = new gui::Window("Nova Cena", 300, 300);
+
+	auto container = new gui::Container(gui::Container::VERTICAL);
+
+	auto line1 = new gui::Container(gui::Container::HORIZONTAL);
+	auto line2 = new gui::Container(gui::Container::HORIZONTAL);
+
+	auto sceneName = new gui::Entry("SemTitulo");
+	line1->add(new gui::Label("Nome: "));
+	line1->add(sceneName);
+
+	auto cancelButton = new gui::Button("Cancelar");
+	auto createButton = new gui::Button("Criar");
+	line2->add(cancelButton);
+	line2->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+	line2->add(createButton);
+
+	container->add(line1);
+	container->add(new gui::Spacer(gui::Spacer::VERTICAL));
+	container->add(line2);
+
+	window->setRoot(container);
+	gui::add(window);
+
+	window->onUpdate = [=] (gui::Window* win) {
+	};
+
+	window->onClose = [] (gui::Window* win) {
+	};
+
+	cancelButton->onClick = [window] (gui::Widget *wid) {
+		window->close = true;
+	};
+
+	createButton->onClick = [=] (gui::Widget* wid) {
+		if (getActiveMap())
+			delete getActiveMap();
+		activeMap = new Map(Path("scenes/"+sceneName->getText()+".scene"));
+		activeMap->init();
+		window->close = true;
+	};
+}
+
 void editor::openProgressWindow (float *p) {
 	auto window = new gui::Window("Salvando", 300, 90);
 
@@ -162,6 +206,9 @@ editor::Editor::Editor () {
 }
 
 void editor::Editor::select (Object *obj) {
+	if (input::keyboard["space"])
+		return;
+
 	if (obj == NULL) {
 		selection.clear();
 		dragStart.clear();
@@ -207,6 +254,8 @@ void editor::Editor::drag (vec2 position) {
 				i++;
 			}
 		}
+
+		srectSize = position-srectPosition;
 	}
 }
 void editor::Editor::setDrag (bool dragging, vec2 dragStart) {
@@ -219,6 +268,9 @@ void editor::Editor::setDrag (bool dragging, vec2 dragStart) {
 	}
 
 	if (dragging == true) {
+		srectPosition = dragStart;
+		srectSize = vec2(0,0);
+
 		int i = 0;
 		for (auto o :selection) {
 			if (input::keyboard["left ctrl"]) {
@@ -239,6 +291,25 @@ void editor::Editor::setDrag (bool dragging, vec2 dragStart) {
 	} else {
 		for (auto o :selection)
 			toGrid(o);
+		if (selection.size() == 0) {
+			this->dragStart.clear();
+			for (auto o :getActiveMap()->objects) {
+				int x = srectPosition.x;
+				int y = srectPosition.y;
+				int w = srectSize.x;
+				int h = srectSize.y;
+
+				int ox = o->num_properties["x"]-getActiveMap()->camx;
+				int oy = o->num_properties["y"]-getActiveMap()->camy;
+				int ow = o->num_properties["w"];
+				int oh = o->num_properties["h"];
+	
+				if (gui::insideRect(ox, oy, oh, oh, x, y, w, h)) {
+					selection.push_back(o);
+					this->dragStart.push_back(vec2());
+				}
+			}
+		}
 	}
 }
 
@@ -252,12 +323,13 @@ void editor::Editor::render () {
 		i++;
 	}
 
-	if (enableGrid) {
-		glPushMatrix();
-		glLoadIdentity();
+	glPushMatrix();
+	glLoadIdentity();
 
-		float zoomX = getActiveMap()->zoomX;
-		float zoomY = getActiveMap()->zoomY;
+	float zoomX = getActiveMap()->zoomX;
+	float zoomY = getActiveMap()->zoomY;
+
+	if (enableGrid) {
 		float dX = gridSize.x*zoomX;
 		float dY = gridSize.y*zoomY;
 
@@ -277,9 +349,14 @@ void editor::Editor::render () {
 			video::setColor1(*gui::colors["foreground"]);
 			video::fillRect(left, y, w, 1);
 		}
-
-		glPopMatrix();
 	}
+
+	if (dragging && selection.size() == 0) {
+		video::setColor1(*gui::colors["foreground"]);
+		video::fillRect(srectPosition.x*zoomX, srectPosition.y*zoomY, srectSize.x*zoomX, srectSize.y*zoomY);
+	}
+
+	glPopMatrix();
 }
 
 void editor::Editor::toGrid (Object *o) {
@@ -409,4 +486,18 @@ vec2 editor::Editor::getGridSize() {
 void editor::Editor::setGridSize(vec2 size) {
 	if (size.x > 0 && size.y > 0)
 		gridSize = size;
+}
+
+void editor::Editor::copyObject () {
+	for (auto o :selection) {
+		getActiveMap()->addObject(new Object(*o));
+	}
+}
+
+void editor::Editor::deleteObject () {
+	for (auto o :selection) {
+		getActiveMap()->deleteObject((int)(long)o);
+	}
+
+	selection.clear();
 }
