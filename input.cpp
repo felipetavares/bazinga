@@ -41,6 +41,8 @@ bool input::Context::keypress (string key) {
       }
     }
   }
+
+  return true;
 }
 
 bool input::Context::keyunpress (string key) {
@@ -67,7 +69,10 @@ bool input::Context::keyunpress (string key) {
       }
     }
   }
+
+  return true;
 }
+
 void input::Context::createArgs (lua_State *L) {
   // Push the table
   lua_newtable(L);

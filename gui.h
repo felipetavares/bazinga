@@ -56,6 +56,7 @@ namespace bazinga {
 			int w, h;
 			int ux, uy;
 		public:
+			virtual ~Widget();
 			virtual void event (Event&) = 0;
 			virtual void pack (int, int) = 0;
 			virtual void getPreferredSize(int&, int&) = 0;
@@ -89,6 +90,7 @@ namespace bazinga {
 			vector <Widget*> children;
 
 			Container(Flow,bool=false,bool=false);
+			~Container();
 
 			void pack (int, int);
 			void getPreferredSize(int&, int&);
@@ -133,6 +135,7 @@ namespace bazinga {
 			bool close;
 
 			Window(string, int, int);
+			~Window();
 
 			void event(Event&);
 			void setRoot (Widget*);

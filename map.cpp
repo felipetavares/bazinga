@@ -11,8 +11,9 @@
 using namespace bazinga;
 
 Dialog::Dialog (int id, string text, Path path, string fontName):
-  id(id), text(text), textPosition(0), bufferPosition(0), nextTime(0),
-  ended(false), imagePath(path), fontName(fontName) {
+  imagePath(path), id(id), fontName(fontName),
+  text(text), textPosition(0), bufferPosition(0),
+  nextTime(0), ended(false) {
     sizeW = video::windowWidth/2;
     intervalTime = 0.05;
     nextWordSize = 0;
@@ -255,7 +256,6 @@ int Map::newDialog (string text, Path path, string font) {
 }
 
 void Map::deleteDialog (int id) {
-  int i;
   for (int i=0;i<dialogs.size();i++) {
     auto d = dialogs[i];
     if (d->getID() == id) {
@@ -267,13 +267,14 @@ void Map::deleteDialog (int id) {
 }
 
 bool Map::isDialogEnded (int id) {
-  int i;
   for (int i=0;i<dialogs.size();i++) {
     auto d = dialogs[i];
     if (d->getID() == id) {
       return d->isEnded();
     }
   }
+
+  return true;
 }
 
 void Map::setCamera (float x, float y) {
@@ -300,6 +301,8 @@ int Map::searchObject (string name) {
       return (int)((long)(*i));
     }    
   }
+
+  return 0;
 }
 
 void Map::hideObject (int id, bool hide) {
@@ -535,7 +538,7 @@ BjObject* Map::toJSON(float *progress) {
 
   layers->array.push_back(new BjValue(layer));
 
-  int i;
+  int i = 0;
   for (auto o :objects) {
     array->array.push_back(new BjValue(o->toJSON()));
   

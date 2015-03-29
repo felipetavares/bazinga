@@ -25,6 +25,8 @@ void gui::ResponsiveWidget::event (Event& evt) {
 					outside = false;
 					//evt.invalidate();
 				break;
+				default:
+				break;
 			}
 		} else {
 			if (!outside)

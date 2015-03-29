@@ -121,7 +121,7 @@ int LAPI_set_align (lua_State* L) {
   } else if (alignment == "right") {
     align = text::Right;
   } else {
-    // Error, not a valid value
+    return 0;
   }
 
   text::setAlign(align);
@@ -140,10 +140,14 @@ int LAPI_fill_text (lua_State* L) {
 
 int LAPI_set_camera (lua_State* L) {
   bazinga::getActiveMap()->setCamera(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
+
+  return 0;
 }
 
 int LAPI_set_zoom (lua_State* L) {
   bazinga::getActiveMap()->setZoom(luaL_checknumber(L, 1), luaL_checknumber(L, 2));
+
+  return 0;
 }
 
 int LAPI_new_dialog (lua_State* L) {

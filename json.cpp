@@ -204,6 +204,8 @@ BjObject* json::parseObject (long int& _pos, string& _str) {
 		}
 	} else {
 	}
+
+	return object;
 }
 
 BjValue* json::parseString (long int& _pos, string& _str) {
@@ -222,6 +224,8 @@ BjValue* json::parseString (long int& _pos, string& _str) {
 	} else {
 		// Error
 	}
+
+	return NULL;
 }
 
 BjValue* json::parseNumber (long int& _pos, string& _str) {
@@ -300,6 +304,8 @@ BjArray* json::parseArray (long int& _pos,string& _str) {
 	} else {
 		// Array didn't start with [ ???
 	}
+
+	return array;
 }
 
 
@@ -351,6 +357,8 @@ BjValue* json::parseValue (long int& _pos, string& _str) {
 	else {
 		// INVALID
 	}
+
+	return NULL;
 }
 
 bool json::isChar (char _c, long int& _pos, string& _str) {

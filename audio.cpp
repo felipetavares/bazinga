@@ -114,7 +114,7 @@ void audio::fill_buffer (void* udata, Uint8* stream, int len) {
 	for (int i=0;i<newstreamlen;i++) {
 		double p = double(i)*rate;
 		int j = int(floor(p));
-		int k = int(ceil(p));
+		//int k = int(ceil(p));
 		//newstream[i] = double(((int16_t*)data)[j])*double(p-j)+double(((int16_t*)data)[k])*double(k-p);
 		//newstream[i] = analogAudioAt(p, 1, (int16_t*)data, full_len/2);
 		newstream[i] = ((int16_t*)data)[j]*0;

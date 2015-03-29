@@ -108,7 +108,6 @@ void text::Font::setSize (int size) {
 }
 
 uint32_t text::Font::utf82unicode(uint32_t utf8) {
-	uint32_t unicode;
 	// First byte
 	uint32_t fb1 = (utf8>>0);
 	uint32_t fb2 = (utf8>>8);
@@ -409,6 +408,8 @@ void text::fillText (string text, int x, int y) {
 		case Right:
 			x -= metrics.w;
 		break;
+		default:
+		break;
 	}
 
 	switch (baseline) {
@@ -420,6 +421,8 @@ void text::fillText (string text, int x, int y) {
 		break;
 		case Bottom:
 			y += metrics.h-metrics.dh;
+		break;
+		default:
 		break;
 	}
 

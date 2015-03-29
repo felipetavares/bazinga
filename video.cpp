@@ -37,7 +37,7 @@ video::~video () {
 }
 
 void video::init() {
-	videoFlags = SDL_FULLSCREEN | SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
+	videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
 
 	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
 		console << LINEINFO << "cannot Init SDL" << outline;

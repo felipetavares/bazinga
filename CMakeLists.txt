@@ -11,6 +11,7 @@ ADD_DEFINITIONS(
     #-pthread # Multithreaded
     -gdwarf-3 # Debug, shall we
     -Wl,-rpath=lib
+    -Wall
 )
 
 #IF (WIN32)
@@ -91,7 +92,7 @@ set_target_properties(bazingares PROPERTIES IMPORTED_LOCATION "bazinga.res")
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
   lua.o ALL
-  COMMAND ${CMAKE_MAKE_PROGRAM} ansi
+  COMMAND ${CMAKE_MAKE_PROGRAM} generic
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
 
@@ -115,12 +116,10 @@ ExternalProject_Add(
   Chipmunk
   URL ${CMAKE_SOURCE_DIR}/chipmunk/Chipmunk-6.2.1/
   INSTALL_COMMAND ""
-  CMAKE_ARGS -DCMAKE_CXX_COMPILER=g++
-  -DCMAKE_C_COMPILER=gcc
+  CMAKE_ARGS -DCMAKE_CXX_COMPILER=clang++-3.5
+  -DCMAKE_C_COMPILER=clang-3.5
   -DCMAKE_CXX_FLAGS=-std=c++11
   -DCMAKE_MAKE_PROGRAM=make
-  -DCMAKE_AR=ar
-  -DCMAKE_LINK_PROGRAM=""
 )
 ENDIF(UNIX)
 

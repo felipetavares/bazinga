@@ -38,6 +38,8 @@ sm4 sm4::operator = (const sm4& mat) {
   b = mat.a;
   c = mat.c;
   d = mat.d;
+
+  return *this;
 }
 
 sm4 sm4::operator + (const sm4& mat) {
@@ -205,7 +207,7 @@ vec4 sm4::getColumn (const unsigned int i) {
   case 3:
     return vec4 {a.w,b.w,c.w,d.w};
   default:
-    return getColumn (std::abs(i%4));
+    return getColumn (i%4);
   }
 }
 

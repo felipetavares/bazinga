@@ -40,6 +40,10 @@ void gui::LI::set (float x0, float y0, float x1, float y1) {
 	this->y1 = y1;
 }
 
+gui::Widget::~Widget () {
+
+}
+
 void gui::Widget::focus () {
 
 }
@@ -122,14 +126,20 @@ void gui::Scissor::apply () {
 }
 
 gui::Container::Container (Flow flow, bool scrollable, bool alignCenter):
-	borderLeft(6), borderRight(6), borderTop(6), borderBottom(6),
-	spacing(6) {
+	spacing(6), borderLeft(6), borderRight(6), borderTop(6), borderBottom(6)
+	 {
 	this->flow = flow;
 	this->scrollable = scrollable;
 	this->alignCenter = alignCenter;
 	scrollX = scrollY = 0;
 	x = y = 0;
 	w = h = 0;
+}
+
+gui::Container::~Container () {
+	for (auto w :children) {
+		delete w;
+	}
 }
 
 void gui::Container::event (Event& evt) {
@@ -469,6 +479,11 @@ gui::Window::Window (string title, int w, int h):
 			  	   curtime+0.1, 	1);
 }
 
+gui::Window::~Window () {
+	delete root;
+	delete scale;
+}
+
 void gui::Window::setRoot (Widget *root) {
 	this->root = root;
 	this->root->pack(w,h-tbar-12);
@@ -539,6 +554,8 @@ void gui::Window::event (Event& evt) {
 				h = root->getH()+tbar+12;
 				evt.invalidate();
 		  	}
+		break;
+		default:
 		break;
 	}
 

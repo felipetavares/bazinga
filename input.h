@@ -26,7 +26,7 @@ namespace bazinga {
 
       bool keypress (string);
       bool keyunpress (string);
-      void createArgs(lua_State *L=L);
+      void createArgs(lua_State *L=input::L);
       void updateArgs();
     };
 

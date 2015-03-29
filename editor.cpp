@@ -304,7 +304,7 @@ void editor::Editor::setDrag (bool dragging, vec2 dragStart) {
 				int ow = o->num_properties["w"];
 				int oh = o->num_properties["h"];
 	
-				if (gui::insideRect(ox, oy, oh, oh, x, y, w, h)) {
+				if (gui::insideRect(ox, oy, ow, oh, x, y, w, h)) {
 					selection.push_back(o);
 					this->dragStart.push_back(vec2());
 				}
@@ -362,9 +362,6 @@ void editor::Editor::render () {
 void editor::Editor::toGrid (Object *o) {
 	if (!enableGrid)
 		return;
-
-	float x = o->num_properties["w"]/2;
-	float y = o->num_properties["h"]/2;
 
 	/* Vectors something like
 	 this
@@ -442,7 +439,7 @@ void editor::Editor::toGrid2 (Object *o) {
 
 	auto px = o->num_properties["x"];
 	auto py = o->num_properties["y"];
-	auto pw = o->num_properties["w"];
+	//auto pw = o->num_properties["w"];
 	auto ph = o->num_properties["h"];
 
 	o->num_properties["x"] = x + px - fmod((px+x-gridPosition.x),gridSize.x);
@@ -455,8 +452,8 @@ void editor::Editor::toGrid3 (Object *o) {
 
 	auto px = o->num_properties["x"];
 	auto py = o->num_properties["y"];
-	auto pw = o->num_properties["w"];
-	auto ph = o->num_properties["h"];
+	//auto pw = o->num_properties["w"];
+	//auto ph = o->num_properties["h"];
 
 	o->num_properties["x"] = x + px - fmod((px+x-gridPosition.x),gridSize.x);
 	o->num_properties["y"] = y + py - fmod((py+y-gridPosition.y),gridSize.y);
@@ -469,7 +466,7 @@ void editor::Editor::toGrid4 (Object *o) {
 	auto px = o->num_properties["x"];
 	auto py = o->num_properties["y"];
 	auto pw = o->num_properties["w"];
-	auto ph = o->num_properties["h"];
+	//auto ph = o->num_properties["h"];
 
 	o->num_properties["x"] = x + px - fmod((px+x-gridPosition.x),gridSize.x)+gridSize.x - pw;
 	o->num_properties["y"] = y + py - fmod((py+y-gridPosition.y),gridSize.y);
