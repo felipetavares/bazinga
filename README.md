@@ -6,7 +6,7 @@ Bazinga Testing
 Testing tech for the Bazinga! Engine.
 Bazinga! Engine is a fully featured engine for 2d games.
 Its workflow is based upon the [Bazinga! Edit](https://github.com/felipetavares/bazinga.v2) editor, which exports to a custom JSON
-map format and them the map can be loaded and executed.
+map format and then the map can be loaded and executed.
 
 Full lua integration and objects are supported at this stage.
 

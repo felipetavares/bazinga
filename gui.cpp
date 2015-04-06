@@ -485,6 +485,10 @@ gui::Window::~Window () {
 }
 
 void gui::Window::setRoot (Widget *root) {
+	if (this->root != NULL) {
+		delete this->root;
+	}
+
 	this->root = root;
 	this->root->pack(w,h-tbar-12);
 	w = root->getW();

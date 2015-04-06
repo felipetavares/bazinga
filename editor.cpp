@@ -87,10 +87,13 @@ void editor::openProgressWindow (float *p) {
 }
 
 void editor::openPropertiesWindow (Object *o) {
-	if (currentPropWindow != NULL)
-		currentPropWindow->close = true;
+	gui::Window *window;
 
-	auto window = new gui::Window("Objeto: "+o->str_properties["name"], 400, video::windowHeight);
+	if (currentPropWindow != NULL) {
+		window = currentPropWindow;
+	} else {
+		window = new gui::Window("Objeto: "+o->str_properties["name"], 400, video::windowHeight);
+	}
 
 	auto container = new gui::Container(gui::Container::VERTICAL);
 	auto buttonsContainer = new gui::Container(gui::Container::HORIZONTAL, false, true);
@@ -148,7 +151,9 @@ void editor::openPropertiesWindow (Object *o) {
 	propertiesContainer->borderTop = propertiesContainer->borderBottom = 0;
 
 	window->setRoot(container);
-	gui::add(window, video::windowWidth/2-400, 0);
+	
+	if (window != currentPropWindow)
+		gui::add(window, video::windowWidth/2-400, 0);
 
 	window->onUpdate = [=] (gui::Window* win) {
 	};
