@@ -1,7 +1,7 @@
 Bazinga Testing
 ==============
 
-![Bazinga! Engine](https://raw.github.com/felipetavares/bazingatesting/master/tmpbuild/icon.png)
+![Bazinga! Engine](https://raw.github.com/felipetavares/bazingatesting/master/tmpbuild/assets/images/icon.png)
 
 #### The CCSL team recommends [Atom](https://atom.io)!
 
