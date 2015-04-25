@@ -17,7 +17,9 @@ function update(self)
 		accept = bazinga.ended_dialog(dialog)
 	end
 
-	bazinga.hide_object(spacebarAnimationID, not accept)
+	if spacebarAnimationID ~= 0 then
+		bazinga.hide_object(spacebarAnimationID, not accept)
+	end
 
 	if self.anim ~= '' and self.anim_ended ~= 0 then
 		dialog = bazinga.new_dialog(dialogs[dialogNum], 'assets/images/augusto-face.png', 'sb')

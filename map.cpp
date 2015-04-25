@@ -24,7 +24,7 @@ void Dialog::update () {
     if (curtime > nextTime) {
       switch (text[textPosition]) {
         case '!': case '.': case '?':
-          intervalTime = 0.5;
+          intervalTime = 1;
         break;
         case ';': case ':':
           intervalTime = 0.5;
@@ -68,6 +68,8 @@ void Dialog::render () {
 }
 
 void Dialog::fillChar () {
+  audio::play(Path("assets/audio/keyhit.ogg"));
+
   buffer[bufferPosition] += text[textPosition++];
 
   auto size = text::measureText(buffer[bufferPosition]);
@@ -184,7 +186,7 @@ bool Map::init () {
   lScript = luaL_newstate();
   luaL_openlibs (lScript);
   Object::createLuaAPI(lScript);
-  
+
   // Loads the file
   if (luaL_dofile(lScript, (Path("scripts/"+file.getName()+".lua")).getPath().c_str())) {
     console << LINEINFO << "script contains errors" <<  outline;
@@ -206,7 +208,7 @@ bool Map::init () {
     string sData = string (data);
 
     jMap = json::parse (sData);
-    
+
     delete data;
   } else {
     console << LINEINFO << "could not load " << file.getPath() << outline;
@@ -299,7 +301,7 @@ int Map::searchObject (string name) {
   for (auto i=objects.begin();i!=objects.end();i++) {
     if ((*i)->str_properties["name"] == name) {
       return (int)((long)(*i));
-    }    
+    }
   }
 
   return 0;
@@ -319,7 +321,7 @@ int Map::newObject (lua_State *L) {
   string sData = string (data);
 
   BjObject *object = json::parse (sData);
-  
+
   Object *o = new Object(object, 0);
 
   lua_insert(L, 2);
@@ -359,7 +361,7 @@ void Map::newObject (Path fpath) {
   string sData = string (data);
 
   BjObject *object = json::parse (sData);
-  
+
   Object *o = new Object(object, 0);
 
   o->init();
@@ -383,11 +385,11 @@ void Map::addObject (Object *object) {
 
 bool Map::getPropertie(int id, string prop, string& str, float& num) {
   try {
-      str = ((Object*)(long)id)->str_properties.at(prop); 
+      str = ((Object*)(long)id)->str_properties.at(prop);
       return true;
   } catch (exception) {
     try {
-      num = ((Object*)(long)id)->num_properties.at(prop); 
+      num = ((Object*)(long)id)->num_properties.at(prop);
       return false;
     } catch (exception) {
       num = 0;
@@ -430,7 +432,7 @@ cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
     }
 
     // Default: collision will occur
-    return true;  
+    return true;
 }
 
 void Map::update() {
@@ -541,7 +543,7 @@ BjObject* Map::toJSON(float *progress) {
   int i = 0;
   for (auto o :objects) {
     array->array.push_back(new BjValue(o->toJSON()));
-  
+
     *progress = float(i)/float(objects.size());
     i++;
   }
@@ -555,7 +557,7 @@ void Map::save () {
   auto progress = new float(0);
   editor::openProgressWindow(progress);
 
-  thread t ([this, progress, fileName] () {    
+  thread t ([this, progress, fileName] () {
     auto data = toJSON(progress);
     auto dump = json::dumpjson(data);
 

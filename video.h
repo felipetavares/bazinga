@@ -44,6 +44,7 @@ namespace bazinga {
 		~video();
 
 		static void init();
+		static void resize(int, int);
 		static void deinit();
 		static void setWindowTitleAndIcon (string,string="");
 		static void setWindowIcon(Path);
@@ -55,11 +56,11 @@ namespace bazinga {
 		static void strokeRect(int, int, int, int);
 		static void fillCircle(int, int, int);
 		static void strokeCircle(int, int, int);
-		
+
 		static void setColor1(Color);
 		static void setColor2(Color);
 		static void setBackgroundColor(Color);
-		
+
 		static void fadeFrom(Color, float);
 		static void fadeTo(Color, float);
 	private:

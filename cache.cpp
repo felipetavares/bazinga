@@ -5,20 +5,34 @@
 
 namespace bazinga {
   namespace cache {
-    map <string, Image*> cachedData;
+    map <string, Image*> cachedImage;
     map <string, shader::Vertex*> cachedVertex;
     map <string, shader::Fragment*> cachedFragment;
     map <string, shader::Program*> cachedProgram;
     map <string, text::Font*> cachedFont;
+    map <string, audio::AudioData*> cachedAudio;
+
+    audio::AudioData* getAudio (Path path) {
+      try {
+        return cachedAudio.at(path.getPath());
+      } catch (exception e) {
+        console << LINEINFO << "loading " << path.getPath() << outline;
+
+        audio::AudioData *audio = new audio::AudioData(path);
+        cachedAudio[path.getPath()] = audio;
+
+        return audio;
+      }
+    }
 
     Image* getTexture (Path path) {
       try {
-        return cachedData.at(path.getPath());
+        return cachedImage.at(path.getPath());
       } catch (exception e) {
         console << LINEINFO << "loading " << path.getPath() << outline;
 
         Image *image = new Image(path);
-        cachedData[path.getPath()] = image;
+        cachedImage[path.getPath()] = image;
 
         return image;
       }
@@ -86,7 +100,7 @@ namespace bazinga {
 
     void deinit () {
       map <string, Image*>::iterator i;
-      for (i=cachedData.begin();i != cachedData.end(); i++) {
+      for (i=cachedImage.begin();i != cachedImage.end(); i++) {
         console << LINEINFO << "deleting " << i->first << outline;
         delete i->second;
       }
@@ -107,6 +121,11 @@ namespace bazinga {
       }
 
       for (auto i :cachedFont) {
+        console << LINEINFO << "deleting font '" << i.first << "'" << outline;
+        delete i.second;
+      }
+
+      for (auto i :cachedAudio) {
         console << LINEINFO << "deleting font '" << i.first << "'" << outline;
         delete i.second;
       }

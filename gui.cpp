@@ -41,7 +41,8 @@ void gui::LI::set (float x0, float y0, float x1, float y1) {
 }
 
 gui::Widget::~Widget () {
-
+	unsetMouseFocus(this);
+	unsetFocus(this);
 }
 
 void gui::Widget::focus () {
@@ -495,6 +496,10 @@ void gui::Window::setRoot (Widget *root) {
 	h = root->getH()+tbar+12;
 }
 
+void gui::Window::setTitle (const string title) {
+	this->title = title;
+}
+
 void gui::Window::event (Event& evt) {
 	if (!evt.isValid())
 		return;
@@ -514,8 +519,6 @@ void gui::Window::event (Event& evt) {
 		    }
 
 		    if (inClose(evt.x, evt.y)) {
-				if (onClose)
-					onClose(this);
 				close = true;
 				evt.invalidate();
 		    }
@@ -678,6 +681,8 @@ void gui::render () {
 	// Render all windows
 	for (int w=0;w<windows.size();w++) {
 		if (windows[w]->close) {
+			if (windows[w]->onClose)
+				windows[w]->onClose(windows[w]);
 			delete windows[w];
 			windows.erase(windows.begin()+w);
 
@@ -700,9 +705,9 @@ void gui::deinit () {
 }
 
 void gui::add (gui::Window* window, int x, int y) {
-	if (x != 0)
+	if (x != numeric_limits<int>::max())
 		window->x = x;
-	if (y != 0)
+	if (y != numeric_limits<int>::max())
 		window->y = y;
 	windows.push_back(window);
 	SDL_ShowCursor (1);
@@ -818,7 +823,7 @@ bool gui::keypress (uint16_t unicode, string key) {
 		evt.unicode = unicode;
 		evt.keyname = key;
 		focus->event(evt);
-	
+
 		return !evt.isValid();
 	}
 
@@ -854,7 +859,7 @@ void gui::setScissor (Scissor sc, bool apply) {
 
 void gui::combineScissor (Scissor sc, bool apply) {
 	scissor = scissor+sc;
-	
+
 	if (apply)
 		scissor.apply();
 }

@@ -25,23 +25,34 @@ void editor::openNewSceneWindow () {
 
 	auto line1 = new gui::Container(gui::Container::HORIZONTAL);
 	auto line2 = new gui::Container(gui::Container::HORIZONTAL);
+	auto line3 = new gui::Container(gui::Container::HORIZONTAL);
 
 	auto sceneName = new gui::Entry("SemTitulo");
 	line1->add(new gui::Label("Nome: "));
 	line1->add(sceneName);
 
+	auto completePath = new gui::Label("");
+	line2->add(completePath);
+
 	auto cancelButton = new gui::Button("Cancelar");
 	auto createButton = new gui::Button("Criar");
-	line2->add(cancelButton);
-	line2->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
-	line2->add(createButton);
+	line3->add(cancelButton);
+	line3->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+	line3->add(createButton);
 
 	container->add(line1);
-	container->add(new gui::Spacer(gui::Spacer::VERTICAL));
 	container->add(line2);
+	container->add(new gui::Spacer(gui::Spacer::VERTICAL));
+	container->add(line3);
 
 	window->setRoot(container);
 	gui::add(window);
+
+	sceneName->onChange = [completePath,sceneName] (gui::Widget *wid) {
+		//completePath->setText(sceneName->getText());
+	};
+
+	sceneName->onChange(sceneName);
 
 	window->onUpdate = [=] (gui::Window* win) {
 	};
@@ -88,11 +99,13 @@ void editor::openProgressWindow (float *p) {
 
 void editor::openPropertiesWindow (Object *o) {
 	gui::Window *window;
+	string windowTitle = "Objeto: "+o->str_properties["name"];
 
 	if (currentPropWindow != NULL) {
 		window = currentPropWindow;
+		window->setTitle(windowTitle);
 	} else {
-		window = new gui::Window("Objeto: "+o->str_properties["name"], 400, video::windowHeight);
+		window = new gui::Window(windowTitle, 400, video::windowHeight);
 	}
 
 	auto container = new gui::Container(gui::Container::VERTICAL);
@@ -151,9 +164,9 @@ void editor::openPropertiesWindow (Object *o) {
 	propertiesContainer->borderTop = propertiesContainer->borderBottom = 0;
 
 	window->setRoot(container);
-	
+
 	if (window != currentPropWindow)
-		gui::add(window, video::windowWidth/2-400, 0);
+		gui::add(window, video::windowWidth/2-400, numeric_limits<int>::max());
 
 	window->onUpdate = [=] (gui::Window* win) {
 	};
@@ -175,7 +188,7 @@ void editor::openPropertiesWindow (Object *o) {
 		del->onClick = [=] (gui::Widget* w) {
 			propertiesContainer->remove(info);
 		};
-		propertiesContainer->add(info);		
+		propertiesContainer->add(info);
 	};
 
 	applyButton->onClick = [=] (gui::Widget *w) {
@@ -185,7 +198,7 @@ void editor::openPropertiesWindow (Object *o) {
 		for (auto wid :propertiesContainer->children) {
 			auto c = (gui::Container*)wid;
 			string key = ((gui::Entry*)c->children[0])->getText();
-			string value = ((gui::Entry*)c->children[1])->getText();		
+			string value = ((gui::Entry*)c->children[1])->getText();
 
 			try {
 				float fvalue = stof(value);
@@ -217,7 +230,7 @@ void editor::Editor::select (Object *obj) {
 	if (obj == NULL) {
 		selection.clear();
 		dragStart.clear();
-		return;		
+		return;
 	}
 
 	if (find(selection.begin(), selection.end(), obj) != selection.end())
@@ -251,7 +264,7 @@ void editor::Editor::drag (vec2 position) {
 				o->num_properties["gx"] = (int)(position-dragStart[i]).x;
 				o->num_properties["gy"] = (int)(position-dragStart[i]).y;
 				i++;
-			}			
+			}
 		} else {
 			for (auto o :selection) {
 				o->num_properties["x"] = (int)(position-dragStart[i]).x;
@@ -308,7 +321,7 @@ void editor::Editor::setDrag (bool dragging, vec2 dragStart) {
 				int oy = o->num_properties["y"]-getActiveMap()->camy;
 				int ow = o->num_properties["w"];
 				int oh = o->num_properties["h"];
-	
+
 				if (gui::insideRect(ox, oy, ow, oh, x, y, w, h)) {
 					selection.push_back(o);
 					this->dragStart.push_back(vec2());

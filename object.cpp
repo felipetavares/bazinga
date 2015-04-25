@@ -212,6 +212,14 @@ int LAPI_set_scene (lua_State* L) {
   return 0;
 }
 
+int LAPI_play (lua_State *L) {
+  LAPI_log ("LAPI_play");
+
+  bazinga::audio::play(Path(luaL_checkstring(L, 1)));
+
+  return 0;
+}
+
 int LAPI_set_background_color (lua_State* L) {
   LAPI_log ("LAPI_set_background_color");
 
@@ -460,10 +468,10 @@ void Object::renderSelected (int level) {
     float scaleY = num_properties["sy"]==0?1:num_properties["sy"];
 
     glPushMatrix();
-        glRotatef(num_properties["ang"], 0, 0, 1);
+        //glRotatef(num_properties["ang"], 0, 0, 1);
         glScalef(scaleX, scaleY, 0);
         video::Color color(0,0,0);
-        
+
         if (level == 0)
           color = *gui::colors["active.secondary"];
         else
@@ -487,7 +495,7 @@ void Object::updateProperties() {
       num_properties[string(key)] = value;
     } else {
       const char *value = luaL_checkstring(L, -2);
-      
+
       // Update animation
       if (string(key) == "anim") {
         if (str_properties[string(key)] != string(value)) {
@@ -670,6 +678,12 @@ void Object::createLuaAPI (lua_State* L) {
   // set_background_color (r, g, b)
   lua_pushstring(L, "set_background_color");
   lua_pushcfunction(L, LAPI_set_background_color);
+  lua_settable(L, -3);
+
+  // PLay ogg file
+  // play (file)
+  lua_pushstring(L, "play");
+  lua_pushcfunction(L, LAPI_play);
   lua_settable(L, -3);
 
   lua_setglobal(L, "bazinga");

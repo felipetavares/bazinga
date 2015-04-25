@@ -5,6 +5,7 @@
 #include "image.h"
 #include "text.h"
 #include "filesystem.h"
+#include "audio.h"
 #include <map>
 using namespace std;
 
@@ -13,6 +14,7 @@ namespace bazinga {
   	void init();
   	void deinit();
 
+    audio::AudioData* getAudio(Path);
     Image* getTexture (Path);
   	shader::Vertex* getVertexShader(Path);
   	shader::Fragment* getFragmentShader(Path);

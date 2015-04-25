@@ -34,6 +34,7 @@ namespace bazinga {
   bool scriptsEnabled = true;
   Path newScenePath;
   string mainScenePath = "scenes/main.scene";
+  gui::Window* optionsWindow = NULL;
 
   Map* activeMap = NULL;
 
@@ -62,6 +63,8 @@ namespace bazinga {
 
    while ( SDL_PollEvent(&event) ) {
       switch (event.type) {
+        case SDL_VIDEORESIZE:
+          //video::resize(event.resize.w, event.resize.h);
         case SDL_JOYBUTTONDOWN:
         case SDL_JOYBUTTONUP:
           //inputManager->joystickButtonEvent (event);
@@ -75,171 +78,180 @@ namespace bazinga {
           transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
           input::keypress(keyName, event.key.keysym.unicode);
         } else {
-            auto window = new gui::Window("Opções", 500, 400);
-            auto container = new gui::Container(gui::Container::VERTICAL);
-            auto line = new gui::Container(gui::Container::HORIZONTAL);
-            auto line2 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line3 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line4 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line5 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line6 = new gui::Container(gui::Container::HORIZONTAL);
-            auto line7 = new gui::Container(gui::Container::HORIZONTAL);
+            if (optionsWindow) {
+              optionsWindow->close = true;
+            } else {
+              auto window = new gui::Window("Opções", 500, 400);
+              optionsWindow = window;
+              auto container = new gui::Container(gui::Container::VERTICAL);
+              auto line = new gui::Container(gui::Container::HORIZONTAL);
+              auto line2 = new gui::Container(gui::Container::HORIZONTAL);
+              auto line3 = new gui::Container(gui::Container::HORIZONTAL);
+              auto line4 = new gui::Container(gui::Container::HORIZONTAL);
+              auto line5 = new gui::Container(gui::Container::HORIZONTAL);
+              auto line6 = new gui::Container(gui::Container::HORIZONTAL);
+              auto line7 = new gui::Container(gui::Container::HORIZONTAL);
 
-            line->borderLeft = line->borderRight = 0;
-            line->borderTop = line->borderBottom = 0;
+              line->borderLeft = line->borderRight = 0;
+              line->borderTop = line->borderBottom = 0;
 
-            line2->borderLeft = line2->borderRight = 0;
-            line2->borderTop = line2->borderBottom = 0;
+              line2->borderLeft = line2->borderRight = 0;
+              line2->borderTop = line2->borderBottom = 0;
 
-            line3->borderLeft = line3->borderRight = 0;
-            line3->borderTop = line3->borderBottom = 0;
+              line3->borderLeft = line3->borderRight = 0;
+              line3->borderTop = line3->borderBottom = 0;
 
-            line4->borderLeft = line4->borderRight = 0;
-            line4->borderTop = line4->borderBottom = 0;
+              line4->borderLeft = line4->borderRight = 0;
+              line4->borderTop = line4->borderBottom = 0;
 
-            line5->borderLeft = line5->borderRight = 0;
-            line5->borderTop = line5->borderBottom = 0;
+              line5->borderLeft = line5->borderRight = 0;
+              line5->borderTop = line5->borderBottom = 0;
 
-            line6->borderLeft = line6->borderRight = 0;
-            line6->borderTop = line6->borderBottom = 0;
+              line6->borderLeft = line6->borderRight = 0;
+              line6->borderTop = line6->borderBottom = 0;
 
-            line7->borderLeft = line7->borderRight = 0;
-            line7->borderTop = line7->borderBottom = 0;
+              line7->borderLeft = line7->borderRight = 0;
+              line7->borderTop = line7->borderBottom = 0;
 
-            line->add(new gui::Label("Sair da demo:"));
-            auto button = new gui::Button("Sair");
-            line->add(button);
+              line->add(new gui::Label("Sair da demo:"));
+              auto button = new gui::Button("Sair");
+              line->add(button);
 
-            line2->add(new gui::Label("Frames por segundo:"));
-            auto fps = new gui::Label("####");
-            line2->add(fps);
+              line2->add(new gui::Label("Frames por segundo:"));
+              auto fps = new gui::Label("####");
+              line2->add(fps);
 
-            auto bgraph = new gui::BGraph();
-            line3->add(bgraph);
+              auto bgraph = new gui::BGraph();
+              line3->add(bgraph);
 
-            auto enableGrid = new gui::CheckBox("Grade");
-            auto enableScripts = new gui::CheckBox("Scripts");
-            enableScripts->setChecked(scriptsEnabled);
-            auto gridX = new gui::Entry("80");
-            auto gridY = new gui::Entry("80");
-            line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
-            line4->add(enableScripts);
-            line4->add(enableGrid);
-            line4->add(new gui::Label("X:"));
-            line4->add(gridX);
-            line4->add(new gui::Label("Y:"));
-            line4->add(gridY);
-            line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+              auto enableGrid = new gui::CheckBox("Grade");
+              auto enableScripts = new gui::CheckBox("Scripts");
+              enableScripts->setChecked(scriptsEnabled);
+              auto gridX = new gui::Entry("80");
+              auto gridY = new gui::Entry("80");
+              line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+              line4->add(enableScripts);
+              line4->add(enableGrid);
+              line4->add(new gui::Label("X:"));
+              line4->add(gridX);
+              line4->add(new gui::Label("Y:"));
+              line4->add(gridY);
+              line4->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
 
-            //auto savePath = new gui::Entry();
-            //auto saveName = new gui::Entry();
-            auto saveAs = new gui::Button("Salvar");
-            //auto findFile = new gui::Button(Path("assets/gui/document.png"));
-            line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
-            //line5->add(findFile);
-            //line5->add(savePath);
-            //line5->add(saveName);
-            line5->add(saveAs);
-            line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+              //auto savePath = new gui::Entry();
+              //auto saveName = new gui::Entry();
+              auto saveAs = new gui::Button("Salvar");
+              //auto findFile = new gui::Button(Path("assets/gui/document.png"));
+              line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
+              //line5->add(findFile);
+              //line5->add(savePath);
+              //line5->add(saveName);
+              line5->add(saveAs);
+              line5->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
 
-            auto zoomSlider = new gui::Slider(0);
-            line6->add(zoomSlider);
+              auto zoomSlider = new gui::Slider(0);
+              line6->add(zoomSlider);
 
-            auto newObject = new gui::Button("Novo objeto");
-            auto copyObject = new gui::Button("Copiar Objeto");
-            auto deleteObject = new gui::Button("Deletar Objeto");
-            auto newScene = new gui::Button("Nova cena");
-            line7->add(newObject);
-            line7->add(copyObject);
-            line7->add(deleteObject);
-            line7->add(newScene);
+              auto newObject = new gui::Button("Novo objeto");
+              auto copyObject = new gui::Button("Copiar Objeto");
+              auto deleteObject = new gui::Button("Deletar Objeto");
+              auto newScene = new gui::Button("Nova cena");
+              line7->add(newObject);
+              line7->add(copyObject);
+              line7->add(deleteObject);
+              line7->add(newScene);
 
-            container->add(line);
-            container->add(line2);
-            container->add(line3);
-            container->add(line4);
-            container->add(line5);
-            container->add(line6);
-            container->add(line7);
+              container->add(line);
+              container->add(line2);
+              container->add(line3);
+              container->add(line4);
+              container->add(line5);
+              container->add(line6);
+              container->add(line7);
 
-            window->setRoot(container);
-            gui::add(window, -video::windowWidth/2, video::windowHeight/2-400);
+              window->setRoot(container);
+              gui::add(window, -video::windowWidth/2, video::windowHeight/2-400);
 
-            window->onUpdate = [=] (gui::Window* win) {
-              stringstream ss;
-              ss << floor(1/delta);
-              fps->setText(ss.str());
-              bgraph->addBar(1/delta);
-            };
+              window->onUpdate = [=] (gui::Window* win) {
+                stringstream ss;
+                ss << floor(1/delta);
+                fps->setText(ss.str());
+                bgraph->addBar(1/delta);
+              };
 
-            zoomSlider->onChange = [] (gui::Widget *wid) {
-              auto slider = (gui::Slider*)wid;
+              window->onClose = [] (gui::Window* win) {
+                bazinga::optionsWindow = NULL;
+              };
 
-              getActiveMap()->zoomX = 10*slider->getPosition();
-              getActiveMap()->zoomY = 10*slider->getPosition();
-            };
- 
-            enableScripts->onClick = [] (gui::Widget *wid) {
-              auto checkbox = (gui::CheckBox*)wid;
+              zoomSlider->onChange = [] (gui::Widget *wid) {
+                auto slider = (gui::Slider*)wid;
 
-              bazinga::scriptsEnabled = checkbox->isChecked();
-            };
+                getActiveMap()->zoomX = 10*slider->getPosition();
+                getActiveMap()->zoomY = 10*slider->getPosition();
+              };
 
-            newObject->onClick = [] (gui::Widget *wid) {
-              getActiveMap()->newObject(Path("objects/table.obj"));
-            };
+              enableScripts->onClick = [] (gui::Widget *wid) {
+                auto checkbox = (gui::CheckBox*)wid;
 
-            copyObject->onClick = [] (gui::Widget *wid) {
-              getActiveMap()->edit->copyObject();
-            };
+                bazinga::scriptsEnabled = checkbox->isChecked();
+              };
 
-            deleteObject->onClick = [] (gui::Widget *wid) {
-              getActiveMap()->edit->deleteObject();
-            };
+              newObject->onClick = [] (gui::Widget *wid) {
+                getActiveMap()->newObject(Path("objects/table.obj"));
+              };
 
-            newScene->onClick = [] (gui::Widget *wid) {
-              editor::openNewSceneWindow();
-            };
+              copyObject->onClick = [] (gui::Widget *wid) {
+                getActiveMap()->edit->copyObject();
+              };
 
-            saveAs->onClick = [] (gui::Widget *wid) {
-              getActiveMap()->save();
-            };
+              deleteObject->onClick = [] (gui::Widget *wid) {
+                getActiveMap()->edit->deleteObject();
+              };
 
-            //findFile->onClick = [savePath] (gui::Widget* wid) {
-            //  new gui::FileManager(savePath);
-            //};
+              newScene->onClick = [] (gui::Widget *wid) {
+                editor::openNewSceneWindow();
+              };
 
-            button->onClick = [=] (gui::Widget* wid) {
-              bazinga::quit();
-            };
+              saveAs->onClick = [] (gui::Widget *wid) {
+                getActiveMap()->save();
+              };
 
-            enableGrid->onClick = [=] (gui::Widget* wid) {
-              getActiveMap()->edit->setGrid(((gui::CheckBox*)wid)->isChecked());
-            };
+              //findFile->onClick = [savePath] (gui::Widget* wid) {
+              //  new gui::FileManager(savePath);
+              //};
 
-            gridX->onChange = [=] (gui::Widget* wid) {
-              gui::Entry *entry = (gui::Entry*)wid;
-              try {
-                float x = stof(entry->getText());
-                vec2 grid = getActiveMap()->edit->getGridSize();
-                grid.x = x;
-                getActiveMap()->edit->setGridSize(grid);
-              } catch (exception e) {
+              button->onClick = [=] (gui::Widget* wid) {
+                bazinga::quit();
+              };
 
-              }
-            };
+              enableGrid->onClick = [=] (gui::Widget* wid) {
+                getActiveMap()->edit->setGrid(((gui::CheckBox*)wid)->isChecked());
+              };
 
-            gridY->onChange = [=] (gui::Widget* wid) {
-              gui::Entry *entry = (gui::Entry*)wid;
-              try {
-                float y = stof(entry->getText());
-                vec2 grid = getActiveMap()->edit->getGridSize();
-                grid.y = y;
-                getActiveMap()->edit->setGridSize(grid);
-              } catch (exception e) {
-                
-              }
-            };
+              gridX->onChange = [=] (gui::Widget* wid) {
+                gui::Entry *entry = (gui::Entry*)wid;
+                try {
+                  float x = stof(entry->getText());
+                  vec2 grid = getActiveMap()->edit->getGridSize();
+                  grid.x = x;
+                  getActiveMap()->edit->setGridSize(grid);
+                } catch (exception e) {
+
+                }
+              };
+
+              gridY->onChange = [=] (gui::Widget* wid) {
+                gui::Entry *entry = (gui::Entry*)wid;
+                try {
+                  float y = stof(entry->getText());
+                  vec2 grid = getActiveMap()->edit->getGridSize();
+                  grid.y = y;
+                  getActiveMap()->edit->setGridSize(grid);
+                } catch (exception e) {
+
+                }
+              };
+          }
         }
         break;
         case SDL_KEYUP:
@@ -286,7 +298,7 @@ namespace bazinga {
     bazinga::render::init();
     bazinga::text::init();
     bazinga::input::init();
-    //bazinga::audio::init();
+    bazinga::audio::init();
     bazinga::gui::init();
     bazinga::console.init();
 
@@ -323,6 +335,9 @@ namespace bazinga {
     startTime = chrono::high_resolution_clock::now();
 
     while (events()) {
+      // Copy some audio
+      audio::update();
+
       auto t0 = chrono::high_resolution_clock::now();
       auto elapsed = t0-t;
       t = t0;
@@ -377,7 +392,7 @@ namespace bazinga {
     }
 
     bazinga::gui::deinit();
-    //bazinga::audio::deinit();
+    bazinga::audio::deinit();
     bazinga::input::deinit();
     bazinga::cache::deinit();
     bazinga::text::deinit();

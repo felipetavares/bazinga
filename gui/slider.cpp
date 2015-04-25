@@ -55,23 +55,36 @@ void gui::Slider::setPosition (float position) {
 void gui::Slider::rmove (int x, int y) {
 	if (active) {
 		position = float(x)/float(w);
-		
+
+		if (position > 1)
+			position = 1;
+		if (position < 0)
+			position = 0;
+
 		if (onChange)
 			onChange(this);
 	}
 }
 
 void gui::Slider::ractivate(int x, int y) {
-	position = float(x)/float(w);	
-	
+	setMouseFocus(this);
+
+	position = float(x)/float(w);
+
+	if (position > 1)
+		position = 1;
+	if (position < 0)
+		position = 0;
+
 	if (onChange)
-		onChange(this);	
+		onChange(this);
 
 	active = true;
 }
 
 void gui::Slider::rclick (int x, int y) {
 	active = false;
+	unsetMouseFocus(this);
 }
 
 void gui::Slider::rleave (int x, int y) {

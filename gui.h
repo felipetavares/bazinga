@@ -70,7 +70,7 @@ namespace bazinga {
 		};
 
 		// The heart of any dynamic GUI:
-		// the container.	
+		// the container.
 		class Container :public Widget {
 		public:
 			enum Flow {VERTICAL, HORIZONTAL};
@@ -140,6 +140,7 @@ namespace bazinga {
 			void event(Event&);
 			void setRoot (Widget*);
 			void render();
+			void setTitle(const string);
 		private:
 			bool inBar(int, int);
 			bool inResize(int, int);
@@ -159,9 +160,9 @@ namespace bazinga {
 		void deinit();
 
 		// Add a new window to the interface
-		void add(Window*, int=0, int=0);
+		void add(Window*, int=numeric_limits<int>::max(), int=numeric_limits<int>::max());
 		// Set/Unset focus
-		void setFocus(Widget*); 
+		void setFocus(Widget*);
 		void unsetFocus(Widget*);
 		void setMouseFocus(Widget*);
 		void unsetMouseFocus(Widget*);

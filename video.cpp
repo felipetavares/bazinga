@@ -36,8 +36,28 @@ video::video () {
 video::~video () {
 }
 
+void video::resize (int w, int h) {
+	windowWidth = w;
+	windowHeight = h;
+
+	//screen = SDL_SetVideoMode (windowWidth,windowHeight,windowBpp,videoFlags);
+	glViewport( -windowWidth/2, windowWidth/2, windowHeight/2, -windowHeight/2);
+
+	glClear( GL_COLOR_BUFFER_BIT );
+
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+
+	glOrtho(-windowWidth/2, windowWidth/2, windowHeight/2, -windowHeight/2, -100.0f, 100.0f);
+
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+
+	console << LINEINFO << "OpenGL: " << string((char*)glGetString(GL_VERSION)) << outline;
+}
+
 void video::init() {
-	videoFlags = SDL_FULLSCREEN | SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF;
+	videoFlags = /*SDL_FULLSCREEN |*/ SDL_OPENGL | SDL_HWSURFACE | SDL_DOUBLEBUF /*| SDL_RESIZABLE*/;
 
 	if (SDL_Init (SDL_INIT_EVERYTHING) < 0) {
 		console << LINEINFO << "cannot Init SDL" << outline;
@@ -149,8 +169,8 @@ void video::findBestVideoMode () {
 	windowWidth = windowHeight = 0;
 
 	if (anyResolution) { // Any resolution available
-		windowWidth = 800;
-		windowHeight = 600;
+		windowWidth = 1280;
+		windowHeight = 720;
 	} else {
 		for (auto rect : (*videoModes) ) {
 			if (rect.w * rect.h > windowHeight * windowWidth) {
@@ -193,7 +213,7 @@ void video::fillVGradient (int x, int y, int w, int h) {
 			glVertex3f(w, h, 0);
 			glVertex3f(0, h, 0);
 		glEnd();
-	glPopMatrix();	
+	glPopMatrix();
 }
 
 void video::fillHGradient (int x, int y, int w, int h) {
@@ -208,7 +228,7 @@ void video::fillHGradient (int x, int y, int w, int h) {
 			glVertex3f(0, h, 0);
 			glVertex3f(0, 0, 0);
 		glEnd();
-	glPopMatrix();	
+	glPopMatrix();
 }
 
 void video::setBackgroundColor (Color backgroundColor) {
@@ -231,25 +251,25 @@ void video::fillRect (int x, int y, int w, int h) {
 
 void video::fillCircle (int cx, int cy, int r) {
 	int num_segments = 3*r;
-	float theta = 2 * 3.1415926 / float(num_segments); 
+	float theta = 2 * 3.1415926 / float(num_segments);
 	float c = cosf(theta); // Precalculate the sine and cosine
 	float s = sinf(theta);
 	float t;
 
-	float x = r; // We start at angle = 0 
-	float y = 0; 
-    
-	glBegin(GL_TRIANGLE_FAN); 
+	float x = r; // We start at angle = 0
+	float y = 0;
+
+	glBegin(GL_TRIANGLE_FAN);
 	glColor4f(c1.r,c1.g,c1.b,c1.a);
 	for(int i = 0; i < num_segments; i++) {
-		glVertex2f(x + cx, y + cy); // Output vertex 
-        
+		glVertex2f(x + cx, y + cy); // Output vertex
+
 		// Apply the rotation matrix
 		t = x;
 		x = c * x - s * y;
 		y = s * t + c * y;
-	} 
-	glEnd(); 
+	}
+	glEnd();
 }
 
 void video::strokeRect (int x, int y, int w, int h) {
@@ -268,25 +288,25 @@ void video::strokeRect (int x, int y, int w, int h) {
 
 void video::strokeCircle (int cx, int cy, int r) {
 	int num_segments = 3*r;
-	float theta = 2 * 3.1415926 / float(num_segments); 
+	float theta = 2 * 3.1415926 / float(num_segments);
 	float c = cosf(theta); // Precalculate the sine and cosine
 	float s = sinf(theta);
 	float t;
 
-	float x = r; // We start at angle = 0 
-	float y = 0; 
-    
-	glBegin(GL_LINES); 
+	float x = r; // We start at angle = 0
+	float y = 0;
+
+	glBegin(GL_LINES);
 	glColor4f(c1.r,c1.g,c1.b,c1.a);
-	for(int i = 0; i < num_segments; i++) { 
-		glVertex2f(x + cx, y + cy); // Output vertex 
-        
+	for(int i = 0; i < num_segments; i++) {
+		glVertex2f(x + cx, y + cy); // Output vertex
+
 		// Apply the rotation matrix
 		t = x;
 		x = c * x - s * y;
 		y = s * t + c * y;
-	} 
-	glEnd(); 
+	}
+	glEnd();
 }
 
 void video::render () {
@@ -300,7 +320,7 @@ void video::render () {
 
 		if (bazinga::curtime > endtime) {
 			endtime = starttime = -1;
-		
+
 			if (onFinish) {
 				onFinish();
 				onFinish = NULL;
