@@ -13,6 +13,8 @@ namespace bazinga {
     map <string, audio::AudioData*> cachedAudio;
 
     audio::AudioData* getAudio (Path path) {
+      path = Path(bazinga::projectPath+path.getPath());
+
       try {
         return cachedAudio.at(path.getPath());
       } catch (exception e) {
@@ -26,6 +28,8 @@ namespace bazinga {
     }
 
     Image* getTexture (Path path) {
+      path = Path(bazinga::projectPath+path.getPath());
+
       try {
         return cachedImage.at(path.getPath());
       } catch (exception e) {
@@ -39,6 +43,8 @@ namespace bazinga {
     }
 
     shader::Vertex* getVertexShader (Path path) {
+      path = Path(bazinga::projectPath+path.getPath());
+
       try {
         return cachedVertex.at(path.getPath());
       } catch (exception e) {
@@ -52,6 +58,8 @@ namespace bazinga {
     }
 
     shader::Fragment* getFragmentShader (Path path) {
+      path = Path(bazinga::projectPath+path.getPath());
+
       try {
         return cachedFragment.at(path.getPath());
       } catch (exception e) {
@@ -83,6 +91,8 @@ namespace bazinga {
     }
 
     void createFont (Path fname, string name) {
+      fname = Path(bazinga::projectPath+fname.getPath());
+
       try {
         cachedFont.at(name);
       } catch (exception e) {
@@ -104,31 +114,37 @@ namespace bazinga {
         console << LINEINFO << "deleting " << i->first << outline;
         delete i->second;
       }
+      cachedImage.clear();
 
       for (auto i :cachedVertex) {
         console << LINEINFO << "deleting " << i.first << outline;
         delete i.second;
       }
+      cachedVertex.clear();
 
       for (auto i :cachedFragment) {
         console << LINEINFO << "deleting " << i.first << outline;
         delete i.second;
       }
+      cachedFragment.clear();
 
       for (auto i :cachedProgram) {
         console << LINEINFO << "deleting shader program '" << i.first << "'" << outline;
         delete i.second;
       }
+      cachedProgram.clear();
 
       for (auto i :cachedFont) {
         console << LINEINFO << "deleting font '" << i.first << "'" << outline;
         delete i.second;
       }
+      cachedFont.clear();
 
       for (auto i :cachedAudio) {
         console << LINEINFO << "deleting font '" << i.first << "'" << outline;
         delete i.second;
       }
+      cachedAudio.clear();
     }
   }
 }

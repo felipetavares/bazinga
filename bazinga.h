@@ -8,14 +8,13 @@
 #include "input.h"
 #include "audio.h"
 
-
 namespace bazinga {
 	class Map;
 
 	extern double delta;
 	extern double curtime;
 	extern bool scriptsEnabled;
-
+	extern string projectPath;
 	extern Map* activeMap;
 
 	bool init ();

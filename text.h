@@ -28,7 +28,7 @@ namespace bazinga {
 
 		class Font {
 			FT_Face face;
-			
+
 			vector <GLuint> textures;
 			vector <AreaBuffer*> areaManagers;
 			const unsigned int bufferLen = 256;
@@ -83,7 +83,7 @@ namespace bazinga {
 			float dh;
 		}TextMetrics;
 
-		enum Align {	
+		enum Align {
 			Center,
 			Left,
 			Right
@@ -95,18 +95,18 @@ namespace bazinga {
 			Alphabetic
 		};
 
-		extern Font* font; 
+		extern Font* font;
 		extern Align alignment;
 		extern Baseline baseline;
 
 		void init ();
-		void deinit ();		
+		void deinit ();
 
 		// Text rendering API
 		// Based upon HTML5 Canvas' one
 		// For meanings of constants, refer to
 		// https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_text
-		void setFont (Font*); 	// ctx.font = font		
+		void setFont (Font*); 	// ctx.font = font
 		void setAlign (Align); 	// ctx.textAlign = ('center'|'left'|'right')
 		// Not fully implemented
 		void setBaseline (Baseline); // ctx.textBaseline = ('top'|'middle'|'bottom'|'alphabetic')

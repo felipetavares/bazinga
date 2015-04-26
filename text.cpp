@@ -89,6 +89,7 @@ text::Font::~Font () {
 	for (auto i :charCache) {
 		delete i.second;
 	}
+	charCache.clear();
 
 	for (auto texture :textures)
 		glDeleteTextures(1, &texture);
@@ -96,6 +97,7 @@ text::Font::~Font () {
 	for (auto areaManager :areaManagers) {
 		delete areaManager;
 	}
+	areaManagers.clear();
 }
 
 void text::Font::setColor (video::Color color) {
@@ -181,6 +183,7 @@ int text::Font::measure (const char* str, int len, float& w, float& h, float &dh
 		// Load the character
 		if (FT_Load_Char (face, utf82unicode(c), FT_LOAD_RENDER)) {
 			console << LINEINFO << "cannot load character " << c << outline;
+			cout << LINEINFO << "cannot load character " << c << endl;
 		} else {
 			//cout << "bazinga: text: font: loading character " << c << endl;
 
@@ -223,7 +226,7 @@ int text::Font::measure (const char* str, int len, float& w, float& h, float &dh
 	h = bchar->h+bchar->dh;
 	dh = bchar->dh;
 
-    return advance;
+  return advance;
 }
 
 int text::Font::render (const char *str, int len) {
@@ -370,6 +373,8 @@ void text::deinit() {
 	} else {
 		console << " ok" << outline;
 	}
+
+	freetype = NULL;
 }
 
 void text::setAlign (Align align) {

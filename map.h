@@ -28,7 +28,7 @@ namespace bazinga {
 
     string buffer[bufferSize];
     int bufferPosition;
-  
+
     int sizeW;
 
     float nextTime;
@@ -87,6 +87,7 @@ namespace bazinga {
     void update();
     int newDialog(string, Path, string);
     int searchObject(string);
+    int searchObject(int);
     void hideObject(int, bool);
     bool isDialogEnded(int);
     void deleteDialog(int);

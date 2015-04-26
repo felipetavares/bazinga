@@ -177,7 +177,10 @@ int LAPI_ended_dialog (lua_State* L) {
 int LAPI_search_object (lua_State* L) {
   LAPI_log ("LAPI_search_object");
 
-  lua_pushnumber(L, bazinga::getActiveMap()->searchObject(string(luaL_checkstring(L, 1))));
+  if (lua_isnumber(L, 1))
+    lua_pushnumber(L, bazinga::getActiveMap()->searchObject((int)luaL_checknumber(L, 1)));
+  else
+    lua_pushnumber(L, bazinga::getActiveMap()->searchObject(string(luaL_checkstring(L, 1))));
 
   return 1;
 }
@@ -295,7 +298,7 @@ Object::~Object () {
 }
 
 void Object::loadFile (Path path) {
-  script = path;
+  script = Path(bazinga::projectPath+path.getPath());
 
   // Creates a new Lua state
   L = luaL_newstate();

@@ -25,18 +25,18 @@
 using namespace std;
 
 namespace bazinga {
-  double delta = 0;
-  double curtime = 0;
-  bool consoleFlag = false;
-  bool setNewScene = false;
-  bool blockNewScene = false;
-  bool exitFlag = false;
-  bool scriptsEnabled = true;
+  double delta;
+  double curtime;
+  bool consoleFlag;
+  bool setNewScene;
+  bool blockNewScene;
+  bool exitFlag;
+  bool scriptsEnabled;
+  string projectPath;
   Path newScenePath;
-  string mainScenePath = "scenes/main.scene";
-  gui::Window* optionsWindow = NULL;
-
-  Map* activeMap = NULL;
+  string mainScenePath;
+  gui::Window* optionsWindow;
+  Map* activeMap;
 
   Map* getActiveMap () {
     return activeMap;
@@ -74,6 +74,11 @@ namespace bazinga {
         break;
         case SDL_KEYDOWN:
         if (event.key.keysym.sym != SDLK_ESCAPE) {
+          if (event.key.keysym.sym == SDLK_r &&
+              event.key.keysym.mod == KMOD_LCTRL) {
+              return false;
+          }
+
           string keyName = string(SDL_GetKeyName(event.key.keysym.sym));
           transform (keyName.begin(), keyName.end(), keyName.begin(), ::tolower);
           input::keypress(keyName, event.key.keysym.unicode);
@@ -278,6 +283,7 @@ namespace bazinga {
                                event.button.y-video::windowHeight/2);
         break;
         case SDL_QUIT:
+          exitFlag = true;
           return false;
       }
     }
@@ -294,6 +300,17 @@ namespace bazinga {
   }
 
   bool init () {
+    delta = 0;
+    curtime = 0;
+    consoleFlag = false;
+    setNewScene = false;
+    blockNewScene = false;
+    exitFlag = false;
+    scriptsEnabled = true;
+    mainScenePath = "scenes/main.scene";
+    optionsWindow = NULL;
+    activeMap = NULL;
+
     bazinga::video::init();
     bazinga::render::init();
     bazinga::text::init();
@@ -321,7 +338,7 @@ namespace bazinga {
     bazinga::cache::createShaderProgram (v, f, "text");
     bazinga::cache::getShaderProgram("text")->loadUniforms({"sampler","color"});
 
-    setScene(Path(mainScenePath));
+    setScene(Path(projectPath+mainScenePath));
 
     return true;
   }
@@ -436,16 +453,26 @@ void copyMaps () {
 int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
  #else
 int main (int argc, char** argv) {
+  if (argc > 1) {
+      projectPath = string(argv[1]);
+    if (projectPath[projectPath.size()-1] != '/')
+      projectPath += '/';
+  }
 #endif /* _WIN32 */
+
   console << "Bazinga! Engine compiled in " << __DATE__ << " " << __TIME__ << outline;
+  console << "Using " << projectPath << " as project directory" << outline;
   console << outline;
+
 
   copyMaps();
 
   try {
-    if (bazinga::init())
-      bazinga::gameLoop();
-    bazinga::deinit();
+    do {
+      if (bazinga::init())
+        bazinga::gameLoop();
+      bazinga::deinit();
+    } while (!exitFlag);
   } catch (exception e) {
     console << LINEINFO << e.what() << outline;
   }

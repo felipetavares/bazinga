@@ -185,7 +185,7 @@ void input::init () {
   luaL_openlibs (L);
 
   // Loads the file
-  if (luaL_dofile(L, "mapper.lua")) {
+  if (luaL_dofile(L, (bazinga::projectPath+"mapper.lua").c_str())) {
     console <<  "bazinga: mapper.lua contains errors"  << outline;
 
     if (lua_isstring(L, -1)) {
@@ -202,9 +202,12 @@ void input::deinit () {
 
   if (L) {
     lua_close(L);
+    L = NULL;
   }
 
   for (auto i=contexts.begin();i!=contexts.end();i++) {
     delete i->second;
   }
+  contexts.clear();
+  active.clear();
 }

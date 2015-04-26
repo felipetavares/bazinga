@@ -64,7 +64,7 @@ void video::init() {
 		exit (-1);
 	}
 
-	auto iconPath = Path("assets/images/icon.bmp");
+	auto iconPath = Path(bazinga::projectPath+"assets/images/icon.bmp");
 	console << LINEINFO << "using " << iconPath.getPath() << " as icon" << outline;
     bazinga::video::setWindowIcon(iconPath);
 

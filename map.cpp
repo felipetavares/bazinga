@@ -45,6 +45,11 @@ void Dialog::update () {
 }
 
 void Dialog::render () {
+  auto font = cache::getFont(fontName);
+  text::setFont(font);
+  text::setAlign(text::Left);
+  text::setBaseline(text::Alphabetic);
+
   auto size = text::measureText("#");
 
   int startY = video::windowHeight/2-1.5*size.h*bufferSize;
@@ -58,17 +63,17 @@ void Dialog::render () {
   video::setColor1(video::Color(1, 1, 1, 1));
   video::fillRect(-sizeW/2-10, startY-30, sizeW+20, 1.5*size.h*bufferSize+10);
 
-  auto font = cache::getFont(fontName);
-  text::setFont(font);
-  text::setAlign(text::Left);
-  text::setBaseline(text::Alphabetic);
-
   for (int i=0;i<bufferSize;i++)
     text::fillText(buffer[i], -sizeW/2, startY+i*1.5*size.h-10);
 }
 
 void Dialog::fillChar () {
-  audio::play(Path("assets/audio/keyhit.ogg"));
+  auto font = cache::getFont(fontName);
+  text::setFont(font);
+  text::setAlign(text::Left);
+  text::setBaseline(text::Alphabetic);
+
+  //audio::play(Path("assets/audio/keyhit.ogg"));
 
   buffer[bufferPosition] += text[textPosition++];
 
@@ -188,7 +193,7 @@ bool Map::init () {
   Object::createLuaAPI(lScript);
 
   // Loads the file
-  if (luaL_dofile(lScript, (Path("scripts/"+file.getName()+".lua")).getPath().c_str())) {
+  if (luaL_dofile(lScript, (Path(bazinga::projectPath+"scripts/"+file.getName()+".lua")).getPath().c_str())) {
     console << LINEINFO << "script contains errors" <<  outline;
 
     if (lua_isstring(lScript, -1)) {
@@ -307,6 +312,16 @@ int Map::searchObject (string name) {
   return 0;
 }
 
+int Map::searchObject (int id) {
+  for (auto i=objects.begin();i!=objects.end();i++) {
+    if ((*i)->num_properties["id"] == id) {
+      return (int)((long)(*i));
+    }
+  }
+
+  return 0;
+}
+
 void Map::hideObject (int id, bool hide) {
   ((Object*)(long)id)->num_properties["hidden"] = (int)hide;
 }
@@ -315,7 +330,7 @@ void Map::hideObject (int id, bool hide) {
 // Called from Lua
 int Map::newObject (lua_State *L) {
   // Get file path
-  Path fpath = Path(string(lua_tostring(L, 1)));
+  Path fpath = Path(bazinga::projectPath+string(lua_tostring(L, 1)));
 
   char *data = fs::getFileData(fpath);
   string sData = string (data);
@@ -436,13 +451,14 @@ cpBool Map::pmBeginCollision (cpArbiter* arb, cpSpace* space, void* data) {
 }
 
 void Map::update() {
-  for (auto i=objects.begin();i!=objects.end();i++) {
-    if ((*i)  ->num_properties["delete"]) {
-      delete (*i);
-      objects.erase(i);
+  for (auto i=0;i<objects.size();i++) {
+    objects[i]->update();
+
+    if (objects[i]->num_properties["delete"]) {
+      delete objects[i];
+      objects.erase(objects.begin()+i);
       i--;
-    } else
-      (*i)->update();
+    }
   }
 
   for (int i=0;i<dialogs.size();i++) {

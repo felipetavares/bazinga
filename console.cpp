@@ -59,15 +59,15 @@ void Console::log (string message) {
         messages.push_back(Message(message));
 
         int height = video::windowHeight/lineHeight;
-        
+
         if (video::windowHeight > 0 && messages.size()>=height && !manualScrolling) {
             offset--;
-        }    
+        }
     }
 }
 
 void Console::render () {
-    video::setColor1(video::Color(0.2 , 0.4, 0.1, 0.5));
+    video::setColor1(video::Color(0.8 , 1, 0.5, 1));
     video::fillRect(-video::windowWidth/2, -video::windowHeight/2,
                     video::windowWidth, video::windowHeight);
 
