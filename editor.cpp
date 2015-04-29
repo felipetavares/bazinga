@@ -1,7 +1,7 @@
 #include "editor.h"
-
 #include "gui.h"
 #include "gui/label.h"
+#include "gui/paletteitem.h"
 #include "gui/entry.h"
 #include "gui/button.h"
 #include "gui/spacer.h"
@@ -17,6 +17,130 @@
 using namespace bazinga;
 
 gui::Window *editor::currentPropWindow = NULL;
+vector <editor::Command*> editor::commands;
+
+void editor::openCommandPaletteWindow () {
+    console << LINEINFO << outline;
+
+    auto fuzzyFinder = new gui::Window("Paleta de Comandos", video::windowWidth/4, 280, false);
+  	auto container = new gui::Container(gui::Container::VERTICAL);
+		auto list = new gui::Container(gui::Container::VERTICAL, true);
+
+    list->borderTop = 0;
+    list->borderBottom = 0;
+    list->borderLeft = 0;
+    list->borderRight = 0;
+    list->spacing = 0;
+
+    list->add(new gui::Label("Nada Encontrado"));
+
+  	auto search = new gui::Entry();
+  	container->add(search);
+
+		container->add(list);
+
+  	fuzzyFinder->setRoot(container);
+  	gui::add(fuzzyFinder, -video::windowWidth/8, -140);
+
+    gui::setFocus(search);
+
+  	fuzzyFinder->onUpdate = [] (gui::Window* win) {
+		};
+
+  	fuzzyFinder->onClose = [] (gui::Window* win) {
+  	};
+
+    search->onChange = [=] (gui::Widget* wid) {
+      static Command *top = NULL;
+      static gui::PaletteItem *topItem = NULL;
+
+      if (search->keyBuffer == "return") {
+        fuzzyFinder->close = true;
+        if (top)
+          top->exec();
+      } else if (search->keyBuffer == "up") {
+        auto p = find(commands.begin(), commands.end(), top);
+
+        if (p != commands.begin()) {
+          p--;
+
+          top = *p;
+
+          if (topItem) {
+            topItem->select(false);
+          }
+
+          if (top->item) {
+            top->item->select(true);
+            topItem = top->item;
+          }
+        }
+      } else if (search->keyBuffer == "down") {
+        auto p = find(commands.begin(), commands.end(), top);
+        if (p != commands.end()-1) {
+          p++;
+
+          top = *p;
+
+          if (topItem) {
+            topItem->select(false);
+          }
+
+          if (top->item) {
+            top->item->select(true);
+            topItem = top->item;
+         }
+       }
+      } else {
+        list->clear();
+
+        for (auto command :commands)
+          command->score(search->getText());
+
+        sort (commands.begin(), commands.end(), [] (const Command* a, const Command* b) {
+          return ((Command*)a)->score() < ((Command*)b)->score();
+        });
+
+        top = commands[0];
+
+        for (auto i=0;i<commands.size();i++) {
+          auto command = commands[i];
+
+          if (command->match(search->getText())) {
+            stringstream ss;
+
+            ss << command->getName();
+
+            auto visualEd = text::visualed(command->getName(), search->getText());
+
+            auto item = new gui::PaletteItem(ss.str(), visualEd);
+
+            if (command == top) {
+              topItem = item;
+              topItem->select(true);
+            }
+
+            command->item = item;
+
+            list->add(item);
+          }
+        }
+      }
+
+      if (topItem && top) {
+        float p = find(commands.begin(), commands.end(), top)-commands.begin();
+        float len = (float)(list->getFullH()-list->getH());
+        float scroll = p*(float)topItem->getH()/len;
+        float single = (float)(topItem->getH()-1)/len;
+        float th = (float)list->getH()/len;
+
+        if (scroll > th) {
+          list->scrollV(scroll-th+single);
+        } else
+          list->scrollV(0);
+      }
+    };
+}
 
 void editor::openNewSceneWindow () {
 	auto window = new gui::Window("Nova Cena", 300, 300);
@@ -74,22 +198,28 @@ void editor::openNewSceneWindow () {
 }
 
 void editor::openProgressWindow (float *p) {
-	auto window = new gui::Window("Salvando", 300, 90);
+	auto window = new gui::Window("Salvando", 300, 20, false);
 
 	auto container = new gui::Container(gui::Container::VERTICAL);
 
 	auto progess = new gui::Progress(0);
 	container->add(progess);
 
+  container->spacing = 0;
+
 	window->setRoot(container);
 	gui::add(window);
+
+  auto begin = bazinga::curtime;
 
 	window->onUpdate = [=] (gui::Window* win) {
 		progess->setPosition(*p);
 
 		if (*p >= 1) {
-			win->close = true;
-			delete p;
+			if (bazinga::curtime-begin > 2) {
+        win->close = true;
+  			delete p;
+      }
 		}
 	};
 
@@ -105,7 +235,7 @@ void editor::openPropertiesWindow (Object *o) {
 		window = currentPropWindow;
 		window->setTitle(windowTitle);
 	} else {
-		window = new gui::Window(windowTitle, 400, video::windowHeight);
+		window = new gui::Window(windowTitle, 400, video::windowHeight, false);
 	}
 
 	auto container = new gui::Container(gui::Container::VERTICAL);
@@ -515,4 +645,97 @@ void editor::Editor::deleteObject () {
 	}
 
 	selection.clear();
+}
+
+editor::Command::Command (string name, function<void(void)> func):
+  name(name), func(func) {
+}
+
+bool editor::Command::match (string text) {
+  //return text::ed(text, name) < text.size()/name.size();
+  return true;
+}
+
+float editor::Command::score (string text) {
+  if (text.size() == 0)
+    return 9999;
+
+  this->text = text;
+
+  /*
+  char *str = new char[name.size()];
+  strcpy(str, name.c_str());
+
+  char *p = strtok(str, ": ");
+  int min = text::ed(string(p), text);
+  p = strtok(NULL, ": ");
+  while (p) {
+    if (text::ed(string(p), text) < min) {
+      min = text::ed(string(p), text);
+    }
+    p = strtok(NULL, ": ");
+  }
+
+  delete str;
+  */
+
+  return text::ed(name, text);//float(text.size());
+}
+
+float editor::Command::score () {
+  return score(text);
+}
+
+void editor::Command::exec () {
+  func();
+}
+
+string editor::Command::getName () {
+  return name;
+}
+
+void editor::init () {
+  commands.push_back (new Command ("Projeto: Recarregar", [] () {
+    bazinga::reloadProject();
+  }));
+
+  commands.push_back (new Command ("Projeto: Abrir", [] () {
+    bazinga::openProject();
+  }));
+
+  commands.push_back (new Command ("Cena: Criar", [] () {
+    editor::createNewScene();
+  }));
+
+  commands.push_back (new Command ("Cena: Salvar", [] () {
+    bazinga::saveScene();
+  }));
+
+  commands.push_back (new Command ("Sair", [] () {
+    bazinga::quit();
+  }));
+
+  commands.push_back (new Command ("Alternar FPS", [] () {
+    bazinga::toggleFPSWindow();
+  }));
+
+  commands.push_back (new Command ("Sobre", [] () {
+  }));
+
+  commands.push_back (new Command ("Sobre: CCSL", [] () {
+  }));
+
+  commands.push_back (new Command ("Créditos", [] () {
+  }));
+}
+
+void editor::deinit () {
+  for (auto command :commands) {
+    delete command;
+  }
+  commands.clear();
+}
+
+void editor::createNewScene () {
+    openNewSceneWindow();
 }

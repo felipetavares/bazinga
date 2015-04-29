@@ -104,6 +104,8 @@ namespace bazinga {
 			void event(Event&);
 			int getW();
 			int getH();
+			int getFullW();
+			int getFullH();
 
 			void scrollH(float);
 			void scrollV(float);
@@ -123,6 +125,11 @@ namespace bazinga {
 			bool overclose;
 			bool overmaximize;
 
+			/*
+				Determines if the window has a bar
+			*/
+			bool hasBar;
+
 			int gvecx, gvecy;
 
 			string title;
@@ -134,7 +141,7 @@ namespace bazinga {
 
 			bool close;
 
-			Window(string, int, int);
+			Window(string, int, int, bool=true);
 			~Window();
 
 			void event(Event&);

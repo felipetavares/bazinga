@@ -26,7 +26,7 @@ namespace bazinga {
         	string getString();
         	string getText();
         	void increaseNumber();
-        };	
+        };
 	private:
 		bool manualScrolling;
         int offset;

@@ -54,10 +54,10 @@ void gui::Entry::rrender (int x, int y) {
 	video::fillRect(this->x+x, this->y+y, w, h);
 
 	if (focused) {
-		int shadowSize = 2;
+		int shadowSize = 1;
 		video::Color c = *gui::colors["active"];
 		video::setColor1(video::Color(c.r, c.g, c.b, 0.5));
-		video::setColor2(video::Color(c.r, c.g, c.b, 0));
+		video::setColor2(video::Color(c.r, c.g, c.b, 0.2));
 		video::shadow(ux+shadowSize, uy+shadowSize, w-2*shadowSize, h-2*shadowSize, shadowSize);
 	}
 
@@ -125,6 +125,7 @@ void gui::Entry::rclick (int x, int y) {
 
 void gui::Entry::rkey (string value, string key) {
 	timeSinceLastType = 0;
+	keyBuffer = key;
 
 	if (key == "left shift" ||
 		key == "right shift" ||
@@ -136,7 +137,10 @@ void gui::Entry::rkey (string value, string key) {
 		key == "right super" ||
 		key == "numlock" ||
 		key == "down" ||
-		key == "up") {
+		key == "up" ||
+		key == "return") {
+		if (onChange)
+			onChange(this);
 		return;
 	}
 
@@ -161,7 +165,7 @@ void gui::Entry::insert (string data) {
 
 void gui::Entry::remove () {
 	if (text.size() > 0) {
-		text = text.substr(0, cam+cursor-1)+text.substr(cam+cursor, text.size());	
+		text = text.substr(0, cam+cursor-1)+text.substr(cam+cursor, text.size());
 		cursor--;
 
 		if (cursor < 0) {

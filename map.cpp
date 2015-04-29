@@ -372,7 +372,7 @@ int Map::newObject (lua_State *L) {
 // Creates an object from an object description file
 // NOT Called from Lua
 void Map::newObject (Path fpath) {
-  char *data = fs::getFileData(fpath);
+  char *data = fs::getFileData(Path(bazinga::projectPath+fpath.getPath()));
   string sData = string (data);
 
   BjObject *object = json::parse (sData);

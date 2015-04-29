@@ -201,7 +201,7 @@ void gui::Container::pack (int sX, int sY) {
  	    freeY = sY-(borderTop+borderBottom);
 	}
 
-	if (freeX > 0 && freeY > 0) {
+	if ((freeX > 0 && freeY > 0) || scrollable) {
 		w = sX;
 		h = sY;
 	} else {
@@ -293,6 +293,11 @@ void gui::Container::getFullSize (int &pw, int &ph) {
 	}
 
 	ph += borderBottom + borderTop + 2*spacing;
+
+	if (pw != -1)
+		pw ++;
+	if (ph != -1)
+		ph ++;
 }
 
 void gui::Container::getPreferredSize (int &pw, int &ph) {
@@ -377,7 +382,9 @@ void gui::Container::render (int wx, int wy) {
 	for (auto child :children) {
 		if (scrollable && (fullH > h)) {
 			if (inside(child->x-scrollX*(fullW-w), child->y+child->h-scrollY*(fullH-h),
-						x, y, w, h))
+						x, y, w, h) ||
+					inside(child->x-scrollX*(fullW-w), child->y-scrollY*(fullH-h),
+									x, y, w, h))
 				child->render(wx-scrollX*(fullW-w), wy-scrollY*(fullH-h));
 		} else {
 			child->render(wx, wy);
@@ -423,6 +430,14 @@ int gui::Container::getH () {
 	return h;
 }
 
+int gui::Container::getFullW () {
+	return fullW;
+}
+
+int gui::Container::getFullH () {
+	return fullH;
+}
+
 void gui::Container::scrollH (float scrollX) {
 	this->scrollX = scrollX;
 }
@@ -444,7 +459,8 @@ void gui::Event::invalidate () {
 	captured = true;
 }
 
-gui::Window::Window (string title, int w, int h):
+gui::Window::Window (string title, int w, int h, bool hasBar):
+	hasBar(hasBar),
 	onUpdate(NULL),
 	onClose(NULL) {
 	this->title = title;
@@ -491,9 +507,16 @@ void gui::Window::setRoot (Widget *root) {
 	}
 
 	this->root = root;
-	this->root->pack(w,h-tbar-12);
+
+	if (hasBar) {
+		this->root->pack(w,h-tbar-12);
+		h = root->getH()+tbar+12;
+	} else {
+		this->root->pack(w,h);
+		h = root->getH();
+	}
+
 	w = root->getW();
-	h = root->getH()+tbar+12;
 }
 
 void gui::Window::setTitle (const string title) {
@@ -577,6 +600,9 @@ void gui::Window::event (Event& evt) {
 }
 
 bool gui::Window::inClose (int x, int y) {
+	if (!hasBar)
+		return false;
+
 	int cx = this->x+tbar/2-x;
 	int cy = this->y+tbar/2-y;
 	int r = tbar/4;
@@ -585,6 +611,9 @@ bool gui::Window::inClose (int x, int y) {
 }
 
 bool gui::Window::inMaximize (int x, int y) {
+	if (!hasBar)
+		return false;
+
 	int cx = this->x+tbar/2*3-x;
 	int cy = this->y+tbar/2-y;
 	int r = tbar/4;
@@ -593,11 +622,17 @@ bool gui::Window::inMaximize (int x, int y) {
 }
 
 bool gui::Window::inBar (int x, int y) {
+	if (!hasBar)
+		return false;
+
     return inside (x, y,
     			   this->x, this->y, this->w, this->tbar);
 }
 
 bool gui::Window::inResize (int x, int y) {
+	if (!hasBar)
+		return false;
+
 	return inside (x, y,
 				   this->x+this->w-12,
 				   this->y+this->h-12,
@@ -608,49 +643,68 @@ bool gui::Window::inResize (int x, int y) {
 void gui::Window::render () {
 	onUpdate(this);
 
+	/*
+		Zoom effect
+	*/
 	glPushMatrix();
 	glTranslatef(w/2,h/2,0);
 	glScalef(this->scale->v(curtime), this->scale->v(curtime), 0);
 	glTranslatef(-w/2,-h/2,0);
+
 	int x = (this->x)/this->scale->v(curtime);
 	int y = (this->y)/this->scale->v(curtime);
 
+	/*
+		Window shadow
+	*/
 	video::setColor1(video::Color(0, 0, 0, 0));
 	video::setColor2(video::Color(0, 0, 0, 0.2));
 	video::shadow(x, y, w, h, 6);
 
+	/*
+		Window background
+	*/
 	video::setColor1(*gui::colors["background"]);
 	video::fillRect(x, y, w, h);
 
-	video::setColor1(video::Color(0.8,0,0,0.5));
-	video::fillCircle(x+tbar/2,y+tbar/2,tbar/4);
+	/*
+		Bar
+	*/
 
-	video::setColor1(video::Color(0.3,0.8,0.2,0.5));
-	video::fillCircle(x+tbar/2*3,y+tbar/2,tbar/4);
+	if (hasBar) {
+		video::setColor1(video::Color(0.8,0,0,0.5));
+		video::fillCircle(x+tbar/2,y+tbar/2,tbar/4);
 
-	auto font = cache::getFont("default");
-	font->setColor(*gui::colors["text.regular"]);
-	font->setSize(tbar/4*3);
-	text::setFont(font);
-	text::setAlign(text::Center);
-	text::setBaseline(text::Middle);
-	text::fillText(title, x+this->w/2, y+tbar/2);
+		video::setColor1(video::Color(0.3,0.8,0.2,0.5));
+		video::fillCircle(x+tbar/2*3,y+tbar/2,tbar/4);
 
-	if (overclose) {
-		auto close = cache::getTexture(Path("assets/gui/close.png"));
-		close->render(x+tbar/2, y+tbar/2);
+		auto font = cache::getFont("default");
+		font->setColor(*gui::colors["text.regular"]);
+		font->setSize(tbar/4*3);
+		text::setFont(font);
+		text::setAlign(text::Center);
+		text::setBaseline(text::Middle);
+		text::fillText(title, x+this->w/2, y+tbar/2);
+
+		if (overclose) {
+			auto close = cache::getTexture(Path("assets/gui/close.png"));
+			close->render(x+tbar/2, y+tbar/2);
+		}
+
+		if (overmaximize) {
+			auto maximize = cache::getTexture(Path("assets/gui/maximize.png"));
+			maximize->render(x+tbar/2*3, y+tbar/2);
+		}
+
+		auto resize = cache::getTexture(Path("assets/gui/resize.png"));
+		resize->render(this->x+this->w-6, this->y+this->h-6);
 	}
-
-	if (overmaximize) {
-		auto maximize = cache::getTexture(Path("assets/gui/maximize.png"));
-		maximize->render(x+tbar/2*3, y+tbar/2);
-	}
-
-	auto resize = cache::getTexture(Path("assets/gui/resize.png"));
-	resize->render(this->x+this->w-6, this->y+this->h-6);
 
 	if (root) {
-		root->render(x, y+tbar);
+		if (hasBar)
+			root->render(x, y+tbar);
+		else
+			root->render(x, y);
 	}
 
 	glPopMatrix();
@@ -661,12 +715,14 @@ void gui::init () {
 
 	colors["background"] = new video::Color (1, 1 , 1, 1);
 	colors["background.contrast"] = new video::Color (0.95, 0.95, 0.95, 1);
+	colors["background.contrast.extra"] = new video::Color (0.80, 0.80, 0.80, 1);
 	colors["foreground"] = new video::Color (0,1,0, 0.5);
 	colors["foreground.contrast"] = new video::Color (0,0.7,0, 0.5);
 	colors["active"] = new video::Color (0,0.8,0, 1);
 	colors["active.contrast"] = new video::Color (0,0.7,0, 1);
 	colors["active.secondary"] = new video::Color (0.8,0,0, 1);
 	colors["text.regular"] = new video::Color(0.4,0.4,0.4,1);
+	colors["text.contrast"] = new video::Color(0.0,0.0,0.0,1);
 }
 
 void gui::render () {
@@ -702,6 +758,7 @@ void gui::deinit () {
 	for (auto w :windows) {
 		delete w;
 	}
+	windows.clear();
 }
 
 void gui::add (gui::Window* window, int x, int y) {

@@ -14,6 +14,8 @@ namespace bazinga {
 			bool focused;
 			float timeSinceLastType;
 		public:
+			string keyBuffer;
+
 			function <void(Widget*)> onChange;
 
 			Entry(string="");

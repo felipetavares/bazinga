@@ -114,6 +114,34 @@ namespace bazinga {
 		void fillText (string, int, int); // ctx.fillText(str, x, y)
 		// Measures an UTF-8 encoded strnig
 		TextMetrics measureText (string);
+		// Not based upon HTML5
+		void fillArgText (string, int, int, vector<int>,
+											vector<function <void(Font*)>>);
+
+		/*
+			Auxiliar fuzzy search functions
+		*/
+
+		/*
+			Distance between two strings
+
+			Edit distance consider transforming one string
+			into another using some basic primitives:
+
+			* insert char
+			* delete char
+			* change char
+
+			returns how many of these operations are needed
+		*/
+		float ed (string, string);
+		/*
+			Used for visualization of how the strings
+			are "mixed" with ed.
+			0's are for characters from x
+			1's for y's ones
+		*/
+		vector<int> visualed(string, string);
 	}
 }
 

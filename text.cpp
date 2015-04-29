@@ -5,6 +5,117 @@
 #include <bitset>
 using namespace bazinga;
 
+vector<int> text::visualed (string x, string y) {
+	// Mix start filled with 1's
+	// this means all characters are from y
+	vector<int> mix = vector<int>(y.size(), 1);
+
+	typedef struct room {
+		// Pointer to previous position
+		room *prev;
+		// Operation taken at this position
+		int op;
+	}room;
+	// Operations table, used later for
+	// reconstruction the path taken
+	// to find the edit distance
+	room OP [x.size()+1][y.size()+1];
+	int C [x.size()+1][y.size()+1];
+
+	// Fill the matrix
+	OP[0][0] = room {NULL, 0};
+	C[0][0] = 0;
+
+	for (int i=1;i<=x.size();i++) {
+		OP[i][0] = room {&OP[i-1][0], 1};
+		C[i][0] = i;
+	}
+
+	for (int j=1;j<=y.size();j++) {
+		OP[0][j] = room {&OP[0][j-1], 2};
+		C[0][j] = j;
+	}
+
+	for (int i=1;i<=x.size();i++) {
+		for (int j=1;j<=y.size();j++) {
+			if (tolower(x[i-1]) == tolower(y[j-1])) {
+				// Match
+				C[i][j] = C[i-1][j-1];
+				OP[i][j] = room {&OP[i-1][j-1], 0};
+			} else {
+				auto v = {C[i-1][j]+1, C[i][j-1]+1, C[i-1][j-1]+1};
+				C[i][j] = min(v);
+				switch (min_element(v.begin(), v.end())-v.begin()) {
+					case 0:
+						OP[i][j] = room {&OP[i-1][j], 1};
+					break;
+					case 1:
+						OP[i][j] = room {&OP[i][j-1], 2};
+					break;
+					case 2:
+						OP[i][j] = room {&OP[i-1][j-1], 3};
+					break;
+				}
+			}
+		}
+	}
+
+	// Find the path taken
+	vector <int> operations;
+
+	room *r = &OP[x.size()][y.size()];
+
+	while (r->prev != NULL) {
+		operations.push_back(r->op);
+		r = r->prev;
+	}
+
+	int p = 0;
+	for (int i=operations.size()-1;i>=0;i--,p++) {
+		switch (operations[i]) {
+			case 1:
+				mix.insert(mix.begin()+p, 0);
+			break;
+			case 2:
+				mix.erase(mix.begin()+p);
+				p--;
+			break;
+			case 3:
+				mix[p] = 0;
+			break;
+		}
+	}
+
+	return mix;
+}
+
+float text::ed (string x, string y) {
+	int C [x.size()+1][y.size()+1];
+
+	for (int i=0;i<=x.size();i++) {
+		C[i][0] = i;
+	}
+
+	for (int j=0;j<=y.size();j++) {
+		C[0][j] = j;
+	}
+
+	for (int i=1;i<=x.size();i++) {
+		for (int j=1;j<=y.size();j++) {
+			if (tolower(x[i-1]) == tolower(y[j-1])) {
+				// Match
+				C[i][j] = C[i-1][j-1]-16;
+			} else {
+				auto v = {C[i-1][j]+1, C[i][j-1]+8, C[i-1][j-1]+4};
+				// Insert, delete, substitute
+				C[i][j] = min(v);
+			}
+		}
+	}
+
+	return C[x.size()][y.size()];
+}
+
 text::AreaBuffer::AreaBuffer (int w, int h) {
 	freeAreas.push_back(Area({0, 0, w, h}));
 
@@ -285,7 +396,7 @@ int text::Font::render (const char *str, int len) {
 		}
 	}
 
-    bazinga::cache::getShaderProgram("text")->use();
+  bazinga::cache::getShaderProgram("text")->use();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -314,9 +425,9 @@ int text::Font::render (const char *str, int len) {
 
 	glTranslatef(bchar->adw,bchar->adh,0);
 
-    bazinga::cache::getShaderProgram("text")->stopUse();
+  bazinga::cache::getShaderProgram("text")->stopUse();
 
-    return advance;
+	return advance;
 }
 
 void text::Font::newAtlas () {
@@ -387,6 +498,79 @@ void text::setBaseline (Baseline bs) {
 
 void text::setFont (Font* ft) {
 	font = ft;
+}
+
+/*
+	Argumented text
+
+	argList contains indexes to argumentations
+	that are called for every character
+*/
+void text::fillArgText (string text, int x, int y, vector <int> argList,
+												vector <function <void(Font*)>> argumentations) {
+	if (font == NULL) {
+		console << LINEINFO << "invalid font" << outline;
+		return;
+	}
+
+	const char *str = text.c_str();
+	int len = text.size();
+	TextMetrics metrics;
+
+	if (alignment != Left || baseline != Alphabetic) {
+		/*
+			Maybe we'll need an measureArgText
+		*/
+		metrics = measureText(text);
+	}
+
+	switch (alignment) {
+		case Center:
+			x -= metrics.w/2;
+		break;
+		case Left:
+			// Already ok
+		break;
+		case Right:
+			x -= metrics.w;
+		break;
+		default:
+		break;
+	}
+
+	switch (baseline) {
+		case Top:
+			y -= metrics.dh;
+		break;
+		case Middle:
+			y -= metrics.dh+metrics.h/2;
+		break;
+		case Bottom:
+			y += metrics.h-metrics.dh;
+		break;
+		default:
+		break;
+	}
+
+	glPushMatrix();
+	glTranslatef(x, y, 0);
+	int i = 0;
+	while (len > 0) {
+		argumentations[argList[i]](font);
+
+		int advance = font->render(str, len);
+
+		if (advance > 0) {
+			str += advance;
+			len -= advance;
+		} else {
+			console << "bazinga: text: invalid utf8 string '" << text << "'" << outline;
+			break;
+		}
+
+		i++;
+	}
+	glPopMatrix();
 }
 
 void text::fillText (string text, int x, int y) {

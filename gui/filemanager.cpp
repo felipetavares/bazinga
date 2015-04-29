@@ -32,10 +32,11 @@ string toHumanSize (size_t size) {
 	return human.str();
 }
 
-gui::FileManager::FileManager (Entry *finalEntry) {
+gui::FileManager::FileManager (Entry *finalEntry, string title, string selectText):
+ 	onSelect(NULL) {
 	this->finalEntry = finalEntry;
 
-	window = new gui::Window("Arquivos", 800, 600);
+	window = new gui::Window(title, 800, 600);
 
 	container = new gui::Container(gui::Container::VERTICAL);
 	auto buttonsContainer = new gui::Container(gui::Container::HORIZONTAL, false, true);
@@ -46,7 +47,8 @@ gui::FileManager::FileManager (Entry *finalEntry) {
 	container->add(buttonsContainer);
 
 	buttonsContainer->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
-	buttonsContainer->add(new gui::Button("Finalizar"));
+	auto selectButton = new gui::Button(selectText);
+	buttonsContainer->add(selectButton);
 	buttonsContainer->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
 	buttonsContainer->borderLeft = buttonsContainer->borderRight = 0;
 	buttonsContainer->borderTop = buttonsContainer->borderBottom = 0;
@@ -57,6 +59,12 @@ gui::FileManager::FileManager (Entry *finalEntry) {
 	viewContainer->borderLeft = viewContainer->borderRight = 0;
 	viewContainer->borderTop = viewContainer->borderBottom = 0;
 
+	selectButton->onClick = [=] (gui::Widget* wid) {
+		if (onSelect) {
+			onSelect(currentDir);
+		}
+	};
+
 	scrollBar->onChange = [=] (gui::Widget* wid) {
 		filesContainer->scrollV(scrollBar->getScroll());
 	};
@@ -64,7 +72,8 @@ gui::FileManager::FileManager (Entry *finalEntry) {
 	filesContainer->borderLeft = filesContainer->borderRight = 0;
 	filesContainer->borderTop = filesContainer->borderBottom = 0;
 
-	openDirectory(Path("."));
+	currentDir = Path(".");
+	openDirectory(currentDir);
 
 	window->setRoot(container);
 	window->onUpdate = [=] (gui::Window* win) {
@@ -74,6 +83,8 @@ gui::FileManager::FileManager (Entry *finalEntry) {
 
 void gui::FileManager::openDirectory (Path dir) {
 	dir.normalize();
+
+	currentDir = dir;
 
 	console << LINEINFO << "opening directory: " << dir.getPath() << outline;
 
@@ -97,13 +108,13 @@ void gui::FileManager::openDirectory (Path dir) {
 			info->add(new gui::Label(Path("assets/gui/folder.png")));
 		else
 			info->add(new gui::Label(Path("assets/gui/document.png")));
-		
+
 		auto enter = new gui::Button(dentry.getName());
 		info->add(enter);
 		info->add(new gui::Spacer(gui::Spacer::HORIZONTAL));
 		info->add(new gui::Label(toHumanSize(fs::getFileSize(dentry))));
 		filesContainer->add(info);
-	
+
 		if (fs::isDir(dentry)) {
 			enter->onClick = [=] (gui::Widget* w) {
 				openDirectory(dentry);

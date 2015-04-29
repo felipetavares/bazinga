@@ -92,7 +92,7 @@ set_target_properties(bazingares PROPERTIES IMPORTED_LOCATION "bazinga.res")
 # Compila Lua 5.2.2
 ADD_CUSTOM_TARGET(
   lua.o ALL
-  COMMAND ${CMAKE_MAKE_PROGRAM} ansi
+  COMMAND ${CMAKE_MAKE_PROGRAM} linux
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua/lua-5.2.2
 COMMENT "Compilando Lua 5.2.2 (com o Makefile original)")
 
@@ -147,6 +147,7 @@ add_executable (bazinga bazinga.cpp
                         gl/glwin.cpp
                         gui.cpp
                         gui/label.cpp
+                        gui/paletteitem.cpp
                         gui/button.cpp
                         gui/spacer.cpp
                         gui/slider.cpp
@@ -176,7 +177,7 @@ target_link_libraries (bazinga vorbislib)
 target_link_libraries (bazinga ogglib)
 
 IF (UNIX)
-  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libSDL-1.2.so.0.11.4 GL)
+  target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libSDL-1.2.so.0.11.4 GL dl)
   target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libIL.so.1.1.0)
   target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libpng15.so.15)
   target_link_libraries (bazinga ${CMAKE_SOURCE_DIR}/build/lib/libmng.so.1)

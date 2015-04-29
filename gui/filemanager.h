@@ -11,8 +11,11 @@ namespace bazinga {
 			gui::Container* container;
 			gui::Container* filesContainer;
 			gui::Entry *finalEntry;
+			Path currentDir;
 		public:
-			FileManager(Entry*);
+			function <void(Path)> onSelect;
+
+			FileManager(Entry*,string="Arquivos",string="Abrir");
 
 			void openDirectory(Path);
 		private:

@@ -31,12 +31,14 @@ namespace bazinga {
   bool setNewScene;
   bool blockNewScene;
   bool exitFlag;
+  bool reloadFlag;
   bool scriptsEnabled;
   string projectPath;
   Path newScenePath;
   string mainScenePath;
   gui::Window* optionsWindow;
   Map* activeMap;
+  gui::Window *fpsMeter;
 
   Map* getActiveMap () {
     return activeMap;
@@ -56,9 +58,11 @@ namespace bazinga {
   }
 
   bool events () {
+    usleep(10000);
+
     SDL_Event event;
 
-    if (exitFlag)
+    if (exitFlag || reloadFlag)
       return false;
 
    while ( SDL_PollEvent(&event) ) {
@@ -75,8 +79,14 @@ namespace bazinga {
         case SDL_KEYDOWN:
         if (event.key.keysym.sym != SDLK_ESCAPE) {
           if (event.key.keysym.sym == SDLK_r &&
-              event.key.keysym.mod == KMOD_LCTRL) {
+              event.key.keysym.mod & KMOD_LCTRL) {
               return false;
+          }
+
+          if (event.key.keysym.sym == SDLK_p &&
+              event.key.keysym.mod & KMOD_LCTRL) {
+              editor::openCommandPaletteWindow();
+              break;
           }
 
           string keyName = string(SDL_GetKeyName(event.key.keysym.sym));
@@ -118,16 +128,9 @@ namespace bazinga {
               line7->borderLeft = line7->borderRight = 0;
               line7->borderTop = line7->borderBottom = 0;
 
-              line->add(new gui::Label("Sair da demo:"));
+              line->add(new gui::Label("Sair da Bazinga!:"));
               auto button = new gui::Button("Sair");
               line->add(button);
-
-              line2->add(new gui::Label("Frames por segundo:"));
-              auto fps = new gui::Label("####");
-              line2->add(fps);
-
-              auto bgraph = new gui::BGraph();
-              line3->add(bgraph);
 
               auto enableGrid = new gui::CheckBox("Grade");
               auto enableScripts = new gui::CheckBox("Scripts");
@@ -168,7 +171,6 @@ namespace bazinga {
 
               container->add(line);
               container->add(line2);
-              container->add(line3);
               container->add(line4);
               container->add(line5);
               container->add(line6);
@@ -178,10 +180,6 @@ namespace bazinga {
               gui::add(window, -video::windowWidth/2, video::windowHeight/2-400);
 
               window->onUpdate = [=] (gui::Window* win) {
-                stringstream ss;
-                ss << floor(1/delta);
-                fps->setText(ss.str());
-                bgraph->addBar(1/delta);
               };
 
               window->onClose = [] (gui::Window* win) {
@@ -202,7 +200,7 @@ namespace bazinga {
               };
 
               newObject->onClick = [] (gui::Widget *wid) {
-                getActiveMap()->newObject(Path("objects/table.obj"));
+                getActiveMap()->newObject(Path("objects/default.obj"));
               };
 
               copyObject->onClick = [] (gui::Widget *wid) {
@@ -306,10 +304,12 @@ namespace bazinga {
     setNewScene = false;
     blockNewScene = false;
     exitFlag = false;
+    reloadFlag = false;
     scriptsEnabled = true;
     mainScenePath = "scenes/main.scene";
     optionsWindow = NULL;
     activeMap = NULL;
+    fpsMeter = NULL;
 
     bazinga::video::init();
     bazinga::render::init();
@@ -318,6 +318,7 @@ namespace bazinga {
     bazinga::audio::init();
     bazinga::gui::init();
     bazinga::console.init();
+    bazinga::editor::init();
 
     // On Linux: nothing
     // On Windows: setup OpenGL above 1.1
@@ -408,6 +409,7 @@ namespace bazinga {
       delete activeMap;
     }
 
+    bazinga::editor::deinit();
     bazinga::gui::deinit();
     bazinga::audio::deinit();
     bazinga::input::deinit();
@@ -421,8 +423,56 @@ namespace bazinga {
   void quit () {
     exitFlag = true;
   }
+
+  void reloadProject () {
+    reloadFlag = true;
+  }
+
+  void openProject () {
+    auto files = new gui::FileManager(NULL, "Abrir Projeto","Abrir Projeto");
+    files->openDirectory(Path("./"));
+    files->onSelect = [] (Path path) {
+      projectPath = path.getPath();
+      reloadFlag = true;
+    };
+  }
+
+  void saveScene () {
+    if (activeMap) {
+      activeMap->save();
+    }
+  }
+
+  void toggleFPSWindow () {
+    if (fpsMeter) {
+      fpsMeter->close = true;
+      fpsMeter = NULL;
+    } else {
+      auto window = new gui::Window("FPS", 200, 100, false);
+      auto container = new gui::Container(gui::Container::VERTICAL);
+
+      container->borderLeft = container->borderRight = 0;
+      container->borderTop = container->borderBottom = 0;
+
+      auto bgraph = new gui::BGraph();
+
+      container->add(bgraph);
+
+      window->setRoot(container);
+      gui::add(window, -video::windowWidth/2, -video::windowHeight/2);
+
+      window->onUpdate = [=] (gui::Window* win) {
+        stringstream ss;
+        ss << floor(1/delta);
+        bgraph->addBar(1/delta);
+      };
+
+      fpsMeter = window;
+    }
+  }
 }
 
+/*
 void copyMaps () {
 #ifdef _WIN32
   // List map dir
@@ -448,10 +498,11 @@ void copyMaps () {
   }
 #endif
 }
+*/
 
 #ifdef _WIN32
 int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
- #else
+#else
 int main (int argc, char** argv) {
   if (argc > 1) {
       projectPath = string(argv[1]);
@@ -461,11 +512,8 @@ int main (int argc, char** argv) {
 #endif /* _WIN32 */
 
   console << "Bazinga! Engine compiled in " << __DATE__ << " " << __TIME__ << outline;
-  console << "Using " << projectPath << " as project directory" << outline;
+  console << "Using '" << projectPath << "' as project directory" << outline;
   console << outline;
-
-
-  copyMaps();
 
   try {
     do {

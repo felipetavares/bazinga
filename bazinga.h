@@ -16,6 +16,7 @@ namespace bazinga {
 	extern bool scriptsEnabled;
 	extern string projectPath;
 	extern Map* activeMap;
+	extern bool exitFlag;
 
 	bool init ();
 	void gameLoop();
@@ -27,7 +28,12 @@ namespace bazinga {
 	void toggleConsole();
 	void setScene(Path);
 
+	// Exposed API
 	void quit();
+	void reloadProject();
+	void openProject();
+	void saveScene();
+	void toggleFPSWindow();
 }
 
 #endif /* BAZINGA_H */
